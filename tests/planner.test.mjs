@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
+import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
 import {
   formatNumericInputValue,
   reconcileNumericInputValue,
@@ -190,6 +191,57 @@ test("legacy taxable accounts retain the saved gain-share estimate", () => {
   plan.assumptions.taxableGainFraction = 20;
   plan.accounts = [{ id: "legacy", name: "Legacy brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0 }];
   assert.ok(Math.abs(projectPlan(plan)[0].realizedTaxableGain - 10_000) < 0.01);
+});
+
+test("RMD applicable ages follow final Treasury rules without guessing for 1959", () => {
+  assert.equal(rmdApplicableAge(1958), 73);
+  assert.equal(rmdApplicableAge(1959), null);
+  assert.equal(rmdApplicableAge(1960), 75);
+});
+
+test("Uniform Lifetime Table calculates the IRS age-75 example", () => {
+  const result = calculateRmd({
+    birthYear: 1951,
+    calendarYear: 2026,
+    age: 75,
+    priorYearEndBalance: 100_000,
+  });
+  assert.equal(result.status, "required");
+  assert.equal(result.denominator, 24.6);
+  assert.ok(Math.abs(result.requiredDistribution - 4_065.04) < 0.01);
+});
+
+test("projection calculates RMDs separately for each account owner", () => {
+  const plan = copyPlan();
+  plan.household.maritalStatus = "married";
+  plan.household.currentAge = 73;
+  plan.household.birthYear = 1953;
+  plan.household.partnerAge = 75;
+  plan.household.partnerBirthYear = 1951;
+  plan.household.retirementAge = 73;
+  plan.household.partnerRetirementAge = 75;
+  plan.household.planToAge = 73;
+  plan.accounts = [
+    { id: "your-ira", name: "Your IRA", kind: "traditional", owner: "you", balance: 265_000, annualContribution: 0 },
+    { id: "partner-ira", name: "Partner IRA", kind: "traditional", owner: "partner", balance: 246_000, annualContribution: 0 },
+  ];
+  const row = projectPlan(plan)[0];
+  assert.ok(Math.abs(row.youRmd - 10_000) < 0.01);
+  assert.ok(Math.abs(row.partnerRmd - 10_000) < 0.01);
+  assert.ok(Math.abs(row.requiredMinimumDistribution - 20_000) < 0.01);
+  assert.ok(Math.abs(row.cash - 20_000) < 0.01);
+});
+
+test("joint tax-deferred balances are not silently assigned to an RMD owner", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 75;
+  plan.household.birthYear = 1951;
+  plan.household.retirementAge = 75;
+  plan.household.planToAge = 75;
+  plan.accounts = [
+    { id: "needs-owner", name: "Needs owner", kind: "traditional", owner: "joint", balance: 246_000, annualContribution: 0 },
+  ];
+  assert.equal(projectPlan(plan)[0].requiredMinimumDistribution, 0);
 });
 
 test("legacy plan imports receive a compatible filing status", () => {

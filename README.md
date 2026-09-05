@@ -14,7 +14,7 @@ The live site is published at <https://pyinthesky.github.io/financialplanner/>. 
 - Healthcare, Medicare-years, healthcare inflation, and a long-term-care stress reserve
 - Home value, assessment percentage, mill rate, home insurance, and a mortgage-payoff scenario
 - Debt avalanche and debt snowball schedules with payment rollover
-- Transparent withdrawal order with 2026 progressive federal brackets and editable state/capital-gains estimates
+- Transparent withdrawal order with owner-specific RMDs, 2026 progressive federal brackets, and editable state/capital-gains estimates
 - Deterministic projections and a seeded 240-path Monte Carlo planning range
 - Interactive Recharts visualizations
 - Print-optimized PDF report through the browser's **Save as PDF** flow
@@ -78,7 +78,8 @@ The work is organized into bounded batches so each batch can ship independently.
 - [x] Social Security taxation worksheet using provisional income, filing-status thresholds, tax-exempt interest, and the married-filing-separately lived-apart distinction
 - [ ] RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
   - [x] Account-level taxable adjusted basis, contribution basis tracking, proportional gain realization, and explicit tax-lot limitations
-  - [ ] Owner-specific RMD/QCD rules and early-withdrawal constraints
+  - [x] Owner-specific non-inherited RMD projection using optional birth years, prior year-end balances, and the IRS Uniform Lifetime Table, with 1959 and special-rule review states
+  - [ ] QCD rules and early-withdrawal constraints
 - [ ] Roth conversion ladder and bracket-filling comparison
 - [ ] Medicare IRMAA and ACA premium-tax-credit interactions
 
@@ -136,6 +137,7 @@ The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDol
 - Federal tax year 2026 brackets and standard deductions: [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf), published October 9, 2025 and effective for taxable years beginning in 2026. Future projection years inflate these values for planning only; they are not predictions of future law.
 - Social Security benefit taxation: [IRS Publication 915 (2025)](https://www.irs.gov/pub/irs-pdf/p915.pdf), the latest completed edition checked September 5, 2026 and effective for tax year 2025. The planner applies Worksheet 1's statutory thresholds without inflation indexing and labels unmodeled exceptions.
 - Taxable investment basis and realized gains: [IRS Publication 550 (2025)](https://www.irs.gov/pub/irs-pdf/p550.pdf), dated March 5, 2026 for use in preparing 2025 returns. The projection uses account-level aggregate adjusted basis with proportional allocation; it does not claim to reproduce specific-lot accounting.
+- Required minimum distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf), published January 21, 2026, and the [2024 final Treasury regulations](https://www.irs.gov/irb/2024-33_IRB). The projection uses each named owner's prior year-end non-inherited tax-deferred balance and Table III. It does not guess the reserved 1959 applicable-age rule or silently apply IRA rules to joint, inherited, current-employer, 5%-owner, or younger-spouse cases.
 
 ## Contributing
 

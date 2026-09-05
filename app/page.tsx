@@ -501,7 +501,9 @@ export default function HomePage() {
               ]}
             />
             <Field label="Your current age" value={plan.household.currentAge} onChange={(value) => setHousehold("currentAge", value)} max={99} />
+            <Field label="Your birth year" value={plan.household.birthYear} onChange={(value) => setHousehold("birthYear", value)} min={1900} max={new Date().getFullYear()} help="Optional. Used locally to determine when RMDs begin; 1959 requires review." />
             {plan.household.maritalStatus === "married" && <Field label="Partner current age" value={plan.household.partnerAge} onChange={(value) => setHousehold("partnerAge", value)} max={99} />}
+            {plan.household.maritalStatus === "married" && <Field label="Partner birth year" value={plan.household.partnerBirthYear} onChange={(value) => setHousehold("partnerBirthYear", value)} min={1900} max={new Date().getFullYear()} help="Optional. Used only for the partner's RMD schedule." />}
             <Field label="Your retirement age" value={plan.household.retirementAge} onChange={(value) => setHousehold("retirementAge", value)} max={99} />
             {plan.household.maritalStatus === "married" && <Field label="Partner retirement age" value={plan.household.partnerRetirementAge} onChange={(value) => setHousehold("partnerRetirementAge", value)} max={99} />}
             <Field label="Plan through age" value={plan.household.planToAge} onChange={(value) => setHousehold("planToAge", value)} min={plan.household.currentAge + 1} max={120} />
@@ -602,7 +604,7 @@ export default function HomePage() {
                     >
                       <NativeSelectOption value="you">You</NativeSelectOption>
                       {plan.household.maritalStatus === "married" && <NativeSelectOption value="partner">Partner</NativeSelectOption>}
-                      <NativeSelectOption value="joint">Joint</NativeSelectOption>
+                      <NativeSelectOption value="joint">Joint {account.kind === "traditional" ? "— excluded from RMD estimate" : ""}</NativeSelectOption>
                     </NativeSelect>
                   </TableCell>
                   <TableCell>
@@ -667,6 +669,11 @@ export default function HomePage() {
         <span>Total invested assets</span>
         <strong>{currency.format(totalPortfolio(plan))}</strong>
       </div>
+      {plan.accounts.some((account) => account.kind === "traditional" && account.owner === "joint") && (
+        <p className="model-note">
+          <Calculator /> Tax-deferred accounts need an individual owner for RMD calculations. Joint tax-deferred balances remain in the portfolio but are excluded from the RMD estimate until assigned to you or your partner.
+        </p>
+      )}
       <p className="model-note">
         <Calculator /> For taxable accounts, enter the aggregate adjusted basis shown by your brokerage. The projection uses an average-basis planning estimate; actual tax lots, holding periods, loss harvesting, wash sales, and basis adjustments can change realized gains.
       </p>
@@ -1169,6 +1176,11 @@ export default function HomePage() {
     const withdrawalRows = projection.filter((row) => row.age >= plan.household.retirementAge);
     const targetTax = calculateFederalIncomeTax(plan.assumptions.targetOrdinaryIncome, plan.household.filingStatus);
     const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
+    const firstRmdYear = projection.find((row) => row.requiredMinimumDistribution > 0);
+    const has1959RmdReview =
+      plan.household.birthYear === 1959 ||
+      (plan.household.maritalStatus === "married" &&
+        plan.household.partnerBirthYear === 1959);
     return (
       <>
         <SectionHeading title="Taxes & withdrawals" description="A transparent withdrawal order that can be reviewed—not a black-box recommendation." />
@@ -1223,26 +1235,33 @@ export default function HomePage() {
               <li>
                 <span>1</span>
                 <div>
-                  <strong>Fill the chosen ordinary-income band</strong>
-                  <p>Use traditional 401(k), 403(b), and IRA dollars up to your target.</p>
+                  <strong>Take each owner's required minimum distribution</strong>
+                  <p>Use the prior year-end owner balance and IRS Uniform Lifetime denominator.</p>
                 </div>
               </li>
               <li>
                 <span>2</span>
+                <div>
+                  <strong>Fill the chosen ordinary-income band</strong>
+                  <p>Use additional traditional 401(k), 403(b), and IRA dollars up to your target.</p>
+                </div>
+              </li>
+              <li>
+                <span>3</span>
                 <div>
                   <strong>Use taxable assets for the remaining gap</strong>
                   <p>Only the gain fraction is assessed at the capital-gains rate.</p>
                 </div>
               </li>
               <li>
-                <span>3</span>
+                <span>4</span>
                 <div>
                   <strong>Match HSA dollars to healthcare</strong>
                   <p>HSA withdrawals are modeled only against medical costs.</p>
                 </div>
               </li>
               <li>
-                <span>4</span>
+                <span>5</span>
                 <div>
                   <strong>Preserve Roth assets for last</strong>
                   <p>Roth balances remain the final flexible pool.</p>
@@ -1251,6 +1270,26 @@ export default function HomePage() {
             </ol>
           </Panel>
         </div>
+        <Panel title="Required minimum distribution worksheet" eyebrow="FIRST MODELED RMD YEAR">
+          {firstRmdYear ? (
+            <div className="worksheet-grid">
+              <div><span>Projection year / your age</span><strong>{firstRmdYear.year} / {firstRmdYear.age}</strong></div>
+              <div><span>Your RMD</span><strong>{currency.format(firstRmdYear.youRmd)}</strong></div>
+              {plan.household.maritalStatus === "married" && <div><span>Partner RMD</span><strong>{currency.format(firstRmdYear.partnerRmd)}</strong></div>}
+              <div><span>Total required distribution</span><strong>{currency.format(firstRmdYear.requiredMinimumDistribution)}</strong></div>
+            </div>
+          ) : (
+            <p className="panel-copy">Enter each owner's birth year and assign tax-deferred accounts to an individual owner to project RMDs.</p>
+          )}
+          {has1959RmdReview && (
+            <p className="model-note">
+              <Calculator /> Birth year 1959 needs review: the final Treasury regulations reserve that applicable-age provision, so this planner does not guess or force an RMD start year.
+            </p>
+          )}
+          <p className="model-note">
+            <Calculator /> This planning estimate divides each owner's prior year-end tax-deferred balance by IRS Publication 590-B Table III. It assumes the distribution is taken in its applicable calendar year. It does not yet model a first-year April 1 delay, current-employer plan delay, 5% owner rules, inherited accounts, or the younger-spouse Table II exception. Excess RMD cash remains in the plan.
+          </p>
+        </Panel>
         <Panel title="Social Security taxation worksheet" eyebrow="FIRST MODELED BENEFIT YEAR">
           {socialSecurityYear ? (
             <div className="worksheet-grid">
@@ -1294,12 +1333,14 @@ export default function HomePage() {
           </ChartContainer>
         </Panel>
         <p className="model-note">
-          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, RMDs, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
+          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, QCDs, early-distribution penalties, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
           <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">
             IRS Rev. Proc. 2025-32
           </a>
           {" · "}
           <a href="https://www.irs.gov/pub/irs-pdf/p915.pdf" target="_blank" rel="noreferrer">IRS Publication 915 (2025)</a>
+          {" · "}
+          <a href="https://www.irs.gov/pub/irs-pdf/p590b.pdf" target="_blank" rel="noreferrer">IRS Publication 590-B (2025)</a>
         </p>
       </>
     );

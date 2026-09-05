@@ -1,5 +1,6 @@
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
+import { calculateRmd } from "./rmd.ts";
 
 export type AccountKind = "taxable" | "traditional" | "roth" | "cash" | "hsa";
 export type Owner = "you" | "partner" | "joint";
@@ -50,7 +51,9 @@ export interface PlannerData {
     filingStatus: FilingStatus;
     marriedFilingSeparatelyLivedApart: boolean;
     currentAge: number;
+    birthYear: number;
     partnerAge: number;
+    partnerBirthYear: number;
     retirementAge: number;
     partnerRetirementAge: number;
     planToAge: number;
@@ -118,6 +121,9 @@ export interface ProjectionYear {
   withdrawals: number;
   taxableWithdrawal: number;
   traditionalWithdrawal: number;
+  requiredMinimumDistribution: number;
+  youRmd: number;
+  partnerRmd: number;
   rothWithdrawal: number;
   hsaWithdrawal: number;
   fundedRatio: number;
@@ -137,7 +143,9 @@ export const DEFAULT_PLAN: PlannerData = {
     filingStatus: "single",
     marriedFilingSeparatelyLivedApart: false,
     currentAge: 0,
+    birthYear: 0,
     partnerAge: 0,
+    partnerBirthYear: 0,
     retirementAge: 0,
     partnerRetirementAge: 0,
     planToAge: 0,
@@ -207,9 +215,26 @@ export function projectPlan(
   const contributions = Object.fromEntries(
     kinds.map((kind) => [kind, 0]),
   ) as Record<AccountKind, number>;
+  const traditionalBalances: Record<Owner, number> = {
+    you: 0,
+    partner: 0,
+    joint: 0,
+  };
+  const traditionalContributions: Record<Owner, number> = {
+    you: 0,
+    partner: 0,
+    joint: 0,
+  };
   for (const account of data.accounts) {
     balances[account.kind] += Math.max(0, account.balance);
     contributions[account.kind] += Math.max(0, account.annualContribution);
+    if (account.kind === "traditional") {
+      traditionalBalances[account.owner] += Math.max(0, account.balance);
+      traditionalContributions[account.owner] += Math.max(
+        0,
+        account.annualContribution,
+      );
+    }
   }
   const legacyGainFraction = Math.max(
     0,
@@ -251,9 +276,34 @@ export function projectPlan(
         )
     : 0;
 
+  const syncTraditionalBalance = () => {
+    balances.traditional =
+      traditionalBalances.you +
+      traditionalBalances.partner +
+      traditionalBalances.joint;
+  };
+  const withdrawTraditional = (requested: number) => {
+    const available =
+      traditionalBalances.you +
+      traditionalBalances.partner +
+      traditionalBalances.joint;
+    const amount = Math.min(Math.max(0, requested), available);
+    if (available <= 0 || amount <= 0) return 0;
+    for (const owner of ["you", "partner", "joint"] as const) {
+      traditionalBalances[owner] = Math.max(
+        0,
+        traditionalBalances[owner] -
+          amount * (traditionalBalances[owner] / available),
+      );
+    }
+    syncTraditionalBalance();
+    return amount;
+  };
+
   for (let index = 0; index < years; index += 1) {
     const age = data.household.currentAge + index;
     const partnerAge = data.household.partnerAge + index;
+    const calendarYear = startYear + index;
     const retired = age >= data.household.retirementAge;
     const partnerRetired =
       data.household.maritalStatus === "single" ||
@@ -267,10 +317,18 @@ export function projectPlan(
           : data.assumptions.preRetirementReturn,
       );
 
+    const priorTraditionalBalances = { ...traditionalBalances };
     for (const kind of kinds) {
+      if (kind === "traditional") continue;
       balances[kind] *= 1 + rate;
       if (!fullyRetired) balances[kind] += contributions[kind];
     }
+    for (const owner of ["you", "partner", "joint"] as const) {
+      traditionalBalances[owner] *= 1 + rate;
+      if (!fullyRetired)
+        traditionalBalances[owner] += traditionalContributions[owner];
+    }
+    syncTraditionalBalance();
     if (!fullyRetired) taxableCostBasis += contributions.taxable;
 
     let income = 0;
@@ -340,9 +398,44 @@ export function projectPlan(
     let spendingGap = Math.max(0, spending - income);
     let taxableWithdrawal = 0;
     let traditionalWithdrawal = 0;
+    let requiredMinimumDistribution = 0;
+    let youRmd = 0;
+    let partnerRmd = 0;
     let rothWithdrawal = 0;
     let hsaWithdrawal = 0;
     let realizedTaxableGain = 0;
+
+    const youRmdCalculation = calculateRmd({
+      birthYear: data.household.birthYear,
+      calendarYear,
+      age,
+      priorYearEndBalance: priorTraditionalBalances.you,
+    });
+    const partnerRmdCalculation = calculateRmd({
+      birthYear: data.household.partnerBirthYear,
+      calendarYear,
+      age: partnerAge,
+      priorYearEndBalance:
+        data.household.maritalStatus === "married"
+          ? priorTraditionalBalances.partner
+          : 0,
+    });
+    youRmd = Math.min(
+      youRmdCalculation.requiredDistribution,
+      traditionalBalances.you,
+    );
+    partnerRmd = Math.min(
+      partnerRmdCalculation.requiredDistribution,
+      traditionalBalances.partner,
+    );
+    traditionalBalances.you -= youRmd;
+    traditionalBalances.partner -= partnerRmd;
+    syncTraditionalBalance();
+    requiredMinimumDistribution = youRmd + partnerRmd;
+    traditionalWithdrawal = requiredMinimumDistribution;
+    const rmdUsedForSpending = Math.min(spendingGap, requiredMinimumDistribution);
+    spendingGap -= rmdUsedForSpending;
+    balances.cash += requiredMinimumDistribution - rmdUsedForSpending;
 
     if (fullyRetired) {
       const nonSocialSecurityIncome = income - socialSecurityIncome;
@@ -353,24 +446,32 @@ export function projectPlan(
         const candidate = (low + high) / 2;
         const taxableBenefits = calculateTaxableSocialSecurity({
           benefits: socialSecurityIncome,
-          otherIncome: nonSocialSecurityIncome + candidate,
+          otherIncome:
+            nonSocialSecurityIncome +
+            requiredMinimumDistribution +
+            candidate,
           taxExemptInterest: data.assumptions.taxExemptInterest,
           filingStatus: data.household.filingStatus,
           marriedFilingSeparatelyLivedApart:
             data.household.marriedFilingSeparatelyLivedApart,
         }).taxableBenefits;
         if (
-          nonSocialSecurityIncome + candidate + taxableBenefits <=
+          nonSocialSecurityIncome +
+            requiredMinimumDistribution +
+            candidate +
+            taxableBenefits <=
           data.assumptions.targetOrdinaryIncome
         ) low = candidate;
         else high = candidate;
       }
-      traditionalWithdrawal = Math.min(
+      const plannedTraditionalWithdrawal = Math.min(
         maximumTraditional,
         low,
       );
-      balances.traditional -= traditionalWithdrawal;
-      spendingGap -= traditionalWithdrawal;
+      traditionalWithdrawal += withdrawTraditional(
+        plannedTraditionalWithdrawal,
+      );
+      spendingGap -= plannedTraditionalWithdrawal;
 
       const taxableBalanceBeforeWithdrawal = balances.taxable;
       taxableWithdrawal = Math.min(taxableBalanceBeforeWithdrawal, spendingGap);
@@ -399,8 +500,7 @@ export function projectPlan(
       spendingGap -= hsaWithdrawal;
 
       const extraTraditional = Math.min(balances.traditional, spendingGap);
-      balances.traditional -= extraTraditional;
-      traditionalWithdrawal += extraTraditional;
+      traditionalWithdrawal += withdrawTraditional(extraTraditional);
       spendingGap -= extraTraditional;
 
       rothWithdrawal = Math.min(balances.roth, spendingGap);
@@ -446,8 +546,7 @@ export function projectPlan(
     }
     balances.taxable -= taxDraw;
     const remainingTax = taxes - taxDraw;
-    if (remainingTax > 0)
-      balances.traditional = Math.max(0, balances.traditional - remainingTax);
+    if (remainingTax > 0) withdrawTraditional(remainingTax);
 
     home *= 1 + inflation;
     const portfolio = kinds.reduce((sum, kind) => sum + balances[kind], 0);
@@ -458,7 +557,7 @@ export function projectPlan(
       hsaWithdrawal;
     rows.push({
       age,
-      year: startYear + index,
+      year: calendarYear,
       ...balances,
       home: data.housing.includeInNetWorth ? home : 0,
       portfolio,
@@ -477,6 +576,9 @@ export function projectPlan(
       withdrawals,
       taxableWithdrawal,
       traditionalWithdrawal,
+      requiredMinimumDistribution,
+      youRmd,
+      partnerRmd,
       rothWithdrawal,
       hsaWithdrawal,
       fundedRatio:
@@ -635,6 +737,8 @@ export function normalizePlan(input: unknown): PlannerData {
       filingStatus,
       marriedFilingSeparatelyLivedApart:
         candidate.household.marriedFilingSeparatelyLivedApart ?? false,
+      birthYear: candidate.household.birthYear ?? 0,
+      partnerBirthYear: candidate.household.partnerBirthYear ?? 0,
     },
     assumptions: {
       ...candidate.assumptions,
