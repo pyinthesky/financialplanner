@@ -72,6 +72,19 @@ The work is organized into bounded batches so each batch can ship independently.
 - [x] Render untouched numeric inputs as blank rather than `0`; select existing values on focus for predictable replacement while preserving intentional zero values
 - [x] Unify field, affix, and secondary-surface borders, backgrounds, and corner radii so compound inputs have no white seams or mismatched rounding
 
+### Batch 1B — Review-driven experience corrections
+
+- [ ] Reorder the guided journey so **Data & Privacy** is the welcoming start, explains and offers the encrypted vault before sensitive entry, and **Plan Summary** is the final destination
+- [ ] Apply consistent title case to page headings, panel titles, navigation labels, chart labels, and legends; replace internal keys such as `hsaWithdrawal` with human-readable labels
+- [ ] Give every quantitative input a visible, unambiguous unit or currency affix where applicable, while preserving blank zero-value onboarding
+- [ ] Add a restrained save-state animation to the unlocked-vault indicator, with reduced-motion support and distinct saving/saved/failed states
+- [ ] Fix the missing separation above Timed Expenses and audit vertical rhythm between every card and section
+- [ ] Restore the portfolio-projection chart in printed/PDF output and add a print regression check that verifies the chart is rendered rather than merely present in markup
+- [ ] Repeat the mobile audit on real narrow Safari/Chrome viewports: eliminate page-level horizontal scrolling, reduce excessive padding, stack remaining hostile controls, restore missing inter-card gaps, and test long labels and keyboard-open states
+- [ ] Prevent descenders and focus rings from clipping in native selects and other form controls
+- [ ] Remove redundant in-content navigation actions such as **Review Assumptions** when the primary menu already provides the destination
+- [ ] Reshape rough Planning Signals cards into a calm, prioritized summary with a plain-language reason and next useful action for each signal
+
 ### Batch 2 — Federal tax engine (in progress)
 
 - [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
@@ -82,6 +95,8 @@ The work is organized into bounded batches so each batch can ship independently.
   - [ ] QCD rules and early-withdrawal constraints
 - [ ] Roth conversion ladder and bracket-filling comparison
 - [ ] Medicare IRMAA and ACA premium-tax-credit interactions
+- [ ] Replace the manually entered flat capital-gains rate with an effective-dated federal long-term-capital-gains worksheet driven by filing status, ordinary income, realized gains, and applicable surtaxes; retain an explicit override for unmodeled cases
+- [ ] Replace ambiguous labels such as **VA effective rate** with the full jurisdiction and **estimated effective state income-tax rate**, including a short explanation of what income the estimate applies to
 
 ### Batch 3 — Social Security and pension decisions
 
@@ -95,10 +110,11 @@ The work is organized into bounded batches so each batch can ship independently.
 ### Batch 4 — State, health, and long-term care data
 
 - Versioned state and local income-tax and retirement-income rules
-- Optional U.S. ZIP/locality assistance using authoritative, effective-dated data to suggest state/local tax assumptions, assessment conventions, and mill rates; keep every value reviewable and overridable, never require a ZIP, and retain a manual country-aware path for international users
+- Optional U.S. ZIP/locality assistance, replacing the free-form State field, using authoritative, effective-dated data to suggest state/local tax assumptions, assessment conventions, and mill rates; keep every derived jurisdiction visible, reviewable, and overridable, never require a ZIP, and retain a manual country-aware path for international users
 - Guided state-exchange / HealthCare.gov workflow that helps users identify the correct marketplace, look up current plan-year premiums, and locally populate subsidy and net-premium inputs without transmitting the rest of the plan
 - Medicare premium assumptions and state long-term-care cost references
-- Property-tax presets while preserving user-entered assessed values and local mill rates
+- Property-tax presets while preserving user-entered assessed values; allow entry by either mill rate or annual tax from a statement, derive the other value when possible, and avoid double counting
+- Effective-dated economic defaults, beginning with a clearly sourced rolling 20-year historical inflation average that users can review and override
 
 ### Batch 5 — Scenario laboratory
 
@@ -108,6 +124,8 @@ The work is organized into bounded batches so each batch can ship independently.
 - Guardrails, cash buckets, and sequence-of-returns stress tests
 - Recommended cash-buffer range on the plan overview, with an itemized explanation of which essential costs it covers, how many months it funds, and how the recommendation changes by income stability and retirement stage
 - Inheritance, one-time income, home sale/downsize, and legacy goals
+- A monthly plan-summary view connecting income sources, required and discretionary withdrawals, categorized expenses, tax set-asides, remaining margin, and annual/irregular obligations
+- Plan-summary income views that include pensions without incorrectly capitalizing them into portfolio assets, plus a user toggle between combined household cash flow and individually split sources
 
 ### Batch 6 — Trust, accessibility, and optional AI
 
@@ -122,11 +140,21 @@ The work is organized into bounded batches so each batch can ship independently.
 - Prioritized, explainable suggestions that show which changes could most improve the plan and why
 - A simple financial-resilience score that combines retirement funding with income-to-required-debt-payment burden; show the components and never present it as a credit score or guarantee
 - A guided monthly-bills worksheet with common categories, annual/irregular expense prompts, and a clear bridge from current cash flow to retirement spending
+- A dedicated retirement-spending worksheet, separate from general economic assumptions, that can be populated from the monthly-bills worksheet and reconciles current, retirement-only, and separately modeled costs
 - HSA contribution, investing, receipt-retention, qualified-expense, Medicare-enrollment, and retirement-withdrawal strategy, with current limits and rules kept effective-dated
 - Plain-language estate-planning education: why a will matters, common will/trust distinctions, when complexity may warrant an attorney, and a neutral checklist for evaluating providers—without referrals or affiliate links
 - Fiduciary-advisor education: RIA and Form ADV basics, fee-only versus fee-based distinctions, reasonable fee structures by service and asset level, conflicts to watch for, and an easy path to check SEC or state registration using official sources
 - A balanced self-directed alternative showing when a low-cost diversified index-fund portfolio may be sufficient, with guidance scaled to assets, complexity, confidence, and desired service—not a blanket recommendation
 - Evidence-grounded healthy-living planning prompts that can illustrate potential health and longevity effects without predicting an individual's medical outcome or blaming users for health costs
+- Household entry grouped into clear **You** and **Partner** rows/sections so ages, birth years, retirement timing, benefits, and individually owned accounts remain visually and logically aligned
+- Debt strategies with explicit behavior: Snowball first by default (smallest balance, freed minimums cascade, optional extra); Avalanche (highest APR, freed minimums cascade, optional extra); and Custom (user-directed extra payments without an implied cascade). Explain the behavioral versus interest-cost tradeoff without claiming one method is universally best
+
+### Guided-input architecture
+
+- Treat user-entered facts as a shared local data graph: capture each fact once, record its source/effective date when derived, and use it to populate every dependent worksheet, chart, scenario, and report
+- Distinguish entered, calculated, suggested, and overridden values visually; expose the dependency or formula and let the user change any suggestion without silently overwriting it later
+- Use earlier answers to reveal only materially relevant follow-up questions and prefill downstream fields, while preserving an international/manual path and never transmitting plan data
+- Reconcile duplicated concepts—especially spending, mortgage escrow, property tax, insurance, healthcare, income, and tax rates—so one update flows through the plan without double counting
 
 ### Product benchmark
 
