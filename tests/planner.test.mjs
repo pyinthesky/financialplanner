@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
+import {
+  formatNumericInputValue,
+  reconcileNumericInputValue,
+} from "../lib/numeric-input.ts";
 
 import {
   DEFAULT_PLAN,
@@ -114,4 +118,16 @@ test("legacy plan imports receive a compatible filing status", () => {
   delete legacy.household.filingStatus;
   const normalized = normalizePlan(legacy);
   assert.equal(normalized.household.filingStatus, "marriedJoint");
+});
+
+test("blank plans render zero-valued numeric inputs without a visible zero", () => {
+  assert.equal(formatNumericInputValue(0), "");
+  assert.equal(formatNumericInputValue(Number.NaN), "");
+  assert.equal(formatNumericInputValue(1250), "1250");
+});
+
+test("numeric input text preserves a user-entered zero but follows model resets", () => {
+  assert.equal(reconcileNumericInputValue("0", 0), "0");
+  assert.equal(reconcileNumericInputValue("1250", 0), "");
+  assert.equal(reconcileNumericInputValue("1250.00", 1250), "1250.00");
 });

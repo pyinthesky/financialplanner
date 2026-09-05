@@ -5,6 +5,7 @@ import { Activity, BriefcaseBusiness, Building2, Calculator, ChevronRight, Circl
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
+import { NumericInput } from "@/components/numeric-input";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -65,7 +66,7 @@ function Field({ label, value, onChange, prefix, suffix, min = 0, max, step = 1,
       <Label htmlFor={id}>{label}</Label>
       <div className="input-affix">
         {prefix && <span>{prefix}</span>}
-        <Input id={id} type="number" min={min} max={max} step={step} value={Number.isFinite(value) ? value : 0} onChange={(event) => onChange(event.target.valueAsNumber || 0)} />
+        <NumericInput id={id} min={min} max={max} step={step} value={value} onChange={(event) => onChange(event.target.valueAsNumber || 0)} />
         {suffix && <span>{suffix}</span>}
       </div>
       {help && <p className="field-help">{help}</p>}
@@ -579,8 +580,7 @@ export default function HomePage() {
                     </NativeSelect>
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={account.balance}
                       onChange={(event) =>
                         updateAccount(account.id, {
@@ -591,8 +591,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={account.annualContribution}
                       onChange={(event) =>
                         updateAccount(account.id, {
@@ -709,8 +708,7 @@ export default function HomePage() {
                     </NativeSelect>
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={stream.startAge}
                       onChange={(event) =>
                         updateIncome(stream.id, {
@@ -721,8 +719,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={stream.annualAmount}
                       onChange={(event) =>
                         updateIncome(stream.id, {
@@ -733,8 +730,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       step="0.1"
                       value={stream.cola}
                       onChange={(event) =>
@@ -746,8 +742,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={stream.survivorPercent}
                       onChange={(event) =>
                         updateIncome(stream.id, {
@@ -842,8 +837,7 @@ export default function HomePage() {
                     <Input value={cost.name} onChange={(event) => updateCost(cost.id, { name: event.target.value })} />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={cost.annualAmount}
                       onChange={(event) =>
                         updateCost(cost.id, {
@@ -853,8 +847,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={cost.startAge}
                       onChange={(event) =>
                         updateCost(cost.id, {
@@ -864,8 +857,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={cost.endAge}
                       onChange={(event) =>
                         updateCost(cost.id, {
@@ -1040,8 +1032,7 @@ export default function HomePage() {
                     </NativeSelect>
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={debt.balance}
                       onChange={(event) =>
                         updateDebt(debt.id, {
@@ -1051,8 +1042,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       step="0.1"
                       value={debt.interestRate}
                       onChange={(event) =>
@@ -1063,8 +1053,7 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
+                    <NumericInput
                       value={debt.minimumPayment}
                       onChange={(event) =>
                         updateDebt(debt.id, {
