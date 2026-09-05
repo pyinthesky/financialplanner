@@ -28,3 +28,9 @@ test("primary mobile actions meet a 44px touch target", () => {
   assert.match(css, /\[data-sidebar="menu-button"\] \{ min-height: 3rem; \}/);
   assert.match(css, /\.section-heading button \{ width: 100%; min-height: 2\.75rem; \}/);
 });
+
+test("the PDF report is removed from screen layout and enabled only for printing", () => {
+  assert.match(css, /\.print-report \{ display: none; \}/);
+  assert.match(css, /@media print[\s\S]*\.print-report \{ display: block;/);
+  assert.doesNotMatch(css, /left:\s*-200vw/);
+});
