@@ -542,6 +542,7 @@ export default function HomePage() {
                     owner: "joint",
                     balance: 0,
                     annualContribution: 0,
+                    costBasis: 0,
                   },
                 ],
               }))
@@ -560,6 +561,7 @@ export default function HomePage() {
                 <TableHead>Tax treatment</TableHead>
                 <TableHead>Owner</TableHead>
                 <TableHead>Balance</TableHead>
+                <TableHead>Adjusted cost basis</TableHead>
                 <TableHead>Annual contribution</TableHead>
                 <TableHead>
                   <span className="sr-only">Delete</span>
@@ -615,6 +617,21 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
+                    {account.kind === "taxable" ? (
+                      <NumericInput
+                        value={account.costBasis ?? 0}
+                        onChange={(event) =>
+                          updateAccount(account.id, {
+                            costBasis: event.target.valueAsNumber || 0,
+                          })
+                        }
+                        aria-label="Adjusted cost basis"
+                      />
+                    ) : (
+                      <span className="not-applicable">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <NumericInput
                       value={account.annualContribution}
                       onChange={(event) =>
@@ -650,6 +667,9 @@ export default function HomePage() {
         <span>Total invested assets</span>
         <strong>{currency.format(totalPortfolio(plan))}</strong>
       </div>
+      <p className="model-note">
+        <Calculator /> For taxable accounts, enter the aggregate adjusted basis shown by your brokerage. The projection uses an average-basis planning estimate; actual tax lots, holding periods, loss harvesting, wash sales, and basis adjustments can change realized gains.
+      </p>
     </>
   );
 
@@ -1171,7 +1191,6 @@ export default function HomePage() {
               />
               <Field label={`${plan.household.state || "State"} effective rate`} value={plan.assumptions.stateEffectiveTaxRate} onChange={(value) => setAssumption("stateEffectiveTaxRate", value)} suffix="%" step={0.1} max={20} />
               <Field label="Capital gains rate" value={plan.assumptions.capitalGainsRate} onChange={(value) => setAssumption("capitalGainsRate", value)} suffix="%" step={0.1} max={50} />
-              <Field label="Taxable account gain share" value={plan.assumptions.taxableGainFraction} onChange={(value) => setAssumption("taxableGainFraction", value)} suffix="%" step={1} max={100} />
               <Field label="Annual tax-exempt interest" value={plan.assumptions.taxExemptInterest} onChange={(value) => setAssumption("taxExemptInterest", value)} prefix="$" step={100} help="Municipal-bond interest can increase taxable Social Security even though the interest itself is federally tax-exempt." />
               <Field label="Ordinary-income target" value={plan.assumptions.targetOrdinaryIncome} onChange={(value) => setAssumption("targetOrdinaryIncome", value)} prefix="$" step={1000} help="The model fills this band with tax-deferred withdrawals before drawing taxable assets." />
             </div>
@@ -1275,7 +1294,7 @@ export default function HomePage() {
           </ChartContainer>
         </Panel>
         <p className="model-note">
-          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. State and capital-gains rates remain planning estimates. Credits, itemized and additional deductions, AMT, NIIT, RMDs, IRMAA, ACA interactions, and Roth conversions are not yet included.{" "}
+          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, RMDs, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
           <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">
             IRS Rev. Proc. 2025-32
           </a>

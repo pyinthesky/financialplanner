@@ -328,6 +328,7 @@ button, input, select { font: inherit; }
 .field-stack { display: flex; min-width: 0; flex-direction: column; gap: .42rem; }
 .field-stack label { color: #4d5b70; font-size: .77rem; font-weight: 650; }
 .field-help { margin: -.12rem 0 0; color: #8994a4; font-size: .69rem; line-height: 1.45; }
+.not-applicable { color: #9aa5b5; }
 .input-affix { display: flex; align-items: stretch; overflow: hidden; border: 1px solid var(--input); border-radius: var(--radius-md); background: #fff; box-shadow: 0 1px 2px rgba(28,45,70,.04); }
 .input-affix:focus-within { border-color: var(--ring); box-shadow: 0 0 0 3px rgba(78,145,237,.16); }
 .input-affix > span { display: flex; align-items: center; padding: 0 .65rem; background: var(--secondary); color: #617088; font-size: .78rem; white-space: nowrap; }
@@ -445,7 +446,8 @@ button, input, select { font: inherit; }
   .accounts-table td:nth-child(2)::before { content: "Tax treatment"; }
   .accounts-table td:nth-child(3)::before { content: "Owner"; }
   .accounts-table td:nth-child(4)::before { content: "Balance"; }
-  .accounts-table td:nth-child(5)::before { content: "Annual contribution"; }
+  .accounts-table td:nth-child(5)::before { content: "Adjusted cost basis"; }
+  .accounts-table td:nth-child(6)::before { content: "Annual contribution"; }
   .income-table td:nth-child(1)::before { content: "Income source"; }
   .income-table td:nth-child(2)::before { content: "Type"; }
   .income-table td:nth-child(3)::before { content: "Owner"; }

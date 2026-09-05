@@ -11,6 +11,7 @@ export interface Account {
   owner: Owner;
   balance: number;
   annualContribution: number;
+  costBasis?: number;
 }
 
 export interface IncomeStream {
@@ -109,6 +110,8 @@ export interface ProjectionYear {
   stateTaxes: number;
   capitalGainsTaxes: number;
   taxableOrdinaryIncome: number;
+  taxableCostBasis: number;
+  realizedTaxableGain: number;
   socialSecurityIncome: number;
   taxableSocialSecurity: number;
   socialSecurityProvisionalIncome: number;
@@ -208,6 +211,21 @@ export function projectPlan(
     balances[account.kind] += Math.max(0, account.balance);
     contributions[account.kind] += Math.max(0, account.annualContribution);
   }
+  const legacyGainFraction = Math.max(
+    0,
+    Math.min(1, pct(data.assumptions.taxableGainFraction)),
+  );
+  let taxableCostBasis = data.accounts
+    .filter((account) => account.kind === "taxable")
+    .reduce(
+      (sum, account) =>
+        sum +
+        Math.max(
+          0,
+          account.costBasis ?? account.balance * (1 - legacyGainFraction),
+        ),
+      0,
+    );
 
   const rows: ProjectionYear[] = [];
   const startYear = new Date().getFullYear();
@@ -253,6 +271,7 @@ export function projectPlan(
       balances[kind] *= 1 + rate;
       if (!fullyRetired) balances[kind] += contributions[kind];
     }
+    if (!fullyRetired) taxableCostBasis += contributions.taxable;
 
     let income = 0;
     let socialSecurityIncome = 0;
@@ -323,6 +342,7 @@ export function projectPlan(
     let traditionalWithdrawal = 0;
     let rothWithdrawal = 0;
     let hsaWithdrawal = 0;
+    let realizedTaxableGain = 0;
 
     if (fullyRetired) {
       const nonSocialSecurityIncome = income - socialSecurityIncome;
@@ -352,7 +372,21 @@ export function projectPlan(
       balances.traditional -= traditionalWithdrawal;
       spendingGap -= traditionalWithdrawal;
 
-      taxableWithdrawal = Math.min(balances.taxable, spendingGap);
+      const taxableBalanceBeforeWithdrawal = balances.taxable;
+      taxableWithdrawal = Math.min(taxableBalanceBeforeWithdrawal, spendingGap);
+      if (taxableWithdrawal > 0 && taxableBalanceBeforeWithdrawal > 0) {
+        const basisAllocated =
+          taxableWithdrawal *
+          (taxableCostBasis / taxableBalanceBeforeWithdrawal);
+        realizedTaxableGain = Math.max(
+          0,
+          taxableWithdrawal - basisAllocated,
+        );
+        taxableCostBasis = Math.max(
+          0,
+          taxableCostBasis - basisAllocated,
+        );
+      }
       balances.taxable -= taxableWithdrawal;
       spendingGap -= taxableWithdrawal;
 
@@ -374,12 +408,13 @@ export function projectPlan(
       spendingGap -= rothWithdrawal;
     }
 
-    const taxableGains =
-      taxableWithdrawal * pct(data.assumptions.taxableGainFraction);
     const socialSecurityTax = calculateTaxableSocialSecurity({
       benefits: socialSecurityIncome,
       otherIncome:
-        income - socialSecurityIncome + traditionalWithdrawal + taxableGains,
+        income -
+          socialSecurityIncome +
+          traditionalWithdrawal +
+          realizedTaxableGain,
       taxExemptInterest: data.assumptions.taxExemptInterest,
       filingStatus: data.household.filingStatus,
       marriedFilingSeparatelyLivedApart:
@@ -400,9 +435,15 @@ export function projectPlan(
     const stateTaxes =
       taxableOrdinary * pct(data.assumptions.stateEffectiveTaxRate);
     const capitalGainsTaxes =
-      taxableGains * pct(data.assumptions.capitalGainsRate);
+      realizedTaxableGain * pct(data.assumptions.capitalGainsRate);
     const taxes = federalTax + stateTaxes + capitalGainsTaxes;
     const taxDraw = Math.min(balances.taxable, taxes);
+    if (taxDraw > 0 && balances.taxable > 0) {
+      taxableCostBasis = Math.max(
+        0,
+        taxableCostBasis - taxDraw * (taxableCostBasis / balances.taxable),
+      );
+    }
     balances.taxable -= taxDraw;
     const remainingTax = taxes - taxDraw;
     if (remainingTax > 0)
@@ -428,6 +469,8 @@ export function projectPlan(
       stateTaxes,
       capitalGainsTaxes,
       taxableOrdinaryIncome: taxableOrdinary,
+      taxableCostBasis,
+      realizedTaxableGain,
       socialSecurityIncome,
       taxableSocialSecurity: socialSecurityTax.taxableBenefits,
       socialSecurityProvisionalIncome: socialSecurityTax.provisionalIncome,

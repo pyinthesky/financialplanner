@@ -148,6 +148,50 @@ test("projection uses calculated taxable benefits instead of assuming 85 percent
   assert.equal(row.taxableOrdinaryIncome, 0);
 });
 
+test("taxable withdrawals realize only the gain above allocated cost basis", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 67;
+  plan.household.retirementAge = 67;
+  plan.household.planToAge = 67;
+  plan.assumptions.annualSpending = 50_000;
+  plan.assumptions.capitalGainsRate = 20;
+  plan.accounts = [{ id: "brokerage", name: "Brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 80_000 }];
+  const row = projectPlan(plan)[0];
+  assert.ok(Math.abs(row.realizedTaxableGain - 10_000) < 0.01);
+  assert.ok(Math.abs(row.capitalGainsTaxes - 2_000) < 0.01);
+});
+
+test("taxable contributions increase adjusted basis", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 40;
+  plan.household.retirementAge = 50;
+  plan.household.planToAge = 40;
+  plan.accounts = [{ id: "brokerage", name: "Brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 12_000, costBasis: 70_000 }];
+  const row = projectPlan(plan)[0];
+  assert.equal(row.taxableCostBasis, 82_000);
+});
+
+test("market-loss withdrawals do not invent taxable gains", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 67;
+  plan.household.retirementAge = 67;
+  plan.household.planToAge = 67;
+  plan.assumptions.annualSpending = 50_000;
+  plan.accounts = [{ id: "brokerage", name: "Brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 120_000 }];
+  assert.equal(projectPlan(plan)[0].realizedTaxableGain, 0);
+});
+
+test("legacy taxable accounts retain the saved gain-share estimate", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 67;
+  plan.household.retirementAge = 67;
+  plan.household.planToAge = 67;
+  plan.assumptions.annualSpending = 50_000;
+  plan.assumptions.taxableGainFraction = 20;
+  plan.accounts = [{ id: "legacy", name: "Legacy brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0 }];
+  assert.ok(Math.abs(projectPlan(plan)[0].realizedTaxableGain - 10_000) < 0.01);
+});
+
 test("legacy plan imports receive a compatible filing status", () => {
   const legacy = copyPlan();
   legacy.household.maritalStatus = "married";
