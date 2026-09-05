@@ -1,3 +1,5 @@
+import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
+
 export type AccountKind = "taxable" | "traditional" | "roth" | "cash" | "hsa";
 export type Owner = "you" | "partner" | "joint";
 
@@ -43,6 +45,7 @@ export interface PlannerData {
   schemaVersion: 1;
   household: {
     maritalStatus: "single" | "married";
+    filingStatus: FilingStatus;
     currentAge: number;
     partnerAge: number;
     retirementAge: number;
@@ -55,7 +58,6 @@ export interface PlannerData {
     inflation: number;
     preRetirementReturn: number;
     retirementReturn: number;
-    federalEffectiveTaxRate: number;
     stateEffectiveTaxRate: number;
     capitalGainsRate: number;
     taxableGainFraction: number;
@@ -100,6 +102,10 @@ export interface ProjectionYear {
   income: number;
   spending: number;
   taxes: number;
+  federalTaxes: number;
+  stateTaxes: number;
+  capitalGainsTaxes: number;
+  taxableOrdinaryIncome: number;
   withdrawals: number;
   taxableWithdrawal: number;
   traditionalWithdrawal: number;
@@ -118,63 +124,46 @@ export interface DebtMonth {
 export const DEFAULT_PLAN: PlannerData = {
   schemaVersion: 1,
   household: {
-    maritalStatus: "married",
-    currentAge: 45,
-    partnerAge: 43,
-    retirementAge: 60,
-    partnerRetirementAge: 60,
-    planToAge: 95,
-    state: "Virginia",
+    maritalStatus: "single",
+    filingStatus: "single",
+    currentAge: 0,
+    partnerAge: 0,
+    retirementAge: 0,
+    partnerRetirementAge: 0,
+    planToAge: 0,
+    state: "",
   },
   assumptions: {
-    annualSpending: 118000,
-    inflation: 2.5,
-    preRetirementReturn: 6.5,
-    retirementReturn: 5,
-    federalEffectiveTaxRate: 15,
-    stateEffectiveTaxRate: 4.5,
-    capitalGainsRate: 15,
-    taxableGainFraction: 45,
-    targetOrdinaryIncome: 95000,
+    annualSpending: 0,
+    inflation: 0,
+    preRetirementReturn: 0,
+    retirementReturn: 0,
+    stateEffectiveTaxRate: 0,
+    capitalGainsRate: 0,
+    taxableGainFraction: 0,
+    targetOrdinaryIncome: 0,
   },
   housing: {
-    homeValue: 650000,
-    assessedPercent: 100,
-    millRate: 10.5,
-    annualInsurance: 2800,
-    includeInNetWorth: true,
+    homeValue: 0,
+    assessedPercent: 0,
+    millRate: 0,
+    annualInsurance: 0,
+    includeInNetWorth: false,
     payoffMortgageAtRetirement: false,
   },
   healthcare: {
-    preMedicareAnnual: 24000,
-    medicareAnnual: 15000,
-    healthInflation: 5,
-    longTermCareAnnual: 90000,
-    longTermCareStartAge: 84,
-    longTermCareYears: 3,
+    preMedicareAnnual: 0,
+    medicareAnnual: 0,
+    healthInflation: 0,
+    longTermCareAnnual: 0,
+    longTermCareStartAge: 0,
+    longTermCareYears: 0,
   },
-  debtStrategy: { method: "avalanche", extraMonthlyPayment: 800 },
-  accounts: [
-    { id: "a1", name: "Taxable brokerage", kind: "taxable", owner: "joint", balance: 620000, annualContribution: 30000 },
-    { id: "a2", name: "401(k)", kind: "traditional", owner: "you", balance: 790000, annualContribution: 23500 },
-    { id: "a3", name: "403(b)", kind: "traditional", owner: "partner", balance: 430000, annualContribution: 23500 },
-    { id: "a4", name: "Roth IRAs", kind: "roth", owner: "joint", balance: 165000, annualContribution: 14000 },
-    { id: "a5", name: "HSA", kind: "hsa", owner: "joint", balance: 38000, annualContribution: 8300 },
-    { id: "a6", name: "Cash reserve", kind: "cash", owner: "joint", balance: 65000, annualContribution: 0 },
-  ],
-  income: [
-    { id: "i1", name: "Social Security — you", owner: "you", kind: "socialSecurity", startAge: 67, annualAmount: 39000, cola: 2.5, survivorPercent: 100 },
-    { id: "i2", name: "Social Security — partner", owner: "partner", kind: "socialSecurity", startAge: 67, annualAmount: 30000, cola: 2.5, survivorPercent: 100 },
-    { id: "i3", name: "Pension", owner: "partner", kind: "pension", startAge: 60, annualAmount: 36000, cola: 2, survivorPercent: 50 },
-  ],
-  debts: [
-    { id: "d1", name: "Mortgage", kind: "mortgage", balance: 285000, interestRate: 3.25, minimumPayment: 1900 },
-    { id: "d2", name: "Auto loan", kind: "auto", balance: 18000, interestRate: 5.9, minimumPayment: 430 },
-  ],
-  recurringCosts: [
-    { id: "r1", name: "Travel", annualAmount: 18000, startAge: 60, endAge: 78, inflationLinked: true },
-    { id: "r2", name: "Home renovation", annualAmount: 50000, startAge: 64, endAge: 65, inflationLinked: false },
-  ],
+  debtStrategy: { method: "avalanche", extraMonthlyPayment: 0 },
+  accounts: [],
+  income: [],
+  debts: [],
+  recurringCosts: [],
 };
 
 const kinds: AccountKind[] = ["taxable", "traditional", "roth", "cash", "hsa"];
@@ -182,16 +171,31 @@ const kinds: AccountKind[] = ["taxable", "traditional", "roth", "cash", "hsa"];
 const pct = (value: number) => Math.max(-0.99, value / 100);
 
 export function totalPortfolio(data: PlannerData) {
-  return data.accounts.reduce((sum, account) => sum + Math.max(0, account.balance), 0);
+  return data.accounts.reduce(
+    (sum, account) => sum + Math.max(0, account.balance),
+    0,
+  );
 }
 
 export function propertyTaxAnnual(data: PlannerData) {
-  return data.housing.homeValue * (data.housing.assessedPercent / 100) * (data.housing.millRate / 1000);
+  return (
+    data.housing.homeValue *
+    (data.housing.assessedPercent / 100) *
+    (data.housing.millRate / 1000)
+  );
 }
 
-export function projectPlan(data: PlannerData, returnOverrides?: number[]): ProjectionYear[] {
-  const balances = Object.fromEntries(kinds.map((kind) => [kind, 0])) as Record<AccountKind, number>;
-  const contributions = Object.fromEntries(kinds.map((kind) => [kind, 0])) as Record<AccountKind, number>;
+export function projectPlan(
+  data: PlannerData,
+  returnOverrides?: number[],
+): ProjectionYear[] {
+  const balances = Object.fromEntries(kinds.map((kind) => [kind, 0])) as Record<
+    AccountKind,
+    number
+  >;
+  const contributions = Object.fromEntries(
+    kinds.map((kind) => [kind, 0]),
+  ) as Record<AccountKind, number>;
   for (const account of data.accounts) {
     balances[account.kind] += Math.max(0, account.balance);
     contributions[account.kind] += Math.max(0, account.annualContribution);
@@ -199,25 +203,43 @@ export function projectPlan(data: PlannerData, returnOverrides?: number[]): Proj
 
   const rows: ProjectionYear[] = [];
   const startYear = new Date().getFullYear();
-  const years = Math.max(1, data.household.planToAge - data.household.currentAge + 1);
+  const years = Math.max(
+    1,
+    data.household.planToAge - data.household.currentAge + 1,
+  );
   let home = Math.max(0, data.housing.homeValue);
   const inflation = pct(data.assumptions.inflation);
   const healthInflation = pct(data.healthcare.healthInflation);
   const debtSchedule = debtPayoffSchedule(data);
-  const yearsToRetirement = Math.max(0, data.household.retirementAge - data.household.currentAge);
+  const yearsToRetirement = Math.max(
+    0,
+    data.household.retirementAge - data.household.currentAge,
+  );
   const mortgagePayoffAtRetirement = data.housing.payoffMortgageAtRetirement
     ? data.debts
         .filter((debt) => debt.kind === "mortgage")
-        .reduce((sum, debt) => sum + remainingLoanBalance(debt, yearsToRetirement * 12), 0)
+        .reduce(
+          (sum, debt) =>
+            sum + remainingLoanBalance(debt, yearsToRetirement * 12),
+          0,
+        )
     : 0;
 
   for (let index = 0; index < years; index += 1) {
     const age = data.household.currentAge + index;
     const partnerAge = data.household.partnerAge + index;
     const retired = age >= data.household.retirementAge;
-    const partnerRetired = data.household.maritalStatus === "single" || partnerAge >= data.household.partnerRetirementAge;
+    const partnerRetired =
+      data.household.maritalStatus === "single" ||
+      partnerAge >= data.household.partnerRetirementAge;
     const fullyRetired = retired && partnerRetired;
-    const rate = returnOverrides?.[index] ?? pct(fullyRetired ? data.assumptions.retirementReturn : data.assumptions.preRetirementReturn);
+    const rate =
+      returnOverrides?.[index] ??
+      pct(
+        fullyRetired
+          ? data.assumptions.retirementReturn
+          : data.assumptions.preRetirementReturn,
+      );
 
     for (const kind of kinds) {
       balances[kind] *= 1 + rate;
@@ -228,35 +250,65 @@ export function projectPlan(data: PlannerData, returnOverrides?: number[]): Proj
     let socialSecurityIncome = 0;
     for (const stream of data.income) {
       const ownerAge = stream.owner === "partner" ? partnerAge : age;
-      if (ownerAge >= stream.startAge && (data.household.maritalStatus === "married" || stream.owner === "you")) {
-        const value = stream.annualAmount * Math.pow(1 + pct(stream.cola), ownerAge - stream.startAge);
+      if (
+        ownerAge >= stream.startAge &&
+        (data.household.maritalStatus === "married" || stream.owner === "you")
+      ) {
+        const value =
+          stream.annualAmount *
+          Math.pow(1 + pct(stream.cola), ownerAge - stream.startAge);
         income += value;
         if (stream.kind === "socialSecurity") socialSecurityIncome += value;
       }
     }
 
-    const baseSpending = data.assumptions.annualSpending * Math.pow(1 + inflation, index);
+    const baseSpending =
+      data.assumptions.annualSpending * Math.pow(1 + inflation, index);
     const recurring = data.recurringCosts.reduce((sum, cost) => {
       if (age < cost.startAge || age > cost.endAge) return sum;
-      return sum + cost.annualAmount * (cost.inflationLinked ? Math.pow(1 + inflation, index) : 1);
+      return (
+        sum +
+        cost.annualAmount *
+          (cost.inflationLinked ? Math.pow(1 + inflation, index) : 1)
+      );
     }, 0);
-    const healthcareBase = age < 65 ? data.healthcare.preMedicareAnnual : data.healthcare.medicareAnnual;
+    const healthcareBase =
+      age < 65
+        ? data.healthcare.preMedicareAnnual
+        : data.healthcare.medicareAnnual;
     const healthcare = healthcareBase * Math.pow(1 + healthInflation, index);
-    const ltc = age >= data.healthcare.longTermCareStartAge && age < data.healthcare.longTermCareStartAge + data.healthcare.longTermCareYears
-      ? data.healthcare.longTermCareAnnual * Math.pow(1 + healthInflation, index)
-      : 0;
-    const housing = propertyTaxAnnual(data) * Math.pow(1 + inflation, index) + data.housing.annualInsurance * Math.pow(1 + inflation, index);
+    const ltc =
+      age >= data.healthcare.longTermCareStartAge &&
+      age <
+        data.healthcare.longTermCareStartAge + data.healthcare.longTermCareYears
+        ? data.healthcare.longTermCareAnnual *
+          Math.pow(1 + healthInflation, index)
+        : 0;
+    const housing =
+      propertyTaxAnnual(data) * Math.pow(1 + inflation, index) +
+      data.housing.annualInsurance * Math.pow(1 + inflation, index);
     const scheduledDebtService = debtSchedule
       .slice(index * 12 + 1, index * 12 + 13)
-      .reduce((sum, month) => sum + month.interestPaid + month.principalPaid, 0);
+      .reduce(
+        (sum, month) => sum + month.interestPaid + month.principalPaid,
+        0,
+      );
     const mortgageMinimums = data.debts
       .filter((debt) => debt.kind === "mortgage")
       .reduce((sum, debt) => sum + debt.minimumPayment * 12, 0);
-    const debtService = data.housing.payoffMortgageAtRetirement && retired
-      ? Math.max(0, scheduledDebtService - mortgageMinimums)
-      : scheduledDebtService;
-    const retirementPayoff = age === data.household.retirementAge ? mortgagePayoffAtRetirement : 0;
-    const spending = (fullyRetired ? baseSpending : 0) + healthcare + recurring + housing + debtService + retirementPayoff;
+    const debtService =
+      data.housing.payoffMortgageAtRetirement && retired
+        ? Math.max(0, scheduledDebtService - mortgageMinimums)
+        : scheduledDebtService;
+    const retirementPayoff =
+      age === data.household.retirementAge ? mortgagePayoffAtRetirement : 0;
+    const spending =
+      (fullyRetired ? baseSpending : 0) +
+      healthcare +
+      recurring +
+      housing +
+      debtService +
+      retirementPayoff;
 
     let spendingGap = Math.max(0, spending - income);
     let taxableWithdrawal = 0;
@@ -265,9 +317,17 @@ export function projectPlan(data: PlannerData, returnOverrides?: number[]): Proj
     let hsaWithdrawal = 0;
 
     if (fullyRetired) {
-      const ordinaryIncome = income - socialSecurityIncome + socialSecurityIncome * 0.85;
-      const bracketRoom = Math.max(0, data.assumptions.targetOrdinaryIncome - ordinaryIncome);
-      traditionalWithdrawal = Math.min(balances.traditional, bracketRoom, spendingGap);
+      const ordinaryIncome =
+        income - socialSecurityIncome + socialSecurityIncome * 0.85;
+      const bracketRoom = Math.max(
+        0,
+        data.assumptions.targetOrdinaryIncome - ordinaryIncome,
+      );
+      traditionalWithdrawal = Math.min(
+        balances.traditional,
+        bracketRoom,
+        spendingGap,
+      );
       balances.traditional -= traditionalWithdrawal;
       spendingGap -= traditionalWithdrawal;
 
@@ -293,18 +353,38 @@ export function projectPlan(data: PlannerData, returnOverrides?: number[]): Proj
       spendingGap -= rothWithdrawal;
     }
 
-    const taxableGains = taxableWithdrawal * pct(data.assumptions.taxableGainFraction);
-    const taxableOrdinary = Math.max(0, income - socialSecurityIncome + socialSecurityIncome * 0.85 + traditionalWithdrawal);
-    const taxes = taxableOrdinary * (pct(data.assumptions.federalEffectiveTaxRate) + pct(data.assumptions.stateEffectiveTaxRate))
-      + taxableGains * pct(data.assumptions.capitalGainsRate);
+    const taxableGains =
+      taxableWithdrawal * pct(data.assumptions.taxableGainFraction);
+    const taxableOrdinary = Math.max(
+      0,
+      income -
+        socialSecurityIncome +
+        socialSecurityIncome * 0.85 +
+        traditionalWithdrawal,
+    );
+    const federalTax = calculateFederalIncomeTax(
+      taxableOrdinary,
+      data.household.filingStatus,
+      Math.pow(1 + inflation, index),
+    ).tax;
+    const stateTaxes =
+      taxableOrdinary * pct(data.assumptions.stateEffectiveTaxRate);
+    const capitalGainsTaxes =
+      taxableGains * pct(data.assumptions.capitalGainsRate);
+    const taxes = federalTax + stateTaxes + capitalGainsTaxes;
     const taxDraw = Math.min(balances.taxable, taxes);
     balances.taxable -= taxDraw;
     const remainingTax = taxes - taxDraw;
-    if (remainingTax > 0) balances.traditional = Math.max(0, balances.traditional - remainingTax);
+    if (remainingTax > 0)
+      balances.traditional = Math.max(0, balances.traditional - remainingTax);
 
     home *= 1 + inflation;
     const portfolio = kinds.reduce((sum, kind) => sum + balances[kind], 0);
-    const withdrawals = taxableWithdrawal + traditionalWithdrawal + rothWithdrawal + hsaWithdrawal;
+    const withdrawals =
+      taxableWithdrawal +
+      traditionalWithdrawal +
+      rothWithdrawal +
+      hsaWithdrawal;
     rows.push({
       age,
       year: startYear + index,
@@ -314,30 +394,52 @@ export function projectPlan(data: PlannerData, returnOverrides?: number[]): Proj
       income,
       spending,
       taxes,
+      federalTaxes: federalTax,
+      stateTaxes,
+      capitalGainsTaxes,
+      taxableOrdinaryIncome: taxableOrdinary,
       withdrawals,
       taxableWithdrawal,
       traditionalWithdrawal,
       rothWithdrawal,
       hsaWithdrawal,
-      fundedRatio: spending > 0 ? Math.min(1, (income + withdrawals) / spending) : 1,
+      fundedRatio:
+        spending > 0 ? Math.min(1, (income + withdrawals) / spending) : 1,
     });
   }
   return rows;
 }
 
 export function debtPayoffSchedule(data: PlannerData): DebtMonth[] {
-  const debts = data.debts.map((debt) => ({ ...debt, balance: Math.max(0, debt.balance) }));
-  const rows: DebtMonth[] = [{ month: 0, totalBalance: debts.reduce((sum, debt) => sum + debt.balance, 0), interestPaid: 0, principalPaid: 0 }];
+  const debts = data.debts.map((debt) => ({
+    ...debt,
+    balance: Math.max(0, debt.balance),
+  }));
+  const rows: DebtMonth[] = [
+    {
+      month: 0,
+      totalBalance: debts.reduce((sum, debt) => sum + debt.balance, 0),
+      interestPaid: 0,
+      principalPaid: 0,
+    },
+  ];
   let rollover = Math.max(0, data.debtStrategy.extraMonthlyPayment);
 
-  for (let month = 1; month <= 600 && debts.some((debt) => debt.balance > 0.01); month += 1) {
+  for (
+    let month = 1;
+    month <= 600 && debts.some((debt) => debt.balance > 0.01);
+    month += 1
+  ) {
     let monthInterest = 0;
     let monthPrincipal = 0;
     let freedMinimums = 0;
     for (const debt of debts) {
       if (debt.balance <= 0) continue;
       const interest = debt.balance * (pct(debt.interestRate) / 12);
-      const payment = Math.min(debt.balance + interest, Math.max(0, debt.minimumPayment));
+      const payment = Math.min(
+        debt.balance + interest,
+        Math.max(0, debt.minimumPayment),
+      );
       const principal = Math.max(0, payment - interest);
       debt.balance = Math.max(0, debt.balance - principal);
       monthInterest += interest;
@@ -345,9 +447,13 @@ export function debtPayoffSchedule(data: PlannerData): DebtMonth[] {
       if (debt.balance <= 0.01) freedMinimums += debt.minimumPayment;
     }
 
-    const candidates = debts.filter((debt) => debt.balance > 0.01).sort((a, b) =>
-      data.debtStrategy.method === "snowball" ? a.balance - b.balance : b.interestRate - a.interestRate,
-    );
+    const candidates = debts
+      .filter((debt) => debt.balance > 0.01)
+      .sort((a, b) =>
+        data.debtStrategy.method === "snowball"
+          ? a.balance - b.balance
+          : b.interestRate - a.interestRate,
+      );
     if (candidates.length > 0 && rollover > 0) {
       const target = candidates[0];
       const extra = Math.min(target.balance, rollover);
@@ -355,7 +461,12 @@ export function debtPayoffSchedule(data: PlannerData): DebtMonth[] {
       monthPrincipal += extra;
     }
     rollover += freedMinimums;
-    rows.push({ month, totalBalance: debts.reduce((sum, debt) => sum + debt.balance, 0), interestPaid: monthInterest, principalPaid: monthPrincipal });
+    rows.push({
+      month,
+      totalBalance: debts.reduce((sum, debt) => sum + debt.balance, 0),
+      interestPaid: monthInterest,
+      principalPaid: monthPrincipal,
+    });
   }
   return rows;
 }
@@ -367,7 +478,10 @@ function remainingLoanBalance(debt: Debt, months: number) {
   if (months <= 0 || principal <= 0) return principal;
   if (monthlyRate === 0) return Math.max(0, principal - payment * months);
   const growth = Math.pow(1 + monthlyRate, months);
-  return Math.max(0, principal * growth - payment * ((growth - 1) / monthlyRate));
+  return Math.max(
+    0,
+    principal * growth - payment * ((growth - 1) / monthlyRate),
+  );
 }
 
 function mulberry32(seed: number) {
@@ -392,27 +506,53 @@ export function estimateSuccessRate(data: PlannerData, simulations = 240) {
     const years = data.household.planToAge - data.household.currentAge + 1;
     const returns = Array.from({ length: years }, (_, index) => {
       const age = data.household.currentAge + index;
-      const mean = pct(age >= data.household.retirementAge ? data.assumptions.retirementReturn : data.assumptions.preRetirementReturn);
+      const mean = pct(
+        age >= data.household.retirementAge
+          ? data.assumptions.retirementReturn
+          : data.assumptions.preRetirementReturn,
+      );
       return Math.max(-0.45, Math.min(0.45, mean + normal(random) * 0.12));
     });
     const projection = projectPlan(data, returns);
     const fullRetirementAge = Math.max(
       data.household.retirementAge,
       data.household.maritalStatus === "married"
-        ? data.household.currentAge + Math.max(0, data.household.partnerRetirementAge - data.household.partnerAge)
+        ? data.household.currentAge +
+            Math.max(
+              0,
+              data.household.partnerRetirementAge - data.household.partnerAge,
+            )
         : data.household.retirementAge,
     );
-    if (projection.filter((row) => row.age >= fullRetirementAge).every((row) => row.fundedRatio >= 0.995)) success += 1;
+    if (
+      projection
+        .filter((row) => row.age >= fullRetirementAge)
+        .every((row) => row.fundedRatio >= 0.995)
+    )
+      success += 1;
   }
   return Math.round((success / simulations) * 100);
 }
 
 export function normalizePlan(input: unknown): PlannerData {
-  if (!input || typeof input !== "object") throw new Error("This file does not contain a retirement plan.");
+  if (!input || typeof input !== "object")
+    throw new Error("This file does not contain a retirement plan.");
   const candidate = input as Partial<PlannerData>;
-  if (candidate.schemaVersion !== 1) throw new Error("This plan uses an unsupported file version.");
-  if (!candidate.household || !candidate.assumptions || !Array.isArray(candidate.accounts)) {
+  if (candidate.schemaVersion !== 1)
+    throw new Error("This plan uses an unsupported file version.");
+  if (
+    !candidate.household ||
+    !candidate.assumptions ||
+    !Array.isArray(candidate.accounts)
+  ) {
     throw new Error("The plan file is missing required sections.");
   }
-  return candidate as PlannerData;
+  const maritalStatus = candidate.household.maritalStatus ?? "single";
+  const filingStatus =
+    candidate.household.filingStatus ??
+    (maritalStatus === "married" ? "marriedJoint" : "single");
+  return {
+    ...candidate,
+    household: { ...candidate.household, maritalStatus, filingStatus },
+  } as PlannerData;
 }

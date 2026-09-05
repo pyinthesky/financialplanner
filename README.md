@@ -14,7 +14,7 @@ The live site is published at <https://pyinthesky.github.io/financialplanner/>. 
 - Healthcare, Medicare-years, healthcare inflation, and a long-term-care stress reserve
 - Home value, assessment percentage, mill rate, home insurance, and a mortgage-payoff scenario
 - Debt avalanche and debt snowball schedules with payment rollover
-- Transparent withdrawal order with editable effective tax assumptions
+- Transparent withdrawal order with 2026 progressive federal brackets and editable state/capital-gains estimates
 - Deterministic projections and a seeded 240-path Monte Carlo planning range
 - Interactive Recharts visualizations
 - Print-optimized PDF report through the browser's **Save as PDF** flow
@@ -52,7 +52,7 @@ The workflow in `.github/workflows/pages.yml` builds `dist-pages` and deploys it
 
 ## Calculation boundaries
 
-This is an educational planning estimate, not tax, investment, legal, insurance, or medical advice. Values are nominal. The current tax model uses editable effective rates rather than a tax-return engine. Social Security and pension benefits are entered from official statements rather than inferred from earnings histories.
+This is an educational planning estimate, not tax, investment, legal, insurance, or medical advice. Values are nominal. Federal ordinary-income tax uses the published 2026 brackets and basic standard deductions for all four filing statuses, with planning-only inflation indexing in later years. It is not yet a complete tax-return engine; state and capital-gains inputs remain simplified estimates. Social Security and pension benefits are entered from official statements rather than inferred from earnings histories.
 
 ## Delivery roadmap
 
@@ -66,13 +66,13 @@ The work is organized into bounded batches so each batch can ship independently.
 - Encrypted local persistence and portable JSON
 - GitHub Pages deployment
 
-### Batch 2 — Federal tax engine
+### Batch 2 — Federal tax engine (in progress)
 
-- Year-specific federal brackets and standard deductions by filing status
-- Social Security taxation worksheet
-- RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
-- Roth conversion ladder and bracket-filling comparison
-- Medicare IRMAA and ACA premium-tax-credit interactions
+- [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
+- [ ] Social Security taxation worksheet
+- [ ] RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
+- [ ] Roth conversion ladder and bracket-filling comparison
+- [ ] Medicare IRMAA and ACA premium-tax-credit interactions
 
 ### Batch 3 — Social Security and pension decisions
 
@@ -118,6 +118,10 @@ The work is organized into bounded batches so each batch can ship independently.
 ### Product benchmark
 
 The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate, and typical bank calculators on depth, synthesis, clarity, and privacy—not by collecting more data. Competitive reviews should focus on their public workflows and identify missing questions, shallow assumptions, opaque calculations, fragmented outputs, lock-in, and unnecessary data collection. The planner should ask only questions that materially change an explainable result, connect cash flow, debt, taxes, benefits, health, housing, and estate decisions, and keep every plan local by default.
+
+## Calculation sources
+
+- Federal tax year 2026 brackets and standard deductions: [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf), published October 9, 2025 and effective for taxable years beginning in 2026. Future projection years inflate these values for planning only; they are not predictions of future law.
 
 ## Contributing
 
