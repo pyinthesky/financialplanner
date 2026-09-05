@@ -405,24 +405,69 @@ button, input, select { font: inherit; }
 }
 
 @media (max-width: 760px) {
-  .topbar { padding-inline: .8rem; }
-  .content-wrap { padding: 1rem; }
-  .section-heading { align-items: stretch; flex-direction: column; gap: 1rem; }
-  .section-heading button { align-self: flex-start; }
+  .topbar { min-height: 3.75rem; gap: .5rem; padding: .55rem .7rem; }
+  .topbar-title { min-width: 0; flex: 1; }
+  .topbar-title > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .content-wrap { padding: .8rem; }
+  .section-heading { align-items: stretch; flex-direction: column; gap: .8rem; margin-bottom: 1.15rem; }
+  .section-heading h1 { font-size: 1.75rem; }
+  .section-heading p { margin-top: .4rem; font-size: .94rem; line-height: 1.5; }
+  .section-heading button { width: 100%; min-height: 2.75rem; }
   .two-column, .form-grid, .threat-grid { grid-template-columns: 1fr; }
-  .debt-topline { grid-template-columns: 1fr; }
+  .planner-panel { padding: 1rem; }
+  .debt-topline { grid-template-columns: 1fr; gap: .85rem; padding: 1rem; }
   .hide-mobile { display: none; }
   .topbar-actions { gap: .3rem; }
-  .topbar-actions button { padding-inline: .65rem; }
-  .chart-panel [data-slot="chart"] { min-width: 620px; }
-  .chart-panel { overflow-x: auto; }
+  .topbar-actions button { width: 2.75rem; min-width: 2.75rem; min-height: 2.75rem; padding-inline: 0; }
+  [data-sidebar="menu-button"] { min-height: 3rem; }
+  .chart-panel [data-slot="chart"] { min-width: 0; height: 17rem; margin-left: 0; width: 100%; }
+  .chart-panel { overflow: hidden; }
+  .table-wrap.mobile-card-table { overflow: visible; }
+  .mobile-card-table table, .mobile-card-table tbody, .mobile-card-table tr, .mobile-card-table td { display: block; width: 100%; min-width: 0; }
+  .mobile-card-table table { min-width: 0; }
+  .mobile-card-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .mobile-card-table tbody { display: grid; gap: .85rem; }
+  .mobile-card-table tr { border: 1px solid var(--border); border-radius: .85rem; background: #fbfcfe; padding: .45rem .75rem; box-shadow: 0 4px 16px rgba(35,54,82,.04); }
+  .mobile-card-table td { display: grid; grid-template-columns: minmax(7.5rem, 40%) minmax(0, 1fr); align-items: center; gap: .65rem; border: 0; border-bottom: 1px solid #e8edf4; padding: .65rem 0; }
+  .mobile-card-table td::before { color: #718096; font-size: .72rem; font-weight: 700; letter-spacing: .035em; text-transform: uppercase; }
+  .mobile-card-table td:last-child { display: flex; justify-content: flex-end; border-bottom: 0; padding-block: .45rem; }
+  .mobile-card-table td:last-child::before { content: none; }
+  .mobile-card-table tr:has(td[colspan]) { padding: 0; }
+  .mobile-card-table td[colspan] { display: block; border: 0; padding: 1.25rem; }
+  .mobile-card-table td[colspan]::before { content: none; }
+  .mobile-card-table input, .mobile-card-table select { width: 100%; min-width: 0; }
+  .accounts-table td:nth-child(1)::before { content: "Account"; }
+  .accounts-table td:nth-child(2)::before { content: "Tax treatment"; }
+  .accounts-table td:nth-child(3)::before { content: "Owner"; }
+  .accounts-table td:nth-child(4)::before { content: "Balance"; }
+  .accounts-table td:nth-child(5)::before { content: "Annual contribution"; }
+  .income-table td:nth-child(1)::before { content: "Income source"; }
+  .income-table td:nth-child(2)::before { content: "Type"; }
+  .income-table td:nth-child(3)::before { content: "Owner"; }
+  .income-table td:nth-child(4)::before { content: "Start age"; }
+  .income-table td:nth-child(5)::before { content: "Annual benefit"; }
+  .income-table td:nth-child(6)::before { content: "COLA"; }
+  .income-table td:nth-child(7)::before { content: "Survivor"; }
+  .costs-table td:nth-child(1)::before { content: "Cost"; }
+  .costs-table td:nth-child(2)::before { content: "Annual amount"; }
+  .costs-table td:nth-child(3)::before { content: "Start age"; }
+  .costs-table td:nth-child(4)::before { content: "End age"; }
+  .costs-table td:nth-child(5)::before { content: "Inflation-linked"; }
+  .debts-table td:nth-child(1)::before { content: "Debt"; }
+  .debts-table td:nth-child(2)::before { content: "Type"; }
+  .debts-table td:nth-child(3)::before { content: "Balance"; }
+  .debts-table td:nth-child(4)::before { content: "APR"; }
+  .debts-table td:nth-child(5)::before { content: "Minimum / month"; }
   .site-footer { flex-direction: column; }
 }
 
 @media (max-width: 460px) {
-  .metric-grid { grid-template-columns: 1fr; }
-  .metric-card { min-height: 7.4rem; }
-  .topbar-title > span { display: none; }
+  .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+  .metric-card { min-height: 7rem; padding: .85rem; }
+  .metric-card > span { font-size: .65rem; }
+  .metric-card strong { font-size: 1.45rem; }
+  .metric-card p { margin-top: .5rem; font-size: .69rem; }
+  .mobile-card-table td { grid-template-columns: 1fr; gap: .35rem; }
 }
 
 @media print {

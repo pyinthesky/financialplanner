@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DEFAULT_PLAN, debtPayoffSchedule, estimateSuccessRate, normalizePlan, projectPlan, propertyTaxAnnual, totalPortfolio, type Account, type Debt, type IncomeStream, type PlannerData, type RecurringCost } from "@/lib/planner";
@@ -123,6 +123,30 @@ function EmptyRow({ message }: { message: string }) {
         {message}
       </TableCell>
     </TableRow>
+  );
+}
+
+function PlannerNavigation({ activeSection, onSelect }: { activeSection: SectionId; onSelect: (section: SectionId) => void }) {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  return (
+    <SidebarMenu>
+      {sections.map((section) => (
+        <SidebarMenuItem key={section.id}>
+          <SidebarMenuButton
+            isActive={activeSection === section.id}
+            aria-current={activeSection === section.id ? "page" : undefined}
+            onClick={() => {
+              onSelect(section.id);
+              if (isMobile) setOpenMobile(false);
+            }}
+          >
+            <section.icon />
+            <span>{section.label}</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
   );
 }
 
@@ -528,7 +552,7 @@ export default function HomePage() {
         }
       />
       <Panel>
-        <div className="table-wrap">
+        <div className="table-wrap mobile-card-table accounts-table">
           <Table>
             <TableHeader>
               <TableRow>
@@ -660,7 +684,7 @@ export default function HomePage() {
         }
       />
       <Panel>
-        <div className="table-wrap">
+        <div className="table-wrap mobile-card-table income-table">
           <Table>
             <TableHeader>
               <TableRow>
@@ -817,7 +841,7 @@ export default function HomePage() {
         </Panel>
       </div>
       <Panel title="Large recurring costs" eyebrow="TIMED EXPENSES">
-        <div className="table-wrap">
+        <div className="table-wrap mobile-card-table costs-table">
           <Table>
             <TableHeader>
               <TableRow>
@@ -996,7 +1020,7 @@ export default function HomePage() {
         </ChartContainer>
       </Panel>
       <Panel>
-        <div className="table-wrap">
+        <div className="table-wrap mobile-card-table debts-table">
           <Table>
             <TableHeader>
               <TableRow>
@@ -1336,16 +1360,7 @@ export default function HomePage() {
             <SidebarGroup>
               <SidebarGroupLabel>YOUR PLAN</SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
-                  {sections.map((section) => (
-                    <SidebarMenuItem key={section.id}>
-                      <SidebarMenuButton isActive={activeSection === section.id} onClick={() => setActiveSection(section.id)}>
-                        <section.icon />
-                        <span>{section.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
+                <PlannerNavigation activeSection={activeSection} onSelect={setActiveSection} />
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
@@ -1370,15 +1385,15 @@ export default function HomePage() {
               <span>{sections.find((section) => section.id === activeSection)?.label}</span>
             </div>
             <div className="topbar-actions">
-              <Button variant="ghost" onClick={() => setActiveSection("data")}>
+              <Button variant="ghost" aria-label="Open data and privacy" onClick={() => setActiveSection("data")}>
                 {vaultStatus === "unlocked" ? <Unlock /> : <Lock />}
                 <span className="hide-mobile">{vaultStatus === "unlocked" ? "Vault unlocked" : vaultStatus === "locked" ? "Vault locked" : "Not saved"}</span>
               </Button>
-              <Button variant="outline" onClick={exportData}>
+              <Button variant="outline" aria-label="Export plan data" onClick={exportData}>
                 <Download />
                 <span className="hide-mobile">Export</span>
               </Button>
-              <Button onClick={() => window.setTimeout(() => window.print(), 120)}>
+              <Button aria-label="Create PDF report" onClick={() => window.setTimeout(() => window.print(), 120)}>
                 <Printer />
                 <span className="hide-mobile">PDF report</span>
               </Button>

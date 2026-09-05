@@ -9,8 +9,8 @@
     "dev": "vite --config vite.github.config.ts",
     "build": "vite build --config vite.github.config.ts",
     "build:pages": "vite build --config vite.github.config.ts",
-    "test": "node --experimental-strip-types --test tests/planner.test.mjs",
-    "test:planner": "node --experimental-strip-types --test tests/planner.test.mjs"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "test:planner": "node --experimental-strip-types --test tests/*.test.mjs"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",

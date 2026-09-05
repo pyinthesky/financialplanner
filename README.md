@@ -68,7 +68,7 @@ The work is organized into bounded batches so each batch can ship independently.
 
 ### Batch 1A — Immediate usability corrections
 
-- [ ] Rebuild narrow-screen navigation, summaries, forms, tables, and charts around mobile task flows, with usable tap targets and no clipped or horizontally trapped content
+- [x] Rebuild narrow-screen navigation, summaries, forms, tables, and charts around mobile task flows, with usable tap targets and no clipped or horizontally trapped content
 - [x] Render untouched numeric inputs as blank rather than `0`; select existing values on focus for predictable replacement while preserving intentional zero values
 - [x] Unify field, affix, and secondary-surface borders, backgrounds, and corner radii so compound inputs have no white seams or mismatched rounding
 
