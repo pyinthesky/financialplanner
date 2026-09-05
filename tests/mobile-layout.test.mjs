@@ -23,6 +23,20 @@ test("mobile navigation closes after selecting a planning section", () => {
   assert.match(page, /aria-current=\{activeSection === section\.id \? "page"/);
 });
 
+test("the privacy page starts the guided journey and plan summary ends it", () => {
+  const privacyPosition = page.indexOf('{ id: "data", label: "Data & Privacy"');
+  const householdPosition = page.indexOf('{ id: "household", label: "Household"');
+  const summaryPosition = page.indexOf('{ id: "overview", label: "Plan Summary"');
+  assert.ok(privacyPosition >= 0 && privacyPosition < householdPosition);
+  assert.ok(summaryPosition > householdPosition);
+  assert.match(page, /useState<SectionId>\("data"\)/);
+});
+
+test("the privacy start explains all local persistence choices", () => {
+  assert.match(page, /You can work without saving, create an encrypted local vault, or restore a plan/);
+  assert.match(page, /Without a vault, the open plan lasts only for this browser session/);
+});
+
 test("primary mobile actions meet a 44px touch target", () => {
   assert.match(css, /\.topbar-actions button \{ width: 2\.75rem;/);
   assert.match(css, /\[data-sidebar="menu-button"\] \{ min-height: 3rem; \}/);

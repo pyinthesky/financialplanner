@@ -23,7 +23,7 @@ type VaultStatus = "off" | "locked" | "unlocked";
 
 const VAULT_KEY = "open-retirement-planner-vault-v1";
 const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
-  { id: "overview", label: "Plan overview", icon: Activity },
+  { id: "data", label: "Data & Privacy", icon: ShieldCheck },
   { id: "household", label: "Household", icon: Home },
   { id: "portfolio", label: "Accounts", icon: BriefcaseBusiness },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
@@ -31,7 +31,7 @@ const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "debt", label: "Debt payoff", icon: WalletCards },
   { id: "health", label: "Health & long-term care", icon: HeartPulse },
   { id: "taxes", label: "Taxes & withdrawals", icon: Calculator },
-  { id: "data", label: "Data & privacy", icon: ShieldCheck },
+  { id: "overview", label: "Plan Summary", icon: Activity },
 ];
 
 const portfolioChartConfig = {
@@ -158,7 +158,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
       <header className="report-header">
         <div>
           <span>OPEN RETIREMENT PLANNER</span>
-          <h1>Retirement plan summary</h1>
+          <h1>Retirement Plan Summary</h1>
         </div>
         <p>Generated {new Date().toLocaleDateString()}</p>
       </header>
@@ -239,7 +239,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
 
 export default function HomePage() {
   const [plan, setPlan] = useState<PlannerData>(DEFAULT_PLAN);
-  const [activeSection, setActiveSection] = useState<SectionId>("overview");
+  const [activeSection, setActiveSection] = useState<SectionId>("data");
   const [vaultStatus, setVaultStatus] = useState<VaultStatus>("off");
   const [vaultOpen, setVaultOpen] = useState(false);
   const [passphrase, setPassphrase] = useState("");
@@ -370,7 +370,7 @@ export default function HomePage() {
 
   const renderOverview = () => (
     <>
-      <SectionHeading title="Plan overview" description="A living projection from today through the end of your planning horizon." />
+      <SectionHeading title="Plan Summary" description="A living projection from today through the end of your planning horizon." />
       <div className="metric-grid">
         <div className="metric-card primary-metric">
           <span>Plan range</span>
@@ -1348,18 +1348,18 @@ export default function HomePage() {
 
   const renderData = () => (
     <>
-      <SectionHeading title="Data & privacy" description="No account, no tracking, no server database. You decide where your plan lives." />
+      <SectionHeading title="Data & Privacy" description="Start here: choose whether this browser should save your plan before entering financial details." />
       <div className="privacy-banner">
         <ShieldCheck />
         <div>
           <span>LOCAL-ONLY BY DESIGN</span>
           <h2>Your plan never leaves this browser.</h2>
-          <p>Calculations, charts, imports, exports, and PDF rendering all happen on your device. The site contains no analytics, advertising pixels, telemetry, sign-in, or third-party data calls.</p>
+          <p>Calculations, charts, imports, exports, and PDF rendering all happen on your device. You can work without saving, create an encrypted local vault, or restore a plan you previously downloaded. The site contains no analytics, advertising pixels, telemetry, sign-in, or third-party data calls.</p>
         </div>
       </div>
       <div className="three-column">
         <Panel title="Encrypted local vault" eyebrow={vaultStatus.toUpperCase()}>
-          <p className="panel-copy">Persist the plan in this browser using AES-256-GCM encryption. Your passphrase is kept only in memory while the page is open.</p>
+          <p className="panel-copy">Optional: save changes in this browser using AES-256-GCM encryption. Without a vault, the open plan lasts only for this browser session unless you download it. Your passphrase is kept only in memory and cannot be recovered.</p>
           <div className="button-stack">
             {vaultStatus === "unlocked" ? (
               <Button onClick={lockVault}>
