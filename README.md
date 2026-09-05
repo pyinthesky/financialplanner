@@ -75,7 +75,7 @@ The work is organized into bounded batches so each batch can ship independently.
 ### Batch 2 — Federal tax engine (in progress)
 
 - [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
-- [ ] Social Security taxation worksheet
+- [x] Social Security taxation worksheet using provisional income, filing-status thresholds, tax-exempt interest, and the married-filing-separately lived-apart distinction
 - [ ] RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
 - [ ] Roth conversion ladder and bracket-filling comparison
 - [ ] Medicare IRMAA and ACA premium-tax-credit interactions
@@ -132,6 +132,7 @@ The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDol
 ## Calculation sources
 
 - Federal tax year 2026 brackets and standard deductions: [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf), published October 9, 2025 and effective for taxable years beginning in 2026. Future projection years inflate these values for planning only; they are not predictions of future law.
+- Social Security benefit taxation: [IRS Publication 915 (2025)](https://www.irs.gov/pub/irs-pdf/p915.pdf), the latest completed edition checked September 5, 2026 and effective for tax year 2025. The planner applies Worksheet 1's statutory thresholds without inflation indexing and labels unmodeled exceptions.
 
 ## Contributing
 

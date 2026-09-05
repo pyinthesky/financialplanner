@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
+import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import {
   formatNumericInputValue,
   reconcileNumericInputValue,
@@ -110,6 +111,41 @@ test("future planning years inflation-index brackets and deduction", () => {
   const base = calculateFederalIncomeTax(66_500, "single");
   const indexed = calculateFederalIncomeTax(66_500 * 1.025, "single", 1.025);
   assert.ok(Math.abs(indexed.tax - base.tax * 1.025) < 0.001);
+});
+
+test("Publication 915 worksheet reproduces the IRS single-filer example", () => {
+  const result = calculateTaxableSocialSecurity({
+    benefits: 5_980,
+    otherIncome: 28_990,
+    filingStatus: "single",
+  });
+  assert.equal(result.provisionalIncome, 31_980);
+  assert.equal(result.taxableBenefits, 2_990);
+});
+
+test("Social Security worksheet applies both the 50% and 85% tiers", () => {
+  assert.equal(calculateTaxableSocialSecurity({ benefits: 10_000, otherIncome: 20_000, filingStatus: "single" }).taxableBenefits, 0);
+  assert.equal(calculateTaxableSocialSecurity({ benefits: 10_000, otherIncome: 24_000, filingStatus: "single" }).taxableBenefits, 2_000);
+  assert.equal(calculateTaxableSocialSecurity({ benefits: 20_000, otherIncome: 40_000, filingStatus: "single" }).taxableBenefits, 17_000);
+});
+
+test("married-filing-separately treatment respects the lived-apart distinction", () => {
+  const together = calculateTaxableSocialSecurity({ benefits: 20_000, otherIncome: 0, filingStatus: "marriedSeparate" });
+  const apart = calculateTaxableSocialSecurity({ benefits: 20_000, otherIncome: 0, filingStatus: "marriedSeparate", marriedFilingSeparatelyLivedApart: true });
+  assert.equal(together.taxableBenefits, 8_500);
+  assert.equal(apart.taxableBenefits, 0);
+});
+
+test("projection uses calculated taxable benefits instead of assuming 85 percent", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 67;
+  plan.household.retirementAge = 67;
+  plan.household.planToAge = 67;
+  plan.income = [{ id: "ss", name: "Social Security", owner: "you", kind: "socialSecurity", startAge: 67, annualAmount: 20_000, cola: 0, survivorPercent: 0 }];
+  const row = projectPlan(plan)[0];
+  assert.equal(row.socialSecurityIncome, 20_000);
+  assert.equal(row.taxableSocialSecurity, 0);
+  assert.equal(row.taxableOrdinaryIncome, 0);
 });
 
 test("legacy plan imports receive a compatible filing status", () => {

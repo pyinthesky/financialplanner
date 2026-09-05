@@ -1,4 +1,5 @@
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
+import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 
 export type AccountKind = "taxable" | "traditional" | "roth" | "cash" | "hsa";
 export type Owner = "you" | "partner" | "joint";
@@ -46,6 +47,7 @@ export interface PlannerData {
   household: {
     maritalStatus: "single" | "married";
     filingStatus: FilingStatus;
+    marriedFilingSeparatelyLivedApart: boolean;
     currentAge: number;
     partnerAge: number;
     retirementAge: number;
@@ -62,6 +64,7 @@ export interface PlannerData {
     capitalGainsRate: number;
     taxableGainFraction: number;
     targetOrdinaryIncome: number;
+    taxExemptInterest: number;
   };
   housing: {
     homeValue: number;
@@ -106,6 +109,9 @@ export interface ProjectionYear {
   stateTaxes: number;
   capitalGainsTaxes: number;
   taxableOrdinaryIncome: number;
+  socialSecurityIncome: number;
+  taxableSocialSecurity: number;
+  socialSecurityProvisionalIncome: number;
   withdrawals: number;
   taxableWithdrawal: number;
   traditionalWithdrawal: number;
@@ -126,6 +132,7 @@ export const DEFAULT_PLAN: PlannerData = {
   household: {
     maritalStatus: "single",
     filingStatus: "single",
+    marriedFilingSeparatelyLivedApart: false,
     currentAge: 0,
     partnerAge: 0,
     retirementAge: 0,
@@ -142,6 +149,7 @@ export const DEFAULT_PLAN: PlannerData = {
     capitalGainsRate: 0,
     taxableGainFraction: 0,
     targetOrdinaryIncome: 0,
+    taxExemptInterest: 0,
   },
   housing: {
     homeValue: 0,
@@ -317,16 +325,29 @@ export function projectPlan(
     let hsaWithdrawal = 0;
 
     if (fullyRetired) {
-      const ordinaryIncome =
-        income - socialSecurityIncome + socialSecurityIncome * 0.85;
-      const bracketRoom = Math.max(
-        0,
-        data.assumptions.targetOrdinaryIncome - ordinaryIncome,
-      );
+      const nonSocialSecurityIncome = income - socialSecurityIncome;
+      const maximumTraditional = Math.min(balances.traditional, spendingGap);
+      let low = 0;
+      let high = maximumTraditional;
+      for (let attempt = 0; attempt < 32; attempt += 1) {
+        const candidate = (low + high) / 2;
+        const taxableBenefits = calculateTaxableSocialSecurity({
+          benefits: socialSecurityIncome,
+          otherIncome: nonSocialSecurityIncome + candidate,
+          taxExemptInterest: data.assumptions.taxExemptInterest,
+          filingStatus: data.household.filingStatus,
+          marriedFilingSeparatelyLivedApart:
+            data.household.marriedFilingSeparatelyLivedApart,
+        }).taxableBenefits;
+        if (
+          nonSocialSecurityIncome + candidate + taxableBenefits <=
+          data.assumptions.targetOrdinaryIncome
+        ) low = candidate;
+        else high = candidate;
+      }
       traditionalWithdrawal = Math.min(
-        balances.traditional,
-        bracketRoom,
-        spendingGap,
+        maximumTraditional,
+        low,
       );
       balances.traditional -= traditionalWithdrawal;
       spendingGap -= traditionalWithdrawal;
@@ -355,11 +376,20 @@ export function projectPlan(
 
     const taxableGains =
       taxableWithdrawal * pct(data.assumptions.taxableGainFraction);
+    const socialSecurityTax = calculateTaxableSocialSecurity({
+      benefits: socialSecurityIncome,
+      otherIncome:
+        income - socialSecurityIncome + traditionalWithdrawal + taxableGains,
+      taxExemptInterest: data.assumptions.taxExemptInterest,
+      filingStatus: data.household.filingStatus,
+      marriedFilingSeparatelyLivedApart:
+        data.household.marriedFilingSeparatelyLivedApart,
+    });
     const taxableOrdinary = Math.max(
       0,
       income -
         socialSecurityIncome +
-        socialSecurityIncome * 0.85 +
+        socialSecurityTax.taxableBenefits +
         traditionalWithdrawal,
     );
     const federalTax = calculateFederalIncomeTax(
@@ -398,6 +428,9 @@ export function projectPlan(
       stateTaxes,
       capitalGainsTaxes,
       taxableOrdinaryIncome: taxableOrdinary,
+      socialSecurityIncome,
+      taxableSocialSecurity: socialSecurityTax.taxableBenefits,
+      socialSecurityProvisionalIncome: socialSecurityTax.provisionalIncome,
       withdrawals,
       taxableWithdrawal,
       traditionalWithdrawal,
@@ -553,6 +586,16 @@ export function normalizePlan(input: unknown): PlannerData {
     (maritalStatus === "married" ? "marriedJoint" : "single");
   return {
     ...candidate,
-    household: { ...candidate.household, maritalStatus, filingStatus },
+    household: {
+      ...candidate.household,
+      maritalStatus,
+      filingStatus,
+      marriedFilingSeparatelyLivedApart:
+        candidate.household.marriedFilingSeparatelyLivedApart ?? false,
+    },
+    assumptions: {
+      ...candidate.assumptions,
+      taxExemptInterest: candidate.assumptions.taxExemptInterest ?? 0,
+    },
   } as PlannerData;
 }

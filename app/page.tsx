@@ -276,7 +276,7 @@ export default function HomePage() {
   const payoffMonths = debtSchedule.at(-1)?.month ?? 0;
   const totalDebt = plan.debts.reduce((sum, debt) => sum + debt.balance, 0);
 
-  const setHousehold = (key: keyof PlannerData["household"], value: string | number) =>
+  const setHousehold = (key: keyof PlannerData["household"], value: string | number | boolean) =>
     setPlan((current) => ({
       ...current,
       household: { ...current.household, [key]: value },
@@ -1148,6 +1148,7 @@ export default function HomePage() {
   const renderTaxes = () => {
     const withdrawalRows = projection.filter((row) => row.age >= plan.household.retirementAge);
     const targetTax = calculateFederalIncomeTax(plan.assumptions.targetOrdinaryIncome, plan.household.filingStatus);
+    const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
     return (
       <>
         <SectionHeading title="Taxes & withdrawals" description="A transparent withdrawal order that can be reviewed—not a black-box recommendation." />
@@ -1171,8 +1172,18 @@ export default function HomePage() {
               <Field label={`${plan.household.state || "State"} effective rate`} value={plan.assumptions.stateEffectiveTaxRate} onChange={(value) => setAssumption("stateEffectiveTaxRate", value)} suffix="%" step={0.1} max={20} />
               <Field label="Capital gains rate" value={plan.assumptions.capitalGainsRate} onChange={(value) => setAssumption("capitalGainsRate", value)} suffix="%" step={0.1} max={50} />
               <Field label="Taxable account gain share" value={plan.assumptions.taxableGainFraction} onChange={(value) => setAssumption("taxableGainFraction", value)} suffix="%" step={1} max={100} />
+              <Field label="Annual tax-exempt interest" value={plan.assumptions.taxExemptInterest} onChange={(value) => setAssumption("taxExemptInterest", value)} prefix="$" step={100} help="Municipal-bond interest can increase taxable Social Security even though the interest itself is federally tax-exempt." />
               <Field label="Ordinary-income target" value={plan.assumptions.targetOrdinaryIncome} onChange={(value) => setAssumption("targetOrdinaryIncome", value)} prefix="$" step={1000} help="The model fills this band with tax-deferred withdrawals before drawing taxable assets." />
             </div>
+            {plan.household.filingStatus === "marriedSeparate" && (
+              <label className="switch-row">
+                <span>
+                  <strong>Lived apart from spouse for the entire tax year</strong>
+                  <small>The IRS uses a $25,000 base only when this is true; otherwise the base is $0.</small>
+                </span>
+                <Switch checked={plan.household.marriedFilingSeparatelyLivedApart} onCheckedChange={(value) => setHousehold("marriedFilingSeparatelyLivedApart", value)} />
+              </label>
+            )}
             <div className="calculated-line">
               <span>2026 standard deduction</span>
               <strong>{currency.format(targetTax.standardDeduction)}</strong>
@@ -1221,6 +1232,22 @@ export default function HomePage() {
             </ol>
           </Panel>
         </div>
+        <Panel title="Social Security taxation worksheet" eyebrow="FIRST MODELED BENEFIT YEAR">
+          {socialSecurityYear ? (
+            <div className="worksheet-grid">
+              <div><span>Projection year / age</span><strong>{socialSecurityYear.year} / {socialSecurityYear.age}</strong></div>
+              <div><span>Total benefits</span><strong>{currency.format(socialSecurityYear.socialSecurityIncome)}</strong></div>
+              <div><span>Provisional income</span><strong>{currency.format(socialSecurityYear.socialSecurityProvisionalIncome)}</strong></div>
+              <div><span>Taxable benefits</span><strong>{currency.format(socialSecurityYear.taxableSocialSecurity)}</strong></div>
+              <div><span>Taxable share</span><strong>{(socialSecurityYear.socialSecurityIncome > 0 ? socialSecurityYear.taxableSocialSecurity / socialSecurityYear.socialSecurityIncome * 100 : 0).toFixed(1)}%</strong></div>
+            </div>
+          ) : (
+            <p className="panel-copy">Add a Social Security income stream to see the first modeled year's provisional-income worksheet.</p>
+          )}
+          <p className="model-note">
+            <Calculator /> Provisional income is one-half of benefits plus other taxable income and tax-exempt interest. The statutory thresholds are held flat, not inflation-indexed. This estimate does not handle benefit repayments, lump-sum elections, or special exclusions and adjustments.
+          </p>
+        </Panel>
         <Panel title="Projected withdrawals" eyebrow="BY TAX TREATMENT">
           <ChartContainer
             config={{
@@ -1248,10 +1275,12 @@ export default function HomePage() {
           </ChartContainer>
         </Panel>
         <p className="model-note">
-          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. State and capital-gains rates remain planning estimates. Credits, itemized and additional deductions, the Social Security worksheet, AMT, NIIT, RMDs, IRMAA, ACA interactions, and Roth conversions are not yet included.{" "}
+          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. State and capital-gains rates remain planning estimates. Credits, itemized and additional deductions, AMT, NIIT, RMDs, IRMAA, ACA interactions, and Roth conversions are not yet included.{" "}
           <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">
             IRS Rev. Proc. 2025-32
           </a>
+          {" · "}
+          <a href="https://www.irs.gov/pub/irs-pdf/p915.pdf" target="_blank" rel="noreferrer">IRS Publication 915 (2025)</a>
         </p>
       </>
     );
