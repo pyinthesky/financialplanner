@@ -103,6 +103,22 @@ The work is organized into bounded batches so each batch can ship independently.
 - Optional user-supplied AI provider connection that sends only a user-approved redacted summary
 - No project-operated storage of credentials or financial data
 
+### Experience and guidance backlog
+
+- A calm, comforting, informative, and inspirational experience that explains uncertainty without using fear, shame, or false precision
+- Prioritized, explainable suggestions that show which changes could most improve the plan and why
+- A simple financial-resilience score that combines retirement funding with income-to-required-debt-payment burden; show the components and never present it as a credit score or guarantee
+- A guided monthly-bills worksheet with common categories, annual/irregular expense prompts, and a clear bridge from current cash flow to retirement spending
+- HSA contribution, investing, receipt-retention, qualified-expense, Medicare-enrollment, and retirement-withdrawal strategy, with current limits and rules kept effective-dated
+- Plain-language estate-planning education: why a will matters, common will/trust distinctions, when complexity may warrant an attorney, and a neutral checklist for evaluating providers—without referrals or affiliate links
+- Fiduciary-advisor education: RIA and Form ADV basics, fee-only versus fee-based distinctions, reasonable fee structures by service and asset level, conflicts to watch for, and an easy path to check SEC or state registration using official sources
+- A balanced self-directed alternative showing when a low-cost diversified index-fund portfolio may be sufficient, with guidance scaled to assets, complexity, confidence, and desired service—not a blanket recommendation
+- Evidence-grounded healthy-living planning prompts that can illustrate potential health and longevity effects without predicting an individual's medical outcome or blaming users for health costs
+
+### Product benchmark
+
+The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate, and typical bank calculators on depth, synthesis, clarity, and privacy—not by collecting more data. Competitive reviews should focus on their public workflows and identify missing questions, shallow assumptions, opaque calculations, fragmented outputs, lock-in, and unnecessary data collection. The planner should ask only questions that materially change an explainable result, connect cash flow, debt, taxes, benefits, health, housing, and estate decisions, and keep every plan local by default.
+
 ## Contributing
 
 Issues and pull requests are welcome. Financial-law changes must cite an authoritative source and include an effective date. Calculation changes should include tests and keep the result explainable in the UI.
