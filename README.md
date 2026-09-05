@@ -66,6 +66,12 @@ The work is organized into bounded batches so each batch can ship independently.
 - Encrypted local persistence and portable JSON
 - GitHub Pages deployment
 
+### Batch 1A — Immediate usability corrections
+
+- [ ] Rebuild narrow-screen navigation, summaries, forms, tables, and charts around mobile task flows, with usable tap targets and no clipped or horizontally trapped content
+- [ ] Render untouched numeric inputs as blank rather than `0`; make replacement predictable on focus while preserving intentional zero values
+- [ ] Unify field, affix, and secondary-surface borders, backgrounds, and corner radii so compound inputs have no white seams or mismatched rounding
+
 ### Batch 2 — Federal tax engine (in progress)
 
 - [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
@@ -81,19 +87,23 @@ The work is organized into bounded batches so each batch can ship independently.
 - Spousal and survivor rules
 - Pension survivor-election and lump-sum comparison
 - Household death-year scenarios
+- Military and government retirement paths, including authoritative, effective-dated treatment for military retirement systems and survivor benefits, FERS/CSRS, TSP, FEGLI, FEHB retirement eligibility, and related tax distinctions
 
 ### Batch 4 — State, health, and long-term care data
 
-- Versioned state income-tax and retirement-income rules
-- State exchange / HealthCare.gov links and locally calculated subsidy estimates
+- Versioned state and local income-tax and retirement-income rules
+- Optional U.S. ZIP/locality assistance using authoritative, effective-dated data to suggest state/local tax assumptions, assessment conventions, and mill rates; keep every value reviewable and overridable, never require a ZIP, and retain a manual country-aware path for international users
+- Guided state-exchange / HealthCare.gov workflow that helps users identify the correct marketplace, look up current plan-year premiums, and locally populate subsidy and net-premium inputs without transmitting the rest of the plan
 - Medicare premium assumptions and state long-term-care cost references
-- Property-tax presets while preserving user-entered local mill rates
+- Property-tax presets while preserving user-entered assessed values and local mill rates
 
 ### Batch 5 — Scenario laboratory
 
 - Side-by-side mortgage payoff versus investing
+- Mortgage principal-and-interest versus escrow reconciliation so taxes, homeowners insurance, HOA, mortgage insurance, and other impounds are not mistaken for debt service or double-counted; connect the result to a dedicated housing view
 - Move-state, retire-date, spending, and claiming-age comparisons
 - Guardrails, cash buckets, and sequence-of-returns stress tests
+- Recommended cash-buffer range on the plan overview, with an itemized explanation of which essential costs it covers, how many months it funds, and how the recommendation changes by income stability and retirement stage
 - Inheritance, one-time income, home sale/downsize, and legacy goals
 
 ### Batch 6 — Trust, accessibility, and optional AI
