@@ -130,3 +130,11 @@ test("the PDF report is removed from screen layout and enabled only for printing
   assert.match(css, /@media print[\s\S]*\.print-report \{ display: block;/);
   assert.doesNotMatch(css, /left:\s*-200vw/);
 });
+
+test("the PDF portfolio chart uses precomputed SVG geometry instead of hidden responsive measurement", () => {
+  assert.match(page, /buildPrintPortfolioChart\(projection\)/);
+  assert.match(page, /<svg className="report-portfolio-chart"/);
+  assert.match(page, /<polygon points=\{series\.points\}/);
+  assert.doesNotMatch(page, /initialDimension=\{\{ width: 900, height: 310 \}\}/);
+  assert.match(css, /\.report-portfolio-chart \{ display: block; width: 100%; height: auto;/);
+});

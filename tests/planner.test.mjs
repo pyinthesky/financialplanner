@@ -4,6 +4,7 @@ import test from "node:test";
 import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
+import { buildPrintPortfolioChart } from "../lib/print-chart.ts";
 import {
   formatNumericInputValue,
   reconcileNumericInputValue,
@@ -18,6 +19,34 @@ import {
 } from "../lib/planner.ts";
 
 const copyPlan = () => structuredClone(DEFAULT_PLAN);
+
+test("print chart builds finite stacked geometry without browser measurement", () => {
+  const geometry = buildPrintPortfolioChart([
+    { age: 40, traditional: 100_000, taxable: 80_000, roth: 30_000, cash: 20_000, hsa: 5_000 },
+    { age: 50, traditional: 140_000, taxable: 100_000, roth: 50_000, cash: 15_000, hsa: 8_000 },
+    { age: 60, traditional: 180_000, taxable: 120_000, roth: 75_000, cash: 25_000, hsa: 12_000 },
+  ]);
+  assert.equal(geometry.polygons.length, 5);
+  assert.deepEqual(geometry.ageTicks.map((tick) => tick.age), [40, 50, 60]);
+  assert.ok(geometry.maxValue >= 412_000);
+
+  for (const series of geometry.polygons) {
+    const coordinates = series.points.split(/[ ,]/).map(Number);
+    assert.ok(coordinates.length > 4);
+    assert.ok(coordinates.every(Number.isFinite));
+    assert.ok(coordinates.every((value, index) => index % 2 === 0 ? value >= 0 && value <= geometry.width : value >= 0 && value <= geometry.height));
+  }
+});
+
+test("print chart produces non-degenerate visible areas for funded series", () => {
+  const geometry = buildPrintPortfolioChart([
+    { age: 40, traditional: 100, taxable: 0, roth: 0, cash: 0, hsa: 0 },
+    { age: 41, traditional: 200, taxable: 0, roth: 0, cash: 0, hsa: 0 },
+  ]);
+  const traditional = geometry.polygons.find((series) => series.key === "traditional");
+  const yValues = traditional.points.split(" ").map((point) => Number(point.split(",")[1]));
+  assert.ok(new Set(yValues).size > 1, "funded series should occupy printable area");
+});
 
 test("projection covers every age in the planning horizon", () => {
   const projection = projectPlan(copyPlan());

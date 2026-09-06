@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DEFAULT_PLAN, debtPayoffSchedule, estimateSuccessRate, normalizePlan, projectPlan, propertyTaxAnnual, totalPortfolio, type Account, type Debt, type IncomeStream, type PlannerData, type RecurringCost } from "@/lib/planner";
 import { calculateFederalIncomeTax, type FilingStatus } from "@/lib/federal-tax";
+import { buildPrintPortfolioChart, PRINT_PORTFOLIO_SERIES } from "@/lib/print-chart";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
 type SectionId = "overview" | "household" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
@@ -165,6 +166,9 @@ function PlannerNavigation({ activeSection, onSelect }: { activeSection: Section
 function PrintReport({ data, projection, successRate, debtMonths }: { data: PlannerData; projection: ReturnType<typeof projectPlan>; successRate: number; debtMonths: number }) {
   const retirement = projection.find((row) => row.age === data.household.retirementAge) ?? projection[0];
   const last = projection.at(-1)!;
+  const printChart = buildPrintPortfolioChart(projection);
+  const retirementIndex = Math.max(0, projection.findIndex((row) => row.age >= data.household.retirementAge));
+  const retirementX = printChart.xPositions[retirementIndex] ?? printChart.plot.left;
   return (
     <article className="print-report" aria-hidden="true">
       <header className="report-header">
@@ -194,20 +198,31 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
       </div>
       <section className="report-chart">
         <h2>Portfolio Projection</h2>
-        <ChartContainer config={portfolioChartConfig} className="h-[310px] w-full aspect-auto" initialDimension={{ width: 900, height: 310 }}>
-          <AreaChart data={projection} margin={{ top: 12, right: 12, left: 12, bottom: 0 }}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="age" tickLine={false} axisLine={false} />
-            <YAxis tickFormatter={(value) => compactCurrency.format(value)} tickLine={false} axisLine={false} width={72} />
-            <Area name="Tax-Deferred" type="monotone" dataKey="traditional" stackId="portfolio" fill="var(--color-traditional)" stroke="var(--color-traditional)" />
-            <Area name="Taxable" type="monotone" dataKey="taxable" stackId="portfolio" fill="var(--color-taxable)" stroke="var(--color-taxable)" />
-            <Area name="Roth" type="monotone" dataKey="roth" stackId="portfolio" fill="var(--color-roth)" stroke="var(--color-roth)" />
-            <Area name="Cash" type="monotone" dataKey="cash" stackId="portfolio" fill="var(--color-cash)" stroke="var(--color-cash)" />
-            <Area name="HSA" type="monotone" dataKey="hsa" stackId="portfolio" fill="var(--color-hsa)" stroke="var(--color-hsa)" />
-            <ReferenceLine x={data.household.retirementAge} stroke="#17243b" strokeDasharray="4 4" />
-            <Legend />
-          </AreaChart>
-        </ChartContainer>
+        <svg className="report-portfolio-chart" viewBox={`0 0 ${printChart.width} ${printChart.height}`} role="img" aria-labelledby="print-portfolio-chart-title">
+          <title id="print-portfolio-chart-title">Stacked portfolio projection by tax treatment</title>
+          {printChart.gridLines.map((line) => (
+            <g key={line.y}>
+              <line x1={printChart.plot.left} x2={printChart.plot.right} y1={line.y} y2={line.y} stroke="#e3e9f1" strokeWidth="1" />
+              <text x={printChart.plot.left - 9} y={line.y + 3} textAnchor="end" fill="#718096" fontSize="10">{compactCurrency.format(line.value)}</text>
+            </g>
+          ))}
+          {printChart.polygons.map((series) => (
+            <g key={series.key}>
+              <polygon points={series.points} fill={series.color} fillOpacity="0.76" />
+              <polyline points={series.topPoints} fill="none" stroke={series.color} strokeWidth="1.2" />
+            </g>
+          ))}
+          <line x1={retirementX} x2={retirementX} y1={printChart.plot.top} y2={printChart.plot.bottom} stroke="#17243b" strokeDasharray="4 4" strokeWidth="1" />
+          <text x={Math.min(retirementX + 5, printChart.plot.right - 32)} y={printChart.plot.top + 11} fill="#17243b" fontSize="10">Retire</text>
+          {printChart.ageTicks.map((tick) => (
+            <text key={tick.age} x={tick.x} y={printChart.height - 14} textAnchor="middle" fill="#718096" fontSize="10">Age {tick.age}</text>
+          ))}
+        </svg>
+        <div className="report-chart-legend" aria-hidden="true">
+          {PRINT_PORTFOLIO_SERIES.map((series) => (
+            <span key={series.key}><i style={{ background: series.color }} />{series.label}</span>
+          ))}
+        </div>
       </section>
       <div className="report-grid">
         <section>

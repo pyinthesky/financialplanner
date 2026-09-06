@@ -435,6 +435,10 @@ button, input, select { font: inherit; }
 .report-metrics strong { display: block; margin-top: 6px; font-size: 18px; }
 .report-chart { border: 1px solid #dce4ee; border-radius: 10px; padding: 16px; }
 .report-chart h2, .report-grid h2 { margin: 0 0 12px; font-size: 14px; }
+.report-portfolio-chart { display: block; width: 100%; height: auto; overflow: visible; }
+.report-chart-legend { display: flex; justify-content: center; gap: 15px; margin-top: -4px; color: #5f6d82; font-size: 9px; }
+.report-chart-legend span { display: flex; align-items: center; gap: 4px; }
+.report-chart-legend i { width: 8px; height: 8px; border-radius: 2px; }
 .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
 .report-grid dl, .report-grid ul { margin: 0; font-size: 11px; color: #5b687b; line-height: 1.55; }
 .report-grid dl div { display: flex; justify-content: space-between; border-bottom: 1px solid #e7ebf1; padding: 6px 0; }
@@ -524,5 +528,5 @@ button, input, select { font: inherit; }
   body { background: white !important; }
   [data-slot="sidebar-wrapper"], body > [data-slot="dialog-portal"] { display: none !important; }
   .print-report { display: block; width: auto; background: white; color: #17243b; padding: 0; font-family: Inter, ui-sans-serif, sans-serif; }
-  .print-report [data-slot="chart"] { break-inside: avoid; }
+  .report-chart { break-inside: avoid; }
 }
