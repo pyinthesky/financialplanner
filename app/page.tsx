@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DEFAULT_PLAN, debtPayoffSchedule, estimateSuccessRate, normalizePlan, projectPlan, propertyTaxAnnual, totalPortfolio, type Account, type Debt, type IncomeStream, type PlannerData, type RecurringCost } from "@/lib/planner";
 import { calculateFederalIncomeTax, type FilingStatus } from "@/lib/federal-tax";
 import { compareRothConversion } from "@/lib/roth-conversion";
+import { calculateMedicareIrmaa, type IrmaaFilingCategory } from "@/lib/medicare-irmaa";
 import { buildPrintPortfolioChart, PRINT_PORTFOLIO_SERIES } from "@/lib/print-chart";
 import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
@@ -370,6 +371,17 @@ export default function HomePage() {
       ...current,
       rothConversionPlanning: {
         ...current.rothConversionPlanning,
+        [key]: value,
+      },
+    }));
+  const setMedicareIrmaaPlanning = (
+    key: keyof PlannerData["medicareIrmaaPlanning"],
+    value: number | PlannerData["medicareIrmaaPlanning"]["filingCategory"],
+  ) =>
+    setPlan((current) => ({
+      ...current,
+      medicareIrmaaPlanning: {
+        ...current.medicareIrmaaPlanning,
         [key]: value,
       },
     }));
@@ -1298,6 +1310,15 @@ export default function HomePage() {
       filingStatus: plan.household.filingStatus,
       ...plan.rothConversionPlanning,
     });
+    const medicareIrmaa = plan.medicareIrmaaPlanning.filingCategory
+      ? calculateMedicareIrmaa({
+          magi: plan.medicareIrmaaPlanning.magi2024,
+          filingCategory: plan.medicareIrmaaPlanning
+            .filingCategory as IrmaaFilingCategory,
+          partBEnrollees: plan.medicareIrmaaPlanning.partBEnrollees,
+          partDEnrollees: plan.medicareIrmaaPlanning.partDEnrollees,
+        })
+      : null;
     const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
     const firstRmdYear = projection.find((row) => row.requiredMinimumDistribution > 0);
     const firstQcdYear = projection.find(
@@ -1486,6 +1507,80 @@ export default function HomePage() {
             <a href="https://www.irs.gov/pub/irs-pdf/p590a.pdf" target="_blank" rel="noreferrer">IRS Publication 590-A (2025)</a>
             {" · "}
             <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">2026 IRS brackets</a>
+          </p>
+        </Panel>
+        <Panel title="Medicare IRMAA Worksheet" eyebrow="2026 PREMIUMS · 2024 LOOKBACK">
+          <div className="form-grid">
+            <Field
+              label="2024 Medicare MAGI"
+              value={plan.medicareIrmaaPlanning.magi2024}
+              onChange={(value) => setMedicareIrmaaPlanning("magi2024", value)}
+              prefix="$"
+              step={1000}
+              help="For IRMAA, Medicare MAGI is adjusted gross income plus tax-exempt interest. Use the amount from the return Social Security used, usually tax year 2024 for 2026 premiums."
+            />
+            <SelectField
+              label="2024 IRMAA filing category"
+              value={plan.medicareIrmaaPlanning.filingCategory}
+              onChange={(value) =>
+                setMedicareIrmaaPlanning(
+                  "filingCategory",
+                  value as PlannerData["medicareIrmaaPlanning"]["filingCategory"],
+                )
+              }
+              options={[
+                { value: "", label: "Choose the applicable category" },
+                { value: "individual", label: "Individual return" },
+                { value: "marriedJoint", label: "Married filing jointly" },
+                {
+                  value: "marriedSeparateLivedTogether",
+                  label: "Married filing separately · lived together",
+                },
+              ]}
+            />
+            <Field
+              label="Part B enrollees"
+              value={plan.medicareIrmaaPlanning.partBEnrollees}
+              onChange={(value) => setMedicareIrmaaPlanning("partBEnrollees", value)}
+              suffix="people"
+              max={2}
+              help="Enter the number of household members actually enrolled in full Part B coverage during 2026."
+            />
+            <Field
+              label="Part D enrollees"
+              value={plan.medicareIrmaaPlanning.partDEnrollees}
+              onChange={(value) => setMedicareIrmaaPlanning("partDEnrollees", value)}
+              suffix="people"
+              max={2}
+              help="Part D IRMAA is separate from—and added to—the premium charged by the selected prescription drug plan."
+            />
+          </div>
+          {medicareIrmaa ? (
+            <div className="worksheet-grid">
+              <div><span>2026 premium tier</span><strong>{medicareIrmaa.tierLabel}</strong></div>
+              <div><span>Part B monthly premium · each</span><strong>{currency.format(medicareIrmaa.partBMonthlyPremiumPerEnrollee)}</strong></div>
+              <div><span>Part B monthly IRMAA · each</span><strong>{currency.format(medicareIrmaa.partBMonthlyIrmaaPerEnrollee)}</strong></div>
+              <div><span>Part D monthly IRMAA · each</span><strong>{currency.format(medicareIrmaa.partDMonthlyIrmaaPerEnrollee)}</strong></div>
+              <div><span>Annual household IRMAA</span><strong>{currency.format(medicareIrmaa.annualHouseholdIrmaa)}</strong></div>
+              <div><span>Known annual premiums</span><strong>{currency.format(medicareIrmaa.annualKnownHouseholdPremium)}</strong><small>Part B plus Part D IRMAA; Part D plan premiums excluded</small></div>
+              <div>
+                <span>Room before the next tier</span>
+                <strong>{medicareIrmaa.roomBeforeNextTier === null ? "Top tier" : currency.format(medicareIrmaa.roomBeforeNextTier)}</strong>
+                {medicareIrmaa.nextTierBoundary !== null && (
+                  <small>
+                    Next tier begins {medicareIrmaa.nextTierStartsAtBoundary ? "at" : "above"} {currency.format(medicareIrmaa.nextTierBoundary)}
+                  </small>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="panel-copy">Choose the filing category from the return used for the 2026 IRMAA determination.</p>
+          )}
+          <p className="model-note">
+            <Calculator /> This worksheet applies the published 2026 Part B and Part D IRMAA tiers to the entered lookback MAGI. It excludes Part D plan premiums, late-enrollment penalties, Part A premiums, immunosuppressive-drug-only Part B coverage, and any decision by Social Security to use a different return. IRMAA applies per enrolled person, even when a joint-return threshold is used. Future-year thresholds and premiums are not projected.{" "}
+            <a href="https://www.ssa.gov/benefits/medicare/medicare-premiums.html" target="_blank" rel="noreferrer">SSA 2026 premium tables</a>
+            {" · "}
+            <a href="https://www.ssa.gov/medicare/lower-irmaa" target="_blank" rel="noreferrer">SSA life-changing-event guidance</a>
           </p>
         </Panel>
         <Panel title="Required Minimum Distribution Worksheet" eyebrow="FIRST MODELED RMD YEAR">

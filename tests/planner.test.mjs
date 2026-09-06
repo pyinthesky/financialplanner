@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { calculateFederalIncomeTax, federalGrossIncomeCeilingForRate } from "../lib/federal-tax.ts";
 import { compareRothConversion } from "../lib/roth-conversion.ts";
+import { calculateMedicareIrmaa } from "../lib/medicare-irmaa.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
 import { calculateQcdCapacity, calculateQcdElection } from "../lib/qcd.ts";
@@ -59,6 +60,60 @@ test("Roth conversion comparison surfaces the amount above a target bracket", ()
   assert.equal(result.conversionWithinTarget, 13_000);
   assert.equal(result.amountAboveTarget, 17_000);
   assert.equal(result.resultingMarginalRate, 0.22);
+});
+
+test("2026 Medicare IRMAA uses 2024 MAGI and charges each enrollee", () => {
+  const result = calculateMedicareIrmaa({
+    magi: 250_000,
+    filingCategory: "marriedJoint",
+    partBEnrollees: 2,
+    partDEnrollees: 2,
+  });
+  assert.equal(result.tier, 1);
+  assert.equal(result.partBMonthlyPremiumPerEnrollee, 284.1);
+  assert.equal(result.partDMonthlyIrmaaPerEnrollee, 14.5);
+  assert.equal(result.annualHouseholdIrmaa, (81.2 + 14.5) * 2 * 12);
+  assert.equal(result.annualKnownHouseholdPremium, (284.1 + 14.5) * 2 * 12);
+  assert.equal(result.roomBeforeNextTier, 24_000);
+});
+
+test("2026 Medicare IRMAA preserves inclusive and top-tier boundaries", () => {
+  const atFirstCeiling = calculateMedicareIrmaa({
+    magi: 109_000,
+    filingCategory: "individual",
+    partBEnrollees: 1,
+    partDEnrollees: 1,
+  });
+  const aboveFirstCeiling = calculateMedicareIrmaa({
+    magi: 109_001,
+    filingCategory: "individual",
+    partBEnrollees: 1,
+    partDEnrollees: 1,
+  });
+  const topTier = calculateMedicareIrmaa({
+    magi: 500_000,
+    filingCategory: "individual",
+    partBEnrollees: 1,
+    partDEnrollees: 1,
+  });
+  assert.equal(atFirstCeiling.tier, 0);
+  assert.equal(aboveFirstCeiling.tier, 1);
+  assert.equal(topTier.tier, 5);
+  assert.equal(topTier.roomBeforeNextTier, null);
+});
+
+test("married-separate IRMAA category uses the lived-together table", () => {
+  const result = calculateMedicareIrmaa({
+    magi: 110_000,
+    filingCategory: "marriedSeparateLivedTogether",
+    partBEnrollees: 1,
+    partDEnrollees: 1,
+  });
+  assert.equal(result.tier, 1);
+  assert.equal(result.partBMonthlyPremiumPerEnrollee, 649.2);
+  assert.equal(result.partDMonthlyIrmaaPerEnrollee, 83.3);
+  assert.equal(result.nextTierBoundary, 391_000);
+  assert.equal(result.nextTierStartsAtBoundary, true);
 });
 
 test("print chart builds finite stacked geometry without browser measurement", () => {
@@ -507,6 +562,10 @@ test("legacy plan imports receive a compatible filing status", () => {
   assert.deepEqual(
     normalized.rothConversionPlanning,
     DEFAULT_PLAN.rothConversionPlanning,
+  );
+  assert.deepEqual(
+    normalized.medicareIrmaaPlanning,
+    DEFAULT_PLAN.medicareIrmaaPlanning,
   );
 });
 

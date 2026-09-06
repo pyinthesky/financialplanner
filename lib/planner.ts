@@ -88,6 +88,16 @@ export interface PlannerData {
     taxableConversionAmount: number;
     targetBracketRate: number;
   };
+  medicareIrmaaPlanning: {
+    magi2024: number;
+    filingCategory:
+      | ""
+      | "individual"
+      | "marriedJoint"
+      | "marriedSeparateLivedTogether";
+    partBEnrollees: number;
+    partDEnrollees: number;
+  };
   housing: {
     homeValue: number;
     assessedPercent: number;
@@ -205,6 +215,12 @@ export const DEFAULT_PLAN: PlannerData = {
     baselineGrossOrdinaryIncome: 0,
     taxableConversionAmount: 0,
     targetBracketRate: 0,
+  },
+  medicareIrmaaPlanning: {
+    magi2024: 0,
+    filingCategory: "",
+    partBEnrollees: 0,
+    partDEnrollees: 0,
   },
   housing: {
     homeValue: 0,
@@ -983,6 +999,10 @@ export function normalizePlan(input: unknown): PlannerData {
     rothConversionPlanning: {
       ...DEFAULT_PLAN.rothConversionPlanning,
       ...candidate.rothConversionPlanning,
+    },
+    medicareIrmaaPlanning: {
+      ...DEFAULT_PLAN.medicareIrmaaPlanning,
+      ...candidate.medicareIrmaaPlanning,
     },
   } as PlannerData;
 }
