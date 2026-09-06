@@ -77,6 +77,22 @@ test("chart legends expose human-readable names instead of internal data keys", 
   assert.doesNotMatch(page, /<(?:Area|Bar|Line)(?![^>]*\bname=)[^>]*\bdataKey=/);
 });
 
+test("every quantitative editor uses the shared visible-affix control", () => {
+  const numericInputTags = page.match(/<NumericInput\b/g) ?? [];
+  assert.equal(numericInputTags.length, 1, "only the shared affixed control should render NumericInput directly");
+  assert.match(page, /function AffixedNumericInput/);
+  assert.match(page, /prefix="\$" suffix="\/ year"/);
+  assert.match(page, /prefix="\$"[\s\S]{0,80}suffix="\/ month"/);
+  assert.match(page, /suffix="years old"/);
+  assert.match(page, /suffix="YYYY"/);
+  assert.match(page, /suffix="%"/);
+});
+
+test("affixed table inputs stay bounded on narrow screens", () => {
+  assert.match(css, /\.table-wrap \.input-affix input \{ min-width: 0;/);
+  assert.match(css, /\.mobile-card-table \.input-affix \{ width: 100%; min-width: 0; \}/);
+});
+
 test("primary mobile actions meet a 44px touch target", () => {
   assert.match(css, /\.topbar-actions button \{ width: 2\.75rem;/);
   assert.match(css, /\[data-sidebar="menu-button"\] \{ min-height: 3rem; \}/);

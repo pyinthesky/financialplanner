@@ -59,16 +59,27 @@ const compactCurrency = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 
+type AffixedNumericInputProps = React.ComponentProps<typeof NumericInput> & {
+  prefix?: string;
+  suffix?: string;
+};
+
+function AffixedNumericInput({ prefix, suffix, ...props }: AffixedNumericInputProps) {
+  return (
+    <div className="input-affix">
+      {prefix && <span>{prefix}</span>}
+      <NumericInput {...props} />
+      {suffix && <span>{suffix}</span>}
+    </div>
+  );
+}
+
 function Field({ label, value, onChange, prefix, suffix, min = 0, max, step = 1, help }: { label: string; value: number; onChange: (value: number) => void; prefix?: string; suffix?: string; min?: number; max?: number; step?: number; help?: string }) {
   const id = `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return (
     <div className="field-stack">
       <Label htmlFor={id}>{label}</Label>
-      <div className="input-affix">
-        {prefix && <span>{prefix}</span>}
-        <NumericInput id={id} min={min} max={max} step={step} value={value} onChange={(event) => onChange(event.target.valueAsNumber || 0)} />
-        {suffix && <span>{suffix}</span>}
-      </div>
+      <AffixedNumericInput id={id} min={min} max={max} step={step} value={value} onChange={(event) => onChange(event.target.valueAsNumber || 0)} prefix={prefix} suffix={suffix} />
       {help && <p className="field-help">{help}</p>}
     </div>
   );
@@ -500,13 +511,13 @@ export default function HomePage() {
                 { value: "single", label: "Single" },
               ]}
             />
-            <Field label="Your current age" value={plan.household.currentAge} onChange={(value) => setHousehold("currentAge", value)} max={99} />
-            <Field label="Your birth year" value={plan.household.birthYear} onChange={(value) => setHousehold("birthYear", value)} min={1900} max={new Date().getFullYear()} help="Optional. Used locally to determine when RMDs begin; 1959 requires review." />
-            {plan.household.maritalStatus === "married" && <Field label="Partner current age" value={plan.household.partnerAge} onChange={(value) => setHousehold("partnerAge", value)} max={99} />}
-            {plan.household.maritalStatus === "married" && <Field label="Partner birth year" value={plan.household.partnerBirthYear} onChange={(value) => setHousehold("partnerBirthYear", value)} min={1900} max={new Date().getFullYear()} help="Optional. Used only for the partner's RMD schedule." />}
-            <Field label="Your retirement age" value={plan.household.retirementAge} onChange={(value) => setHousehold("retirementAge", value)} max={99} />
-            {plan.household.maritalStatus === "married" && <Field label="Partner retirement age" value={plan.household.partnerRetirementAge} onChange={(value) => setHousehold("partnerRetirementAge", value)} max={99} />}
-            <Field label="Plan through age" value={plan.household.planToAge} onChange={(value) => setHousehold("planToAge", value)} min={plan.household.currentAge + 1} max={120} />
+            <Field label="Your current age" value={plan.household.currentAge} onChange={(value) => setHousehold("currentAge", value)} suffix="years old" max={99} />
+            <Field label="Your birth year" value={plan.household.birthYear} onChange={(value) => setHousehold("birthYear", value)} suffix="YYYY" min={1900} max={new Date().getFullYear()} help="Optional. Used locally to determine when RMDs begin; 1959 requires review." />
+            {plan.household.maritalStatus === "married" && <Field label="Partner current age" value={plan.household.partnerAge} onChange={(value) => setHousehold("partnerAge", value)} suffix="years old" max={99} />}
+            {plan.household.maritalStatus === "married" && <Field label="Partner birth year" value={plan.household.partnerBirthYear} onChange={(value) => setHousehold("partnerBirthYear", value)} suffix="YYYY" min={1900} max={new Date().getFullYear()} help="Optional. Used only for the partner's RMD schedule." />}
+            <Field label="Your retirement age" value={plan.household.retirementAge} onChange={(value) => setHousehold("retirementAge", value)} suffix="years old" max={99} />
+            {plan.household.maritalStatus === "married" && <Field label="Partner retirement age" value={plan.household.partnerRetirementAge} onChange={(value) => setHousehold("partnerRetirementAge", value)} suffix="years old" max={99} />}
+            <Field label="Plan through age" value={plan.household.planToAge} onChange={(value) => setHousehold("planToAge", value)} suffix="years old" min={plan.household.currentAge + 1} max={120} />
             <div className="field-stack">
               <Label htmlFor="state">State</Label>
               <Input id="state" value={plan.household.state} onChange={(event) => setHousehold("state", event.target.value)} />
@@ -518,7 +529,7 @@ export default function HomePage() {
             <Field label="General inflation" value={plan.assumptions.inflation} onChange={(value) => setAssumption("inflation", value)} suffix="%" step={0.1} max={20} />
             <Field label="Return before retirement" value={plan.assumptions.preRetirementReturn} onChange={(value) => setAssumption("preRetirementReturn", value)} suffix="%" step={0.1} max={30} />
             <Field label="Return in retirement" value={plan.assumptions.retirementReturn} onChange={(value) => setAssumption("retirementReturn", value)} suffix="%" step={0.1} max={30} />
-            <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" step={1000} help="Excludes healthcare, housing tax/insurance, debts, and recurring costs entered elsewhere." />
+            <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" suffix="/ year" step={1000} help="Excludes healthcare, housing tax/insurance, debts, and recurring costs entered elsewhere." />
           </div>
         </Panel>
       </div>
@@ -608,7 +619,8 @@ export default function HomePage() {
                     </NativeSelect>
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      prefix="$"
                       value={account.balance}
                       onChange={(event) =>
                         updateAccount(account.id, {
@@ -620,7 +632,8 @@ export default function HomePage() {
                   </TableCell>
                   <TableCell>
                     {account.kind === "taxable" ? (
-                      <NumericInput
+                      <AffixedNumericInput
+                        prefix="$"
                         value={account.costBasis ?? 0}
                         onChange={(event) =>
                           updateAccount(account.id, {
@@ -634,7 +647,9 @@ export default function HomePage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      prefix="$"
+                      suffix="/ year"
                       value={account.annualContribution}
                       onChange={(event) =>
                         updateAccount(account.id, {
@@ -759,7 +774,8 @@ export default function HomePage() {
                     </NativeSelect>
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      suffix="years"
                       value={stream.startAge}
                       onChange={(event) =>
                         updateIncome(stream.id, {
@@ -770,7 +786,9 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      prefix="$"
+                      suffix="/ year"
                       value={stream.annualAmount}
                       onChange={(event) =>
                         updateIncome(stream.id, {
@@ -781,7 +799,8 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      suffix="%"
                       step="0.1"
                       value={stream.cola}
                       onChange={(event) =>
@@ -793,7 +812,8 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      suffix="%"
                       value={stream.survivorPercent}
                       onChange={(event) =>
                         updateIncome(stream.id, {
@@ -836,7 +856,7 @@ export default function HomePage() {
       <div className="two-column">
         <Panel title="Baseline Spending" eyebrow="RETIREMENT">
           <div className="form-grid single">
-            <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" step={1000} />
+            <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" suffix="/ year" step={1000} />
             <p className="panel-copy">Enter normal living expenses here. Healthcare, property tax, home insurance, debts, and the large recurring costs below are added separately.</p>
           </div>
         </Panel>
@@ -845,7 +865,7 @@ export default function HomePage() {
             <Field label="Home market value" value={plan.housing.homeValue} onChange={(value) => setHousing("homeValue", value)} prefix="$" step={5000} />
             <Field label="Assessed percent" value={plan.housing.assessedPercent} onChange={(value) => setHousing("assessedPercent", value)} suffix="%" step={1} max={200} />
             <Field label="Mill rate" value={plan.housing.millRate} onChange={(value) => setHousing("millRate", value)} suffix="mills" step={0.1} help="One mill is $1 per $1,000 of assessed value." />
-            <Field label="Annual home insurance" value={plan.housing.annualInsurance} onChange={(value) => setHousing("annualInsurance", value)} prefix="$" step={100} />
+            <Field label="Annual home insurance" value={plan.housing.annualInsurance} onChange={(value) => setHousing("annualInsurance", value)} prefix="$" suffix="/ year" step={100} />
           </div>
           <div className="calculated-line">
             <span>Estimated annual property tax</span>
@@ -888,7 +908,9 @@ export default function HomePage() {
                     <Input value={cost.name} onChange={(event) => updateCost(cost.id, { name: event.target.value })} />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      prefix="$"
+                      suffix="/ year"
                       value={cost.annualAmount}
                       onChange={(event) =>
                         updateCost(cost.id, {
@@ -898,7 +920,8 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      suffix="years"
                       value={cost.startAge}
                       onChange={(event) =>
                         updateCost(cost.id, {
@@ -908,7 +931,8 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      suffix="years"
                       value={cost.endAge}
                       onChange={(event) =>
                         updateCost(cost.id, {
@@ -1032,6 +1056,7 @@ export default function HomePage() {
             }))
           }
           prefix="$"
+          suffix="/ month"
           step={50}
         />
       </div>
@@ -1083,7 +1108,8 @@ export default function HomePage() {
                     </NativeSelect>
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      prefix="$"
                       value={debt.balance}
                       onChange={(event) =>
                         updateDebt(debt.id, {
@@ -1093,7 +1119,8 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      suffix="%"
                       step="0.1"
                       value={debt.interestRate}
                       onChange={(event) =>
@@ -1104,7 +1131,9 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <NumericInput
+                    <AffixedNumericInput
+                      prefix="$"
+                      suffix="/ month"
                       value={debt.minimumPayment}
                       onChange={(event) =>
                         updateDebt(debt.id, {
@@ -1142,8 +1171,8 @@ export default function HomePage() {
       <div className="two-column">
         <Panel title="Healthcare" eyebrow="ANNUAL HOUSEHOLD COST">
           <div className="form-grid">
-            <Field label="Before Medicare" value={plan.healthcare.preMedicareAnnual} onChange={(value) => setHealthcare("preMedicareAnnual", value)} prefix="$" step={500} help="Premiums plus expected out-of-pocket costs." />
-            <Field label="Medicare years" value={plan.healthcare.medicareAnnual} onChange={(value) => setHealthcare("medicareAnnual", value)} prefix="$" step={500} help="Parts B/D, supplement or Advantage, dental, and expected out-of-pocket costs." />
+            <Field label="Before Medicare" value={plan.healthcare.preMedicareAnnual} onChange={(value) => setHealthcare("preMedicareAnnual", value)} prefix="$" suffix="/ year" step={500} help="Premiums plus expected out-of-pocket costs." />
+            <Field label="Medicare years" value={plan.healthcare.medicareAnnual} onChange={(value) => setHealthcare("medicareAnnual", value)} prefix="$" suffix="/ year" step={500} help="Parts B/D, supplement or Advantage, dental, and expected out-of-pocket costs." />
             <Field label="Healthcare inflation" value={plan.healthcare.healthInflation} onChange={(value) => setHealthcare("healthInflation", value)} suffix="%" step={0.1} max={20} />
           </div>
           <div className="info-callout">
@@ -1156,9 +1185,9 @@ export default function HomePage() {
         </Panel>
         <Panel title="Long-Term Care Reserve" eyebrow="STRESS SCENARIO">
           <div className="form-grid">
-            <Field label="Annual care cost" value={plan.healthcare.longTermCareAnnual} onChange={(value) => setHealthcare("longTermCareAnnual", value)} prefix="$" step={1000} />
-            <Field label="Care starts at age" value={plan.healthcare.longTermCareStartAge} onChange={(value) => setHealthcare("longTermCareStartAge", value)} max={120} />
-            <Field label="Years of care" value={plan.healthcare.longTermCareYears} onChange={(value) => setHealthcare("longTermCareYears", value)} max={20} />
+            <Field label="Annual care cost" value={plan.healthcare.longTermCareAnnual} onChange={(value) => setHealthcare("longTermCareAnnual", value)} prefix="$" suffix="/ year" step={1000} />
+            <Field label="Care starts at age" value={plan.healthcare.longTermCareStartAge} onChange={(value) => setHealthcare("longTermCareStartAge", value)} suffix="years old" max={120} />
+            <Field label="Years of care" value={plan.healthcare.longTermCareYears} onChange={(value) => setHealthcare("longTermCareYears", value)} suffix="years" max={20} />
           </div>
           <div className="calculated-line">
             <span>Reserve before inflation</span>
@@ -1203,8 +1232,8 @@ export default function HomePage() {
               />
               <Field label={`${plan.household.state || "State"} effective rate`} value={plan.assumptions.stateEffectiveTaxRate} onChange={(value) => setAssumption("stateEffectiveTaxRate", value)} suffix="%" step={0.1} max={20} />
               <Field label="Capital gains rate" value={plan.assumptions.capitalGainsRate} onChange={(value) => setAssumption("capitalGainsRate", value)} suffix="%" step={0.1} max={50} />
-              <Field label="Annual tax-exempt interest" value={plan.assumptions.taxExemptInterest} onChange={(value) => setAssumption("taxExemptInterest", value)} prefix="$" step={100} help="Municipal-bond interest can increase taxable Social Security even though the interest itself is federally tax-exempt." />
-              <Field label="Ordinary-income target" value={plan.assumptions.targetOrdinaryIncome} onChange={(value) => setAssumption("targetOrdinaryIncome", value)} prefix="$" step={1000} help="The model fills this band with tax-deferred withdrawals before drawing taxable assets." />
+              <Field label="Annual tax-exempt interest" value={plan.assumptions.taxExemptInterest} onChange={(value) => setAssumption("taxExemptInterest", value)} prefix="$" suffix="/ year" step={100} help="Municipal-bond interest can increase taxable Social Security even though the interest itself is federally tax-exempt." />
+              <Field label="Ordinary-income target" value={plan.assumptions.targetOrdinaryIncome} onChange={(value) => setAssumption("targetOrdinaryIncome", value)} prefix="$" suffix="/ year" step={1000} help="The model fills this band with tax-deferred withdrawals before drawing taxable assets." />
             </div>
             {plan.household.filingStatus === "marriedSeparate" && (
               <label className="switch-row">

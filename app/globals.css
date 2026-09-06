@@ -340,6 +340,8 @@ button, input, select { font: inherit; }
 .table-wrap th { color: #718096; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; }
 .table-wrap td { padding-block: .7rem; }
 .table-wrap input, .table-wrap select { min-width: 7rem; background: #fbfcfe; }
+.table-wrap .input-affix { min-width: 8.5rem; background: #fbfcfe; }
+.table-wrap .input-affix input { min-width: 0; background: #fbfcfe; }
 .summary-strip, .calculated-line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid var(--border); border-radius: .85rem; background: #e9f0fa; padding: .9rem 1.15rem; margin-top: 1rem; color: #617088; }
 .summary-strip strong, .calculated-line strong { color: #1b3151; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
 .worksheet-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; }
@@ -442,6 +444,7 @@ button, input, select { font: inherit; }
   .mobile-card-table td[colspan] { display: block; border: 0; padding: 1.25rem; }
   .mobile-card-table td[colspan]::before { content: none; }
   .mobile-card-table input, .mobile-card-table select { width: 100%; min-width: 0; }
+  .mobile-card-table .input-affix { width: 100%; min-width: 0; }
   .accounts-table td:nth-child(1)::before { content: "Account"; }
   .accounts-table td:nth-child(2)::before { content: "Tax treatment"; }
   .accounts-table td:nth-child(3)::before { content: "Owner"; }
