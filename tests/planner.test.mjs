@@ -4,6 +4,7 @@ import test from "node:test";
 import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
+import { calculateQcdCapacity } from "../lib/qcd.ts";
 import { buildPrintPortfolioChart } from "../lib/print-chart.ts";
 import { buildPlanningSignals } from "../lib/planning-signals.ts";
 import {
@@ -272,6 +273,55 @@ test("joint tax-deferred balances are not silently assigned to an RMD owner", ()
     { id: "needs-owner", name: "Needs owner", kind: "traditional", owner: "joint", balance: 246_000, annualContribution: 0 },
   ];
   assert.equal(projectPlan(plan)[0].requiredMinimumDistribution, 0);
+});
+
+test("2026 QCD capacity uses the owner limit and can satisfy an RMD", () => {
+  const result = calculateQcdCapacity({
+    taxYear: 2026,
+    ageOnDistributionDate: 75,
+    eligibleIraBalance: 200_000,
+    requiredMinimumDistribution: 12_000,
+  });
+  assert.equal(result.status, "eligible");
+  assert.equal(result.annualLimit, 111_000);
+  assert.equal(result.potentialExclusionBeforeContributionOffset, 111_000);
+  assert.equal(result.potentialRmdSatisfied, 12_000);
+});
+
+test("QCD capacity does not guess through the age-70 distribution date", () => {
+  const result = calculateQcdCapacity({
+    taxYear: 2026,
+    ageOnDistributionDate: 70,
+    eligibleIraBalance: 100_000,
+    requiredMinimumDistribution: 0,
+  });
+  assert.equal(result.status, "age-date-review");
+  assert.equal(result.potentialExclusionBeforeContributionOffset, 0);
+});
+
+test("QCD capacity does not project an unsupported future-year limit", () => {
+  const result = calculateQcdCapacity({
+    taxYear: 2027,
+    ageOnDistributionDate: 75,
+    eligibleIraBalance: 100_000,
+    requiredMinimumDistribution: 4_000,
+  });
+  assert.equal(result.status, "unsupported-year");
+  assert.equal(result.annualLimit, null);
+  assert.equal(result.potentialExclusionBeforeContributionOffset, 0);
+});
+
+test("plan normalization clears invalid QCD source designations", () => {
+  const plan = copyPlan();
+  plan.accounts = [
+    { id: "ira", name: "IRA", kind: "traditional", owner: "you", balance: 1, annualContribution: 0, qcdEligibleIra: true },
+    { id: "401k", name: "401(k)", kind: "traditional", owner: "joint", balance: 1, annualContribution: 0, qcdEligibleIra: true },
+    { id: "roth", name: "Roth", kind: "roth", owner: "you", balance: 1, annualContribution: 0, qcdEligibleIra: true },
+  ];
+  const normalized = normalizePlan(plan);
+  assert.equal(normalized.accounts[0].qcdEligibleIra, true);
+  assert.equal(normalized.accounts[1].qcdEligibleIra, false);
+  assert.equal(normalized.accounts[2].qcdEligibleIra, false);
 });
 
 test("legacy plan imports receive a compatible filing status", () => {

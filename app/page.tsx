@@ -18,6 +18,7 @@ import { DEFAULT_PLAN, debtPayoffSchedule, estimateSuccessRate, normalizePlan, p
 import { calculateFederalIncomeTax, type FilingStatus } from "@/lib/federal-tax";
 import { buildPrintPortfolioChart, PRINT_PORTFOLIO_SERIES } from "@/lib/print-chart";
 import { buildPlanningSignals } from "@/lib/planning-signals";
+import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
 type SectionId = "overview" | "household" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
@@ -61,6 +62,14 @@ const compactCurrency = new Intl.NumberFormat("en-US", {
   notation: "compact",
   maximumFractionDigits: 1,
 });
+
+const qcdStatusCopy: Record<QcdCapacityStatus, string> = {
+  eligible: "Potentially eligible",
+  "age-date-review": "Confirm the distribution date",
+  underage: "Not yet age-eligible",
+  "no-eligible-ira": "No eligible IRA identified",
+  "unsupported-year": "Law update required",
+};
 
 type AffixedNumericInputProps = React.ComponentProps<typeof NumericInput> & {
   prefix?: string;
@@ -585,6 +594,7 @@ export default function HomePage() {
                     balance: 0,
                     annualContribution: 0,
                     costBasis: 0,
+                    qcdEligibleIra: false,
                   },
                 ],
               }))
@@ -605,6 +615,7 @@ export default function HomePage() {
                 <TableHead>Balance</TableHead>
                 <TableHead>Adjusted Cost Basis</TableHead>
                 <TableHead>Annual Contribution</TableHead>
+                <TableHead>QCD-Eligible IRA</TableHead>
                 <TableHead>
                   <span className="sr-only">Delete</span>
                 </TableHead>
@@ -623,6 +634,10 @@ export default function HomePage() {
                       onChange={(event) =>
                         updateAccount(account.id, {
                           kind: event.target.value as Account["kind"],
+                          qcdEligibleIra:
+                            event.target.value === "traditional" && account.owner !== "joint"
+                              ? account.qcdEligibleIra
+                              : false,
                         })
                       }
                     >
@@ -639,6 +654,10 @@ export default function HomePage() {
                       onChange={(event) =>
                         updateAccount(account.id, {
                           owner: event.target.value as Account["owner"],
+                          qcdEligibleIra:
+                            event.target.value !== "joint" && account.kind === "traditional"
+                              ? account.qcdEligibleIra
+                              : false,
                         })
                       }
                     >
@@ -689,6 +708,17 @@ export default function HomePage() {
                     />
                   </TableCell>
                   <TableCell>
+                    {account.kind === "traditional" && account.owner !== "joint" ? (
+                      <Switch
+                        checked={account.qcdEligibleIra ?? false}
+                        onCheckedChange={(value) => updateAccount(account.id, { qcdEligibleIra: value })}
+                        aria-label={`Identify ${account.name} as a QCD-eligible traditional IRA`}
+                      />
+                    ) : (
+                      <span className="not-applicable">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -720,6 +750,9 @@ export default function HomePage() {
       )}
       <p className="model-note">
         <Calculator /> For taxable accounts, enter the aggregate adjusted basis shown by your brokerage. The projection uses an average-basis planning estimate; actual tax lots, holding periods, loss harvesting, wash sales, and basis adjustments can change realized gains.
+      </p>
+      <p className="model-note">
+        <Calculator /> Mark QCD eligibility only for an individually owned traditional IRA that is not an ongoing SEP or SIMPLE IRA. Workplace plans such as a 401(k) or 403(b) are not eligible QCD sources.
       </p>
     </>
   );
@@ -1235,6 +1268,26 @@ export default function HomePage() {
     const targetTax = calculateFederalIncomeTax(plan.assumptions.targetOrdinaryIncome, plan.household.filingStatus);
     const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
     const firstRmdYear = projection.find((row) => row.requiredMinimumDistribution > 0);
+    const currentProjectionYear = projection[0];
+    const qcdCapacityFor = (owner: "you" | "partner") =>
+      calculateQcdCapacity({
+        taxYear: currentProjectionYear?.year ?? new Date().getFullYear(),
+        ageOnDistributionDate:
+          owner === "you" ? plan.household.currentAge : plan.household.partnerAge,
+        eligibleIraBalance: plan.accounts
+          .filter((account) => account.owner === owner && account.qcdEligibleIra)
+          .reduce((sum, account) => sum + Math.max(0, account.balance), 0),
+        requiredMinimumDistribution:
+          owner === "you"
+            ? currentProjectionYear?.youRmd ?? 0
+            : currentProjectionYear?.partnerRmd ?? 0,
+      });
+    const qcdOwners = [
+      { key: "you" as const, label: "You", result: qcdCapacityFor("you") },
+      ...(plan.household.maritalStatus === "married"
+        ? [{ key: "partner" as const, label: "Partner", result: qcdCapacityFor("partner") }]
+        : []),
+    ];
     const has1959RmdReview =
       plan.household.birthYear === 1959 ||
       (plan.household.maritalStatus === "married" &&
@@ -1348,6 +1401,28 @@ export default function HomePage() {
             <Calculator /> This planning estimate divides each owner's prior year-end tax-deferred balance by IRS Publication 590-B Table III. It assumes the distribution is taken in its applicable calendar year. It does not yet model a first-year April 1 delay, current-employer plan delay, 5% owner rules, inherited accounts, or the younger-spouse Table II exception. Excess RMD cash remains in the plan.
           </p>
         </Panel>
+        <Panel title="Qualified Charitable Distribution Check" eyebrow="2026 IRA RULES">
+          <div className="worksheet-grid">
+            {qcdOwners.map(({ key, label, result }) => (
+              <div key={key}>
+                <span>{label} · {qcdStatusCopy[result.status]}</span>
+                <strong>{currency.format(result.potentialExclusionBeforeContributionOffset)}</strong>
+                <small>
+                  {currency.format(result.eligibleIraBalance)} identified IRA balance
+                  {result.potentialRmdSatisfied > 0
+                    ? ` · up to ${currency.format(result.potentialRmdSatisfied)} of this year's RMD`
+                    : ""}
+                </small>
+              </div>
+            ))}
+          </div>
+          <p className="model-note">
+            <Calculator /> This is a conservative capacity check, not a QCD election. A QCD must be paid directly by the IRA trustee to an eligible charity, and the owner must be at least age 70½ on the distribution date. The 2026 exclusion limit is {currency.format(111_000)} per eligible owner and a QCD can count toward that owner's RMD. The displayed ceiling is before the statutory reduction for deductible IRA contributions made after age 70½. Age 70 requires the exact birth and distribution dates, which this planner does not collect.
+          </p>
+          <p className="model-note">
+            <Calculator /> Mark eligible IRA sources on the Accounts page. This worksheet does not yet alter projected withdrawals or taxes; that requires a user-entered intended gift, contribution-offset review, charity acknowledgement, and distribution timing.
+          </p>
+        </Panel>
         <Panel title="Social Security Taxation Worksheet" eyebrow="FIRST MODELED BENEFIT YEAR">
           {socialSecurityYear ? (
             <div className="worksheet-grid">
@@ -1391,7 +1466,7 @@ export default function HomePage() {
           </ChartContainer>
         </Panel>
         <p className="model-note">
-          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, QCDs, early-distribution penalties, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
+          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. The QCD panel checks 2026 eligibility and capacity but does not yet apply an election to the projection. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, early-distribution penalties, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
           <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">
             IRS Rev. Proc. 2025-32
           </a>
@@ -1399,6 +1474,8 @@ export default function HomePage() {
           <a href="https://www.irs.gov/pub/irs-pdf/p915.pdf" target="_blank" rel="noreferrer">IRS Publication 915 (2025)</a>
           {" · "}
           <a href="https://www.irs.gov/pub/irs-pdf/p590b.pdf" target="_blank" rel="noreferrer">IRS Publication 590-B (2025)</a>
+          {" · "}
+          <a href="https://www.irs.gov/pub/irs-drop/n-25-67.pdf" target="_blank" rel="noreferrer">IRS Notice 2025-67</a>
         </p>
       </>
     );

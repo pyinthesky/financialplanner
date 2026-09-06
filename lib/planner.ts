@@ -13,6 +13,7 @@ export interface Account {
   balance: number;
   annualContribution: number;
   costBasis?: number;
+  qcdEligibleIra?: boolean;
 }
 
 export interface IncomeStream {
@@ -731,6 +732,13 @@ export function normalizePlan(input: unknown): PlannerData {
     (maritalStatus === "married" ? "marriedJoint" : "single");
   return {
     ...candidate,
+    accounts: candidate.accounts.map((account) => ({
+      ...account,
+      qcdEligibleIra:
+        account.kind === "traditional" && account.owner !== "joint"
+          ? account.qcdEligibleIra ?? false
+          : false,
+    })),
     household: {
       ...candidate.household,
       maritalStatus,
