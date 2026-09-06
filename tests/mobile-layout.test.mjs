@@ -37,6 +37,46 @@ test("the privacy start explains all local persistence choices", () => {
   assert.match(page, /Without a vault, the open plan lasts only for this browser session/);
 });
 
+test("navigation, page, and panel titles use consistent title case", () => {
+  for (const title of [
+    "Spending & Housing",
+    "Debt Payoff",
+    "Health & Long-Term Care",
+    "Taxes & Withdrawals",
+    "Household & Assumptions",
+    "Portfolio by Tax Treatment",
+    "Required Minimum Distribution Worksheet",
+  ]) {
+    assert.ok(page.includes(title), `expected title-cased label: ${title}`);
+  }
+
+  for (const oldTitle of [
+    "Spending & housing",
+    "Debt payoff",
+    "Health & long-term care",
+    "Taxes & withdrawals",
+    "Portfolio by tax treatment",
+  ]) {
+    assert.ok(!page.includes(oldTitle), `found sentence-cased title: ${oldTitle}`);
+  }
+});
+
+test("chart legends expose human-readable names instead of internal data keys", () => {
+  for (const name of [
+    "Tax-Deferred Withdrawal",
+    "Taxable Withdrawal",
+    "HSA Withdrawal",
+    "Roth Withdrawal",
+    "Guaranteed Income",
+    "Portfolio Withdrawals",
+    "Planned Spending",
+  ]) {
+    assert.match(page, new RegExp(`name="${name}"`));
+  }
+
+  assert.doesNotMatch(page, /<(?:Area|Bar|Line)(?![^>]*\bname=)[^>]*\bdataKey=/);
+});
+
 test("primary mobile actions meet a 44px touch target", () => {
   assert.match(css, /\.topbar-actions button \{ width: 2\.75rem;/);
   assert.match(css, /\[data-sidebar="menu-button"\] \{ min-height: 3rem; \}/);

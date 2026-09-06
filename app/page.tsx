@@ -27,24 +27,24 @@ const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "household", label: "Household", icon: Home },
   { id: "portfolio", label: "Accounts", icon: BriefcaseBusiness },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
-  { id: "spending", label: "Spending & housing", icon: ReceiptText },
-  { id: "debt", label: "Debt payoff", icon: WalletCards },
-  { id: "health", label: "Health & long-term care", icon: HeartPulse },
-  { id: "taxes", label: "Taxes & withdrawals", icon: Calculator },
+  { id: "spending", label: "Spending & Housing", icon: ReceiptText },
+  { id: "debt", label: "Debt Payoff", icon: WalletCards },
+  { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
+  { id: "taxes", label: "Taxes & Withdrawals", icon: Calculator },
   { id: "overview", label: "Plan Summary", icon: Activity },
 ];
 
 const portfolioChartConfig = {
   taxable: { label: "Taxable", color: "#2f7df4" },
-  traditional: { label: "Tax-deferred", color: "#11a68a" },
+  traditional: { label: "Tax-Deferred", color: "#11a68a" },
   roth: { label: "Roth", color: "#8567e8" },
   cash: { label: "Cash", color: "#e8a82b" },
   hsa: { label: "HSA", color: "#dc5d79" },
 } satisfies ChartConfig;
 const cashFlowConfig = {
-  income: { label: "Guaranteed income", color: "#11a68a" },
-  withdrawals: { label: "Portfolio withdrawals", color: "#2f7df4" },
-  spending: { label: "Planned spending", color: "#d66b36" },
+  income: { label: "Guaranteed Income", color: "#11a68a" },
+  withdrawals: { label: "Portfolio Withdrawals", color: "#2f7df4" },
+  spending: { label: "Planned Spending", color: "#d66b36" },
 } satisfies ChartConfig;
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -181,17 +181,17 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
         </div>
       </div>
       <section className="report-chart">
-        <h2>Portfolio projection</h2>
+        <h2>Portfolio Projection</h2>
         <ChartContainer config={portfolioChartConfig} className="h-[310px] w-full aspect-auto" initialDimension={{ width: 900, height: 310 }}>
           <AreaChart data={projection} margin={{ top: 12, right: 12, left: 12, bottom: 0 }}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="age" tickLine={false} axisLine={false} />
             <YAxis tickFormatter={(value) => compactCurrency.format(value)} tickLine={false} axisLine={false} width={72} />
-            <Area type="monotone" dataKey="traditional" stackId="portfolio" fill="var(--color-traditional)" stroke="var(--color-traditional)" />
-            <Area type="monotone" dataKey="taxable" stackId="portfolio" fill="var(--color-taxable)" stroke="var(--color-taxable)" />
-            <Area type="monotone" dataKey="roth" stackId="portfolio" fill="var(--color-roth)" stroke="var(--color-roth)" />
-            <Area type="monotone" dataKey="cash" stackId="portfolio" fill="var(--color-cash)" stroke="var(--color-cash)" />
-            <Area type="monotone" dataKey="hsa" stackId="portfolio" fill="var(--color-hsa)" stroke="var(--color-hsa)" />
+            <Area name="Tax-Deferred" type="monotone" dataKey="traditional" stackId="portfolio" fill="var(--color-traditional)" stroke="var(--color-traditional)" />
+            <Area name="Taxable" type="monotone" dataKey="taxable" stackId="portfolio" fill="var(--color-taxable)" stroke="var(--color-taxable)" />
+            <Area name="Roth" type="monotone" dataKey="roth" stackId="portfolio" fill="var(--color-roth)" stroke="var(--color-roth)" />
+            <Area name="Cash" type="monotone" dataKey="cash" stackId="portfolio" fill="var(--color-cash)" stroke="var(--color-cash)" />
+            <Area name="HSA" type="monotone" dataKey="hsa" stackId="portfolio" fill="var(--color-hsa)" stroke="var(--color-hsa)" />
             <ReferenceLine x={data.household.retirementAge} stroke="#17243b" strokeDasharray="4 4" />
             <Legend />
           </AreaChart>
@@ -199,7 +199,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
       </section>
       <div className="report-grid">
         <section>
-          <h2>Household assumptions</h2>
+          <h2>Household Assumptions</h2>
           <dl>
             <div>
               <dt>Retirement age</dt>
@@ -222,7 +222,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
           </dl>
         </section>
         <section>
-          <h2>Planning notes</h2>
+          <h2>Planning Notes</h2>
           <ul>
             <li>
               Debt strategy: {data.debtStrategy.method}; projected payoff in {debtMonths} months.
@@ -394,7 +394,7 @@ export default function HomePage() {
         </div>
       </div>
       <div className="overview-grid">
-        <Panel title="Portfolio by tax treatment" eyebrow="LONG-RANGE VIEW" className="chart-panel wide-panel">
+        <Panel title="Portfolio by Tax Treatment" eyebrow="LONG-RANGE VIEW" className="chart-panel wide-panel">
           <ChartContainer config={portfolioChartConfig} className="h-[340px] w-full aspect-auto">
             <AreaChart data={projection} margin={{ top: 12, right: 10, left: 6, bottom: 0 }}>
               <defs>
@@ -420,11 +420,11 @@ export default function HomePage() {
                   />
                 }
               />
-              <Area type="monotone" dataKey="traditional" stackId="portfolio" fill="url(#fill-traditional)" stroke="var(--color-traditional)" />
-              <Area type="monotone" dataKey="taxable" stackId="portfolio" fill="url(#fill-taxable)" stroke="var(--color-taxable)" />
-              <Area type="monotone" dataKey="roth" stackId="portfolio" fill="url(#fill-roth)" stroke="var(--color-roth)" />
-              <Area type="monotone" dataKey="cash" stackId="portfolio" fill="url(#fill-cash)" stroke="var(--color-cash)" />
-              <Area type="monotone" dataKey="hsa" stackId="portfolio" fill="url(#fill-hsa)" stroke="var(--color-hsa)" />
+              <Area name="Tax-Deferred" type="monotone" dataKey="traditional" stackId="portfolio" fill="url(#fill-traditional)" stroke="var(--color-traditional)" />
+              <Area name="Taxable" type="monotone" dataKey="taxable" stackId="portfolio" fill="url(#fill-taxable)" stroke="var(--color-taxable)" />
+              <Area name="Roth" type="monotone" dataKey="roth" stackId="portfolio" fill="url(#fill-roth)" stroke="var(--color-roth)" />
+              <Area name="Cash" type="monotone" dataKey="cash" stackId="portfolio" fill="url(#fill-cash)" stroke="var(--color-cash)" />
+              <Area name="HSA" type="monotone" dataKey="hsa" stackId="portfolio" fill="url(#fill-hsa)" stroke="var(--color-hsa)" />
               <ReferenceLine
                 x={plan.household.retirementAge}
                 stroke="#8c9bb1"
@@ -440,7 +440,7 @@ export default function HomePage() {
             </AreaChart>
           </ChartContainer>
         </Panel>
-        <Panel title="What the plan says" eyebrow="PLANNING SIGNALS" className="insight-panel">
+        <Panel title="What the Plan Says" eyebrow="PLANNING SIGNALS" className="insight-panel">
           <div className={`plan-signal ${shortfall ? "signal-warn" : "signal-good"}`}>
             <span>{shortfall ? "Funding gap" : "Fully funded"}</span>
             <strong>{shortfall ? `Age ${shortfall.age}` : `Through age ${plan.household.planToAge}`}</strong>
@@ -465,16 +465,16 @@ export default function HomePage() {
           </Button>
         </Panel>
       </div>
-      <Panel title="Retirement cash flow" eyebrow="INCOME + WITHDRAWALS">
+      <Panel title="Retirement Cash Flow" eyebrow="INCOME + WITHDRAWALS">
         <ChartContainer config={cashFlowConfig} className="h-[300px] w-full aspect-auto">
           <ComposedChart data={projection.filter((row) => row.age >= fullRetirementAge)} margin={{ top: 12, right: 10, left: 6, bottom: 0 }}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="age" tickLine={false} axisLine={false} />
             <YAxis tickFormatter={(value) => compactCurrency.format(value)} tickLine={false} axisLine={false} width={70} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => <span className="ml-auto font-mono">{currency.format(Number(value))}</span>} />} />
-            <Bar dataKey="income" stackId="funding" fill="var(--color-income)" radius={[0, 0, 3, 3]} />
-            <Bar dataKey="withdrawals" stackId="funding" fill="var(--color-withdrawals)" radius={[3, 3, 0, 0]} />
-            <Line type="monotone" dataKey="spending" stroke="var(--color-spending)" strokeWidth={2} dot={false} />
+            <Bar name="Guaranteed Income" dataKey="income" stackId="funding" fill="var(--color-income)" radius={[0, 0, 3, 3]} />
+            <Bar name="Portfolio Withdrawals" dataKey="withdrawals" stackId="funding" fill="var(--color-withdrawals)" radius={[3, 3, 0, 0]} />
+            <Line name="Planned Spending" type="monotone" dataKey="spending" stroke="var(--color-spending)" strokeWidth={2} dot={false} />
             <Legend />
           </ComposedChart>
         </ChartContainer>
@@ -487,9 +487,9 @@ export default function HomePage() {
 
   const renderHousehold = () => (
     <>
-      <SectionHeading title="Household & assumptions" description="Set the timeline and the few assumptions that drive most of the plan." />
+      <SectionHeading title="Household & Assumptions" description="Set the timeline and the few assumptions that drive most of the plan." />
       <div className="two-column">
-        <Panel title="Planning household" eyebrow="TIMELINE">
+        <Panel title="Planning Household" eyebrow="TIMELINE">
           <div className="form-grid">
             <SelectField
               label="Household"
@@ -513,7 +513,7 @@ export default function HomePage() {
             </div>
           </div>
         </Panel>
-        <Panel title="Economic assumptions" eyebrow="ALL VALUES EDITABLE">
+        <Panel title="Economic Assumptions" eyebrow="ALL VALUES EDITABLE">
           <div className="form-grid">
             <Field label="General inflation" value={plan.assumptions.inflation} onChange={(value) => setAssumption("inflation", value)} suffix="%" step={0.1} max={20} />
             <Field label="Return before retirement" value={plan.assumptions.preRetirementReturn} onChange={(value) => setAssumption("preRetirementReturn", value)} suffix="%" step={0.1} max={30} />
@@ -528,7 +528,7 @@ export default function HomePage() {
   const renderPortfolio = () => (
     <>
       <SectionHeading
-        title="Investment accounts"
+        title="Investment Accounts"
         description="Keep each tax treatment separate so the withdrawal plan can use the right dollars at the right time."
         action={
           <Button
@@ -560,11 +560,11 @@ export default function HomePage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Account</TableHead>
-                <TableHead>Tax treatment</TableHead>
+                <TableHead>Tax Treatment</TableHead>
                 <TableHead>Owner</TableHead>
                 <TableHead>Balance</TableHead>
-                <TableHead>Adjusted cost basis</TableHead>
-                <TableHead>Annual contribution</TableHead>
+                <TableHead>Adjusted Cost Basis</TableHead>
+                <TableHead>Annual Contribution</TableHead>
                 <TableHead>
                   <span className="sr-only">Delete</span>
                 </TableHead>
@@ -715,11 +715,11 @@ export default function HomePage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Income source</TableHead>
+                <TableHead>Income Source</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Owner</TableHead>
-                <TableHead>Start age</TableHead>
-                <TableHead>Annual benefit</TableHead>
+                <TableHead>Start Age</TableHead>
+                <TableHead>Annual Benefit</TableHead>
                 <TableHead>COLA</TableHead>
                 <TableHead>Survivor</TableHead>
                 <TableHead />
@@ -832,15 +832,15 @@ export default function HomePage() {
 
   const renderSpending = () => (
     <>
-      <SectionHeading title="Spending & housing" description="Separate everyday spending from large costs and home carrying costs so each can change on its own timeline." />
+      <SectionHeading title="Spending & Housing" description="Separate everyday spending from large costs and home carrying costs so each can change on its own timeline." />
       <div className="two-column">
-        <Panel title="Baseline spending" eyebrow="RETIREMENT">
+        <Panel title="Baseline Spending" eyebrow="RETIREMENT">
           <div className="form-grid single">
             <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" step={1000} />
             <p className="panel-copy">Enter normal living expenses here. Healthcare, property tax, home insurance, debts, and the large recurring costs below are added separately.</p>
           </div>
         </Panel>
-        <Panel title="Home carrying costs" eyebrow="HOUSING">
+        <Panel title="Home Carrying Costs" eyebrow="HOUSING">
           <div className="form-grid">
             <Field label="Home market value" value={plan.housing.homeValue} onChange={(value) => setHousing("homeValue", value)} prefix="$" step={5000} />
             <Field label="Assessed percent" value={plan.housing.assessedPercent} onChange={(value) => setHousing("assessedPercent", value)} suffix="%" step={1} max={200} />
@@ -867,16 +867,16 @@ export default function HomePage() {
           </label>
         </Panel>
       </div>
-      <Panel title="Large recurring costs" eyebrow="TIMED EXPENSES">
+      <Panel title="Large Recurring Costs" eyebrow="TIMED EXPENSES">
         <div className="table-wrap mobile-card-table costs-table">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Cost</TableHead>
-                <TableHead>Annual amount</TableHead>
-                <TableHead>Start age</TableHead>
-                <TableHead>End age</TableHead>
-                <TableHead>Inflation-linked</TableHead>
+                <TableHead>Annual Amount</TableHead>
+                <TableHead>Start Age</TableHead>
+                <TableHead>End Age</TableHead>
+                <TableHead>Inflation-Linked</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -968,7 +968,7 @@ export default function HomePage() {
   const renderDebt = () => (
     <>
       <SectionHeading
-        title="Debt payoff"
+        title="Debt Payoff"
         description="Compare the motivational snowball with the interest-saving avalanche. Minimum payments roll into the next debt automatically."
         action={
           <Button
@@ -1035,14 +1035,14 @@ export default function HomePage() {
           step={50}
         />
       </div>
-      <Panel title="Payoff path" eyebrow={plan.debtStrategy.method.toUpperCase()} className="chart-panel">
-        <ChartContainer config={{ totalBalance: { label: "Debt balance", color: "#2f7df4" } }} className="h-[280px] w-full aspect-auto">
+      <Panel title="Payoff Path" eyebrow={plan.debtStrategy.method.toUpperCase()} className="chart-panel">
+        <ChartContainer config={{ totalBalance: { label: "Debt Balance", color: "#2f7df4" } }} className="h-[280px] w-full aspect-auto">
           <LineChart data={debtSchedule.filter((_, index) => index % 3 === 0 || index === debtSchedule.length - 1)}>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="month" tickFormatter={(value) => `${Math.floor(value / 12)}y`} tickLine={false} axisLine={false} />
             <YAxis tickFormatter={(value) => compactCurrency.format(value)} tickLine={false} axisLine={false} width={70} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => currency.format(Number(value))} />} />
-            <Line type="monotone" dataKey="totalBalance" stroke="var(--color-totalBalance)" strokeWidth={3} dot={false} />
+            <Line name="Debt Balance" type="monotone" dataKey="totalBalance" stroke="var(--color-totalBalance)" strokeWidth={3} dot={false} />
           </LineChart>
         </ChartContainer>
       </Panel>
@@ -1055,7 +1055,7 @@ export default function HomePage() {
                 <TableHead>Type</TableHead>
                 <TableHead>Balance</TableHead>
                 <TableHead>APR</TableHead>
-                <TableHead>Minimum / month</TableHead>
+                <TableHead>Minimum / Month</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -1138,7 +1138,7 @@ export default function HomePage() {
 
   const renderHealth = () => (
     <>
-      <SectionHeading title="Health & long-term care" description="Keep medical inflation and care shocks visible instead of hiding them inside general spending." />
+      <SectionHeading title="Health & Long-Term Care" description="Keep medical inflation and care shocks visible instead of hiding them inside general spending." />
       <div className="two-column">
         <Panel title="Healthcare" eyebrow="ANNUAL HOUSEHOLD COST">
           <div className="form-grid">
@@ -1149,12 +1149,12 @@ export default function HomePage() {
           <div className="info-callout">
             <Building2 />
             <div>
-              <strong>State exchange planning</strong>
+              <strong>State Exchange Planning</strong>
               <p>Use the net annual premium from your state marketplace or HealthCare.gov after any estimated premium tax credit. Exact premiums and subsidies depend on ZIP code, ages, household size, plan year, and projected MAGI.</p>
             </div>
           </div>
         </Panel>
-        <Panel title="Long-term care reserve" eyebrow="STRESS SCENARIO">
+        <Panel title="Long-Term Care Reserve" eyebrow="STRESS SCENARIO">
           <div className="form-grid">
             <Field label="Annual care cost" value={plan.healthcare.longTermCareAnnual} onChange={(value) => setHealthcare("longTermCareAnnual", value)} prefix="$" step={1000} />
             <Field label="Care starts at age" value={plan.healthcare.longTermCareStartAge} onChange={(value) => setHealthcare("longTermCareStartAge", value)} max={120} />
@@ -1183,9 +1183,9 @@ export default function HomePage() {
         plan.household.partnerBirthYear === 1959);
     return (
       <>
-        <SectionHeading title="Taxes & withdrawals" description="A transparent withdrawal order that can be reviewed—not a black-box recommendation." />
+        <SectionHeading title="Taxes & Withdrawals" description="A transparent withdrawal order that can be reviewed—not a black-box recommendation." />
         <div className="two-column">
-          <Panel title="Federal tax foundation" eyebrow="2026 IRS LAW">
+          <Panel title="Federal Tax Foundation" eyebrow="2026 IRS LAW">
             <div className="form-grid">
               <SelectField
                 label="Federal filing status"
@@ -1230,7 +1230,7 @@ export default function HomePage() {
               </strong>
             </div>
           </Panel>
-          <Panel title="Withdrawal policy" eyebrow="EACH RETIREMENT YEAR">
+          <Panel title="Withdrawal Policy" eyebrow="EACH RETIREMENT YEAR">
             <ol className="strategy-list">
               <li>
                 <span>1</span>
@@ -1270,7 +1270,7 @@ export default function HomePage() {
             </ol>
           </Panel>
         </div>
-        <Panel title="Required minimum distribution worksheet" eyebrow="FIRST MODELED RMD YEAR">
+        <Panel title="Required Minimum Distribution Worksheet" eyebrow="FIRST MODELED RMD YEAR">
           {firstRmdYear ? (
             <div className="worksheet-grid">
               <div><span>Projection year / your age</span><strong>{firstRmdYear.year} / {firstRmdYear.age}</strong></div>
@@ -1290,7 +1290,7 @@ export default function HomePage() {
             <Calculator /> This planning estimate divides each owner's prior year-end tax-deferred balance by IRS Publication 590-B Table III. It assumes the distribution is taken in its applicable calendar year. It does not yet model a first-year April 1 delay, current-employer plan delay, 5% owner rules, inherited accounts, or the younger-spouse Table II exception. Excess RMD cash remains in the plan.
           </p>
         </Panel>
-        <Panel title="Social Security taxation worksheet" eyebrow="FIRST MODELED BENEFIT YEAR">
+        <Panel title="Social Security Taxation Worksheet" eyebrow="FIRST MODELED BENEFIT YEAR">
           {socialSecurityYear ? (
             <div className="worksheet-grid">
               <div><span>Projection year / age</span><strong>{socialSecurityYear.year} / {socialSecurityYear.age}</strong></div>
@@ -1306,12 +1306,12 @@ export default function HomePage() {
             <Calculator /> Provisional income is one-half of benefits plus other taxable income and tax-exempt interest. The statutory thresholds are held flat, not inflation-indexed. This estimate does not handle benefit repayments, lump-sum elections, or special exclusions and adjustments.
           </p>
         </Panel>
-        <Panel title="Projected withdrawals" eyebrow="BY TAX TREATMENT">
+        <Panel title="Projected Withdrawals" eyebrow="BY TAX TREATMENT">
           <ChartContainer
             config={{
               taxableWithdrawal: { label: "Taxable", color: "#2f7df4" },
               traditionalWithdrawal: {
-                label: "Tax-deferred",
+                label: "Tax-Deferred",
                 color: "#11a68a",
               },
               rothWithdrawal: { label: "Roth", color: "#8567e8" },
@@ -1324,10 +1324,10 @@ export default function HomePage() {
               <XAxis dataKey="age" tickLine={false} axisLine={false} />
               <YAxis tickFormatter={(value) => compactCurrency.format(value)} tickLine={false} axisLine={false} width={70} />
               <ChartTooltip content={<ChartTooltipContent formatter={(value) => currency.format(Number(value))} />} />
-              <Bar dataKey="traditionalWithdrawal" stackId="w" fill="var(--color-traditionalWithdrawal)" />
-              <Bar dataKey="taxableWithdrawal" stackId="w" fill="var(--color-taxableWithdrawal)" />
-              <Bar dataKey="hsaWithdrawal" stackId="w" fill="var(--color-hsaWithdrawal)" />
-              <Bar dataKey="rothWithdrawal" stackId="w" fill="var(--color-rothWithdrawal)" radius={[3, 3, 0, 0]} />
+              <Bar name="Tax-Deferred Withdrawal" dataKey="traditionalWithdrawal" stackId="w" fill="var(--color-traditionalWithdrawal)" />
+              <Bar name="Taxable Withdrawal" dataKey="taxableWithdrawal" stackId="w" fill="var(--color-taxableWithdrawal)" />
+              <Bar name="HSA Withdrawal" dataKey="hsaWithdrawal" stackId="w" fill="var(--color-hsaWithdrawal)" />
+              <Bar name="Roth Withdrawal" dataKey="rothWithdrawal" stackId="w" fill="var(--color-rothWithdrawal)" radius={[3, 3, 0, 0]} />
               <Legend />
             </BarChart>
           </ChartContainer>
@@ -1353,12 +1353,12 @@ export default function HomePage() {
         <ShieldCheck />
         <div>
           <span>LOCAL-ONLY BY DESIGN</span>
-          <h2>Your plan never leaves this browser.</h2>
+          <h2>Your Plan Never Leaves This Browser.</h2>
           <p>Calculations, charts, imports, exports, and PDF rendering all happen on your device. You can work without saving, create an encrypted local vault, or restore a plan you previously downloaded. The site contains no analytics, advertising pixels, telemetry, sign-in, or third-party data calls.</p>
         </div>
       </div>
       <div className="three-column">
-        <Panel title="Encrypted local vault" eyebrow={vaultStatus.toUpperCase()}>
+        <Panel title="Encrypted Local Vault" eyebrow={vaultStatus.toUpperCase()}>
           <p className="panel-copy">Optional: save changes in this browser using AES-256-GCM encryption. Without a vault, the open plan lasts only for this browser session unless you download it. Your passphrase is kept only in memory and cannot be recovered.</p>
           <div className="button-stack">
             {vaultStatus === "unlocked" ? (
@@ -1393,13 +1393,13 @@ export default function HomePage() {
               ))}
           </div>
         </Panel>
-        <Panel title="Download raw data" eyebrow="PORTABLE JSON">
+        <Panel title="Download Raw Data" eyebrow="PORTABLE JSON">
           <p className="panel-copy">Save a readable copy you can inspect, version, and re-upload later. The raw file is not encrypted; store it carefully.</p>
           <Button variant="outline" onClick={exportData}>
             <Download /> Download plan
           </Button>
         </Panel>
-        <Panel title="Restore a plan" eyebrow="JSON IMPORT">
+        <Panel title="Restore a Plan" eyebrow="JSON IMPORT">
           <p className="panel-copy">Load a previously downloaded plan. Importing replaces the plan currently open on screen.</p>
           <input ref={fileInput} className="sr-only" type="file" accept="application/json,.json" onChange={(event) => importData(event.target.files?.[0])} />
           <Button variant="outline" onClick={() => fileInput.current?.click()}>
@@ -1407,7 +1407,7 @@ export default function HomePage() {
           </Button>
         </Panel>
       </div>
-      <Panel title="Threat model" eyebrow="WHAT ENCRYPTION CAN — AND CANNOT — DO">
+      <Panel title="Threat Model" eyebrow="WHAT ENCRYPTION CAN — AND CANNOT — DO">
         <div className="threat-grid">
           <div>
             <strong>Helps protect against</strong>

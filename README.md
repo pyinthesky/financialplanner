@@ -75,7 +75,7 @@ The work is organized into bounded batches so each batch can ship independently.
 ### Batch 1B — Review-driven experience corrections
 
 - [x] Reorder the guided journey so **Data & Privacy** is the welcoming start, explains and offers the encrypted vault before sensitive entry, and **Plan Summary** is the final destination
-- [ ] Apply consistent title case to page headings, panel titles, navigation labels, chart labels, and legends; replace internal keys such as `hsaWithdrawal` with human-readable labels
+- [x] Apply consistent title case to page headings, panel titles, navigation labels, chart labels, and legends; replace internal keys such as `hsaWithdrawal` with human-readable labels
 - [ ] Give every quantitative input a visible, unambiguous unit or currency affix where applicable, while preserving blank zero-value onboarding
 - [ ] Add a restrained save-state animation to the unlocked-vault indicator, with reduced-motion support and distinct saving/saved/failed states
 - [ ] Fix the missing separation above Timed Expenses and audit vertical rhythm between every card and section
