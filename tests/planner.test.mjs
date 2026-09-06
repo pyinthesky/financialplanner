@@ -5,6 +5,7 @@ import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
 import { calculateQcdCapacity, calculateQcdElection } from "../lib/qcd.ts";
+import { calculateEarlyDistributionTax } from "../lib/early-distribution.ts";
 import { buildPrintPortfolioChart } from "../lib/print-chart.ts";
 import { buildPlanningSignals } from "../lib/planning-signals.ts";
 import {
@@ -370,6 +371,77 @@ test("projected QCD satisfies RMD, applies the offset, and is not spendable cash
   assert.equal(row.fundedRatio, 0);
 });
 
+test("early distribution tax applies only after a confirmed exception amount", () => {
+  const result = calculateEarlyDistributionTax({
+    ageOnDistributionDate: 58,
+    taxableDistribution: 20_000,
+    confirmedExceptionAmount: 5_000,
+  });
+  assert.equal(result.status, "subject-to-additional-tax");
+  assert.equal(result.confirmedExceptionAmount, 5_000);
+  assert.equal(result.penaltyBase, 15_000);
+  assert.equal(result.additionalTax, 1_500);
+});
+
+test("age 59 remains date-sensitive while age 59 and a half is not early", () => {
+  const review = calculateEarlyDistributionTax({
+    ageOnDistributionDate: 59,
+    taxableDistribution: 10_000,
+    confirmedExceptionAmount: 0,
+  });
+  const eligible = calculateEarlyDistributionTax({
+    ageOnDistributionDate: 59.5,
+    taxableDistribution: 10_000,
+    confirmedExceptionAmount: 0,
+  });
+  assert.equal(review.status, "age-date-review");
+  assert.equal(review.additionalTax, 1_000);
+  assert.equal(eligible.status, "not-early");
+  assert.equal(eligible.additionalTax, 0);
+});
+
+test("projection adds the early-distribution tax without treating an exception as income", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 55;
+  plan.household.retirementAge = 55;
+  plan.household.planToAge = 55;
+  plan.assumptions.annualSpending = 10_000;
+  plan.accounts = [{
+    id: "ira",
+    name: "IRA",
+    kind: "traditional",
+    owner: "you",
+    balance: 20_000,
+    annualContribution: 0,
+  }];
+  plan.earlyWithdrawalPlanning.annualConfirmedExceptionYou = 6_000;
+  const row = projectPlan(plan)[0];
+  assert.equal(row.traditionalWithdrawal, 10_000);
+  assert.equal(row.earlyDistributionExceptionAmount, 6_000);
+  assert.equal(row.earlyDistributionPenaltyBase, 4_000);
+  assert.equal(row.earlyDistributionPenaltyTax, 400);
+  assert.equal(row.taxes, 400);
+});
+
+test("unassigned early tax-deferred withdrawals are flagged rather than penalized against a guessed owner", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 55;
+  plan.household.retirementAge = 55;
+  plan.household.planToAge = 55;
+  plan.assumptions.annualSpending = 10_000;
+  plan.accounts = [{
+    id: "unassigned",
+    name: "Needs owner",
+    kind: "traditional",
+    owner: "joint",
+    balance: 20_000,
+    annualContribution: 0,
+  }];
+  const row = projectPlan(plan)[0];
+  assert.equal(row.earlyDistributionPenaltyTax, 0);
+  assert.equal(row.earlyDistributionReviewAmount, 10_000);
+});
+
 test("plan normalization clears invalid QCD source designations", () => {
   const plan = copyPlan();
   plan.accounts = [
@@ -390,6 +462,10 @@ test("legacy plan imports receive a compatible filing status", () => {
   const normalized = normalizePlan(legacy);
   assert.equal(normalized.household.filingStatus, "marriedJoint");
   assert.deepEqual(normalized.qcdPlanning, DEFAULT_PLAN.qcdPlanning);
+  assert.deepEqual(
+    normalized.earlyWithdrawalPlanning,
+    DEFAULT_PLAN.earlyWithdrawalPlanning,
+  );
 });
 
 test("blank plans render zero-valued numeric inputs without a visible zero", () => {

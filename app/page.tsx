@@ -350,6 +350,17 @@ export default function HomePage() {
       ...current,
       qcdPlanning: { ...current.qcdPlanning, [key]: value },
     }));
+  const setEarlyWithdrawalPlanning = (
+    key: keyof PlannerData["earlyWithdrawalPlanning"],
+    value: number,
+  ) =>
+    setPlan((current) => ({
+      ...current,
+      earlyWithdrawalPlanning: {
+        ...current.earlyWithdrawalPlanning,
+        [key]: value,
+      },
+    }));
   const updateAccount = (id: string, patch: Partial<Account>) =>
     setPlan((current) => ({
       ...current,
@@ -1276,6 +1287,13 @@ export default function HomePage() {
     const firstQcdYear = projection.find(
       (row) => row.qualifiedCharitableDistribution > 0,
     );
+    const firstEarlyDistributionYear = projection.find(
+      (row) =>
+        row.earlyDistributionPenaltyBase > 0 ||
+        row.earlyDistributionExceptionAmount > 0 ||
+        row.earlyDistributionReviewAmount > 0 ||
+        row.earlyRothWithdrawalReviewAmount > 0,
+    );
     const currentProjectionYear = projection[0];
     const qcdCapacityFor = (owner: "you" | "partner") =>
       calculateQcdCapacity({
@@ -1483,6 +1501,63 @@ export default function HomePage() {
             <Calculator /> Mark eligible IRA sources on the Accounts page. The intended gift reduces that IRA balance and may satisfy RMDs, but it is never counted as spendable cash. The entered contribution offset is consumed before any QCD is excluded from income. The known 2026 ceiling is held flat in later years rather than guessing future IRS indexing. Continuing post-70½ deductible contributions, charity eligibility and acknowledgement, split-interest gifts, inherited IRAs, and exact transaction timing remain review items.
           </p>
         </Panel>
+        <Panel title="Early Distribution Check" eyebrow="IRC SECTION 72(T)">
+          <div className="form-grid">
+            <Field
+              label="Your confirmed annual exception"
+              value={plan.earlyWithdrawalPlanning.annualConfirmedExceptionYou}
+              onChange={(value) =>
+                setEarlyWithdrawalPlanning(
+                  "annualConfirmedExceptionYou",
+                  value,
+                )
+              }
+              prefix="$"
+              suffix="/ year"
+              step={500}
+              help="Enter only the taxable distribution amount you have confirmed qualifies for an IRS exception to the additional 10% tax."
+            />
+            {plan.household.maritalStatus === "married" && (
+              <Field
+                label="Partner confirmed annual exception"
+                value={
+                  plan.earlyWithdrawalPlanning
+                    .annualConfirmedExceptionPartner
+                }
+                onChange={(value) =>
+                  setEarlyWithdrawalPlanning(
+                    "annualConfirmedExceptionPartner",
+                    value,
+                  )
+                }
+                prefix="$"
+                suffix="/ year"
+                step={500}
+              />
+            )}
+          </div>
+          {firstEarlyDistributionYear ? (
+            <div className="worksheet-grid">
+              <div><span>First projected review year / age</span><strong>{firstEarlyDistributionYear.year} / {firstEarlyDistributionYear.age}</strong></div>
+              <div><span>Confirmed exception applied</span><strong>{currency.format(firstEarlyDistributionYear.earlyDistributionExceptionAmount)}</strong></div>
+              <div><span>Amount subject to additional tax</span><strong>{currency.format(firstEarlyDistributionYear.earlyDistributionPenaltyBase)}</strong></div>
+              <div><span>Estimated 10% additional tax</span><strong>{currency.format(firstEarlyDistributionYear.earlyDistributionPenaltyTax)}</strong></div>
+              <div><span>Unassigned tax-deferred amount to review</span><strong>{currency.format(firstEarlyDistributionYear.earlyDistributionReviewAmount)}</strong></div>
+              <div><span>Roth amount requiring basis review</span><strong>{currency.format(firstEarlyDistributionYear.earlyRothWithdrawalReviewAmount)}</strong></div>
+            </div>
+          ) : (
+            <p className="panel-copy">No pre-59½ retirement-account distributions are currently projected.</p>
+          )}
+          <p className="model-note">
+            <Calculator /> The projection adds 10% to taxable, individually owned tax-deferred distributions before age 59½ unless covered by the entered confirmed-exception amount. Age 59 is conservatively treated as date-sensitive because the planner does not collect birth and transaction dates. Assign tax-deferred accounts to an owner so the correct age can be used.
+          </p>
+          <p className="model-note">
+            <Calculator /> Exception rules vary by source and facts: examples include qualifying substantially equal periodic payments, disability, certain medical costs, terminal illness, qualified reservist distributions, and separation-from-service rules that generally apply to workplace plans rather than IRAs. This planner does not certify an exception. Roth distributions remain a review item until contribution basis and five-year holding periods are modeled.{" "}
+            <a href="https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-exceptions-to-tax-on-early-distributions" target="_blank" rel="noreferrer">IRS exception table</a>
+            {" · "}
+            <a href="https://www.irs.gov/taxtopics/tc558" target="_blank" rel="noreferrer">IRS Topic 558</a>
+          </p>
+        </Panel>
         <Panel title="Social Security Taxation Worksheet" eyebrow="FIRST MODELED BENEFIT YEAR">
           {socialSecurityYear ? (
             <div className="worksheet-grid">
@@ -1531,7 +1606,7 @@ export default function HomePage() {
           </ChartContainer>
         </Panel>
         <p className="model-note">
-          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. QCD elections use the 2026 statutory ceiling held flat for later-year planning and exclude only the amount remaining after the entered deductible-contribution offset. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, early-distribution penalties, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
+          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. QCD elections use the 2026 statutory ceiling held flat for later-year planning and exclude only the amount remaining after the entered deductible-contribution offset. The early-distribution estimate applies the 10% additional tax to modeled, taxable, owner-assigned withdrawals before age 59½ after a user-confirmed exception amount; it does not determine exception eligibility or Roth ordering. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
           <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">
             IRS Rev. Proc. 2025-32
           </a>

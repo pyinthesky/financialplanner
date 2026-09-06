@@ -2,6 +2,7 @@ import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
 import { calculateQcdElection } from "./qcd.ts";
+import { calculateEarlyDistributionTax } from "./early-distribution.ts";
 
 export type AccountKind = "taxable" | "traditional" | "roth" | "cash" | "hsa";
 export type Owner = "you" | "partner" | "joint";
@@ -78,6 +79,10 @@ export interface PlannerData {
     unusedDeductibleContributionOffsetYou: number;
     unusedDeductibleContributionOffsetPartner: number;
   };
+  earlyWithdrawalPlanning: {
+    annualConfirmedExceptionYou: number;
+    annualConfirmedExceptionPartner: number;
+  };
   housing: {
     homeValue: number;
     assessedPercent: number;
@@ -138,6 +143,11 @@ export interface ProjectionYear {
   qcdRmdSatisfied: number;
   youQcd: number;
   partnerQcd: number;
+  earlyDistributionPenaltyBase: number;
+  earlyDistributionPenaltyTax: number;
+  earlyDistributionExceptionAmount: number;
+  earlyDistributionReviewAmount: number;
+  earlyRothWithdrawalReviewAmount: number;
   rothWithdrawal: number;
   hsaWithdrawal: number;
   fundedRatio: number;
@@ -181,6 +191,10 @@ export const DEFAULT_PLAN: PlannerData = {
     annualGiftPartner: 0,
     unusedDeductibleContributionOffsetYou: 0,
     unusedDeductibleContributionOffsetPartner: 0,
+  },
+  earlyWithdrawalPlanning: {
+    annualConfirmedExceptionYou: 0,
+    annualConfirmedExceptionPartner: 0,
   },
   housing: {
     homeValue: 0,
@@ -343,6 +357,9 @@ export function projectPlan(
           (eligibleOnly ? amount : amount * eligibleShare),
       );
     }
+    if (!eligibleOnly && traditionalWithdrawalsByOwner) {
+      traditionalWithdrawalsByOwner[owner] += amount;
+    }
     syncTraditionalBalance();
     return amount;
   };
@@ -365,6 +382,7 @@ export function projectPlan(
       0,
     );
   };
+  let traditionalWithdrawalsByOwner: Record<Owner, number> | null = null;
 
   let youQcdContributionOffset = Math.max(
     0,
@@ -487,9 +505,15 @@ export function projectPlan(
     let qcdRmdSatisfied = 0;
     let youQcd = 0;
     let partnerQcd = 0;
+    let earlyDistributionPenaltyBase = 0;
+    let earlyDistributionPenaltyTax = 0;
+    let earlyDistributionExceptionAmount = 0;
+    let earlyDistributionReviewAmount = 0;
+    let earlyRothWithdrawalReviewAmount = 0;
     let rothWithdrawal = 0;
     let hsaWithdrawal = 0;
     let realizedTaxableGain = 0;
+    traditionalWithdrawalsByOwner = { you: 0, partner: 0, joint: 0 };
 
     const youRmdCalculation = calculateRmd({
       birthYear: data.household.birthYear,
@@ -644,6 +668,40 @@ export function projectPlan(
       spendingGap -= rothWithdrawal;
     }
 
+    const youEarlyDistribution = calculateEarlyDistributionTax({
+      ageOnDistributionDate: age,
+      taxableDistribution: traditionalWithdrawalsByOwner.you,
+      confirmedExceptionAmount:
+        data.earlyWithdrawalPlanning.annualConfirmedExceptionYou,
+    });
+    const partnerEarlyDistribution = calculateEarlyDistributionTax({
+      ageOnDistributionDate: partnerAge,
+      taxableDistribution:
+        data.household.maritalStatus === "married"
+          ? traditionalWithdrawalsByOwner.partner
+          : 0,
+      confirmedExceptionAmount:
+        data.household.maritalStatus === "married"
+          ? data.earlyWithdrawalPlanning.annualConfirmedExceptionPartner
+          : 0,
+    });
+    earlyDistributionPenaltyBase =
+      youEarlyDistribution.penaltyBase + partnerEarlyDistribution.penaltyBase;
+    earlyDistributionPenaltyTax =
+      youEarlyDistribution.additionalTax + partnerEarlyDistribution.additionalTax;
+    earlyDistributionExceptionAmount =
+      youEarlyDistribution.confirmedExceptionAmount +
+      partnerEarlyDistribution.confirmedExceptionAmount;
+    const eitherOwnerMayBeUnder59Half =
+      age < 59.5 ||
+      (data.household.maritalStatus === "married" && partnerAge < 59.5);
+    earlyDistributionReviewAmount = eitherOwnerMayBeUnder59Half
+      ? traditionalWithdrawalsByOwner.joint
+      : 0;
+    earlyRothWithdrawalReviewAmount = eitherOwnerMayBeUnder59Half
+      ? rothWithdrawal
+      : 0;
+
     const socialSecurityTax = calculateTaxableSocialSecurity({
       benefits: socialSecurityIncome,
       otherIncome:
@@ -674,7 +732,11 @@ export function projectPlan(
       taxableOrdinary * pct(data.assumptions.stateEffectiveTaxRate);
     const capitalGainsTaxes =
       realizedTaxableGain * pct(data.assumptions.capitalGainsRate);
-    const taxes = federalTax + stateTaxes + capitalGainsTaxes;
+    const taxes =
+      federalTax +
+      stateTaxes +
+      capitalGainsTaxes +
+      earlyDistributionPenaltyTax;
     const taxDraw = Math.min(balances.taxable, taxes);
     if (taxDraw > 0 && balances.taxable > 0) {
       taxableCostBasis = Math.max(
@@ -723,6 +785,11 @@ export function projectPlan(
       qcdRmdSatisfied,
       youQcd,
       partnerQcd,
+      earlyDistributionPenaltyBase,
+      earlyDistributionPenaltyTax,
+      earlyDistributionExceptionAmount,
+      earlyDistributionReviewAmount,
+      earlyRothWithdrawalReviewAmount,
       rothWithdrawal,
       hsaWithdrawal,
       fundedRatio:
@@ -898,6 +965,10 @@ export function normalizePlan(input: unknown): PlannerData {
     qcdPlanning: {
       ...DEFAULT_PLAN.qcdPlanning,
       ...candidate.qcdPlanning,
+    },
+    earlyWithdrawalPlanning: {
+      ...DEFAULT_PLAN.earlyWithdrawalPlanning,
+      ...candidate.earlyWithdrawalPlanning,
     },
   } as PlannerData;
 }

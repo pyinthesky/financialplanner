@@ -93,12 +93,12 @@ The highest-value path is to finish the broadly applicable federal-tax correctne
 
 - [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
 - [x] Social Security taxation worksheet using provisional income, filing-status thresholds, tax-exempt interest, and the married-filing-separately lived-apart distinction
-- [ ] RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
+- [x] RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
   - [x] Account-level taxable adjusted basis, contribution basis tracking, proportional gain realization, and explicit tax-lot limitations
   - [x] Owner-specific non-inherited RMD projection using optional birth years, prior year-end balances, and the IRS Uniform Lifetime Table, with 1959 and special-rule review states
   - [x] Effective-dated QCD source, age, annual-limit, and RMD-capacity check, without guessing through age-70 distribution dates or ongoing SEP/SIMPLE status
   - [x] Apply owner-specific intended QCDs and entered post-70½ deductible-contribution offsets to IRA balances, RMD satisfaction, taxable income, Social Security provisional income, and distribution charts without treating gifts as spendable cash; hold the known 2026 ceiling flat in later planning years
-  - [ ] Early-withdrawal constraints and penalty exceptions
+  - [x] Owner-specific pre-59½ traditional-account distribution check with a 10% additional-tax estimate, user-confirmed annual exception amounts, age-59 date review, and explicit unassigned-account/Roth review states; exception eligibility is never inferred
 - [ ] Roth conversion ladder and bracket-filling comparison
 - [ ] Medicare IRMAA and ACA premium-tax-credit interactions
 - [ ] Replace the manually entered flat capital-gains rate with an effective-dated federal long-term-capital-gains worksheet driven by filing status, ordinary income, realized gains, and applicable surtaxes; retain an explicit override for unmodeled cases
@@ -173,6 +173,7 @@ The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDol
 - Taxable investment basis and realized gains: [IRS Publication 550 (2025)](https://www.irs.gov/pub/irs-pdf/p550.pdf), dated March 5, 2026 for use in preparing 2025 returns. The projection uses account-level aggregate adjusted basis with proportional allocation; it does not claim to reproduce specific-lot accounting.
 - Required minimum distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf), published January 21, 2026, and the [2024 final Treasury regulations](https://www.irs.gov/irb/2024-33_IRB). The projection uses each named owner's prior year-end non-inherited tax-deferred balance and Table III. It does not guess the reserved 1959 applicable-age rule or silently apply IRA rules to joint, inherited, current-employer, 5%-owner, or younger-spouse cases.
 - Qualified charitable distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf) for source, direct-transfer, age, contribution-offset, and RMD rules, plus [IRS Notice 2025-67](https://www.irs.gov/pub/irs-drop/n-25-67.pdf), effective January 1, 2026, for the $111,000 annual exclusion limit. Owner elections reduce eligible IRA balances, satisfy applicable RMDs, and exclude only the portion remaining after the user-entered contribution offset. The known 2026 ceiling is held flat in later projection years rather than forecasting future indexing.
+- Early retirement-account distributions: the IRS [Retirement Topics exception table](https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-exceptions-to-tax-on-early-distributions), updated December 11, 2025; [Topic 558](https://www.irs.gov/taxtopics/tc558), updated May 27, 2026; and [Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf). The projection estimates the 10% additional tax on taxable, owner-assigned traditional withdrawals before age 59½ after a user-entered confirmed exception amount. It does not infer exception eligibility, resolve date-sensitive age 59, or apply IRA rules to unassigned and Roth withdrawals.
 
 ## Contributing
 
