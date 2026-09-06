@@ -4,7 +4,7 @@ import test from "node:test";
 import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
-import { calculateQcdCapacity } from "../lib/qcd.ts";
+import { calculateQcdCapacity, calculateQcdElection } from "../lib/qcd.ts";
 import { buildPrintPortfolioChart } from "../lib/print-chart.ts";
 import { buildPlanningSignals } from "../lib/planning-signals.ts";
 import {
@@ -299,16 +299,75 @@ test("QCD capacity does not guess through the age-70 distribution date", () => {
   assert.equal(result.potentialExclusionBeforeContributionOffset, 0);
 });
 
-test("QCD capacity does not project an unsupported future-year limit", () => {
+test("QCD capacity holds the known 2026 ceiling flat in a future year", () => {
   const result = calculateQcdCapacity({
     taxYear: 2027,
     ageOnDistributionDate: 75,
     eligibleIraBalance: 100_000,
     requiredMinimumDistribution: 4_000,
   });
-  assert.equal(result.status, "unsupported-year");
-  assert.equal(result.annualLimit, null);
-  assert.equal(result.potentialExclusionBeforeContributionOffset, 0);
+  assert.equal(result.status, "eligible");
+  assert.equal(result.annualLimit, 111_000);
+  assert.equal(result.potentialExclusionBeforeContributionOffset, 100_000);
+});
+
+test("QCD election consumes the contribution offset before excluding income", () => {
+  const result = calculateQcdElection({
+    taxYear: 2026,
+    ageOnDistributionDate: 75,
+    eligibleIraBalance: 100_000,
+    requiredMinimumDistribution: 10_000,
+    intendedDistribution: 20_000,
+    unusedDeductibleContributionOffset: 5_000,
+  });
+  assert.equal(result.distribution, 20_000);
+  assert.equal(result.excludedFromIncome, 15_000);
+  assert.equal(result.taxableAmount, 5_000);
+  assert.equal(result.rmdSatisfied, 10_000);
+  assert.equal(result.contributionOffsetRemaining, 0);
+});
+
+test("future QCD planning holds the known 2026 limit flat", () => {
+  const result = calculateQcdElection({
+    taxYear: 2030,
+    ageOnDistributionDate: 80,
+    eligibleIraBalance: 200_000,
+    requiredMinimumDistribution: 15_000,
+    intendedDistribution: 150_000,
+    unusedDeductibleContributionOffset: 0,
+  });
+  assert.equal(result.distribution, 111_000);
+  assert.equal(result.limitBasisYear, 2026);
+  assert.equal(result.limitHeldFlat, true);
+});
+
+test("projected QCD satisfies RMD, applies the offset, and is not spendable cash", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 75;
+  plan.household.birthYear = 1951;
+  plan.household.retirementAge = 75;
+  plan.household.planToAge = 75;
+  plan.accounts = [{
+    id: "ira",
+    name: "IRA",
+    kind: "traditional",
+    owner: "you",
+    balance: 20_000,
+    annualContribution: 0,
+    qcdEligibleIra: true,
+  }];
+  plan.qcdPlanning.annualGiftYou = 20_000;
+  plan.qcdPlanning.unusedDeductibleContributionOffsetYou = 5_000;
+  plan.assumptions.annualSpending = 20_000;
+  const row = projectPlan(plan)[0];
+  assert.equal(row.qualifiedCharitableDistribution, 20_000);
+  assert.equal(row.qcdExcludedFromIncome, 15_000);
+  assert.equal(row.qcdTaxableAmount, 5_000);
+  assert.ok(row.qcdRmdSatisfied > 0);
+  assert.equal(row.traditionalWithdrawal, 0);
+  assert.equal(row.cash, 0);
+  assert.equal(row.withdrawals, 0);
+  assert.equal(row.fundedRatio, 0);
 });
 
 test("plan normalization clears invalid QCD source designations", () => {
@@ -330,6 +389,7 @@ test("legacy plan imports receive a compatible filing status", () => {
   delete legacy.household.filingStatus;
   const normalized = normalizePlan(legacy);
   assert.equal(normalized.household.filingStatus, "marriedJoint");
+  assert.deepEqual(normalized.qcdPlanning, DEFAULT_PLAN.qcdPlanning);
 });
 
 test("blank plans render zero-valued numeric inputs without a visible zero", () => {

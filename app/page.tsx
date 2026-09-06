@@ -345,6 +345,11 @@ export default function HomePage() {
       ...current,
       healthcare: { ...current.healthcare, [key]: value },
     }));
+  const setQcdPlanning = (key: keyof PlannerData["qcdPlanning"], value: number) =>
+    setPlan((current) => ({
+      ...current,
+      qcdPlanning: { ...current.qcdPlanning, [key]: value },
+    }));
   const updateAccount = (id: string, patch: Partial<Account>) =>
     setPlan((current) => ({
       ...current,
@@ -1268,6 +1273,9 @@ export default function HomePage() {
     const targetTax = calculateFederalIncomeTax(plan.assumptions.targetOrdinaryIncome, plan.household.filingStatus);
     const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
     const firstRmdYear = projection.find((row) => row.requiredMinimumDistribution > 0);
+    const firstQcdYear = projection.find(
+      (row) => row.qualifiedCharitableDistribution > 0,
+    );
     const currentProjectionYear = projection[0];
     const qcdCapacityFor = (owner: "you" | "partner") =>
       calculateQcdCapacity({
@@ -1401,7 +1409,50 @@ export default function HomePage() {
             <Calculator /> This planning estimate divides each owner's prior year-end tax-deferred balance by IRS Publication 590-B Table III. It assumes the distribution is taken in its applicable calendar year. It does not yet model a first-year April 1 delay, current-employer plan delay, 5% owner rules, inherited accounts, or the younger-spouse Table II exception. Excess RMD cash remains in the plan.
           </p>
         </Panel>
-        <Panel title="Qualified Charitable Distribution Check" eyebrow="2026 IRA RULES">
+        <Panel title="Qualified Charitable Distribution Plan" eyebrow="2026 IRA RULES">
+          <div className="form-grid">
+            <Field
+              label="Your intended annual QCD"
+              value={plan.qcdPlanning.annualGiftYou}
+              onChange={(value) => setQcdPlanning("annualGiftYou", value)}
+              prefix="$"
+              suffix="/ year"
+              step={500}
+              help="A recurring gift paid directly from an eligible IRA; it is not available for household spending."
+            />
+            <Field
+              label="Your unused deductible IRA contribution offset"
+              value={plan.qcdPlanning.unusedDeductibleContributionOffsetYou}
+              onChange={(value) =>
+                setQcdPlanning("unusedDeductibleContributionOffsetYou", value)
+              }
+              prefix="$"
+              help="Cumulative deductible IRA contributions made after age 70½ that have not already reduced an earlier QCD exclusion."
+            />
+            {plan.household.maritalStatus === "married" && (
+              <>
+                <Field
+                  label="Partner intended annual QCD"
+                  value={plan.qcdPlanning.annualGiftPartner}
+                  onChange={(value) => setQcdPlanning("annualGiftPartner", value)}
+                  prefix="$"
+                  suffix="/ year"
+                  step={500}
+                />
+                <Field
+                  label="Partner unused deductible IRA contribution offset"
+                  value={plan.qcdPlanning.unusedDeductibleContributionOffsetPartner}
+                  onChange={(value) =>
+                    setQcdPlanning(
+                      "unusedDeductibleContributionOffsetPartner",
+                      value,
+                    )
+                  }
+                  prefix="$"
+                />
+              </>
+            )}
+          </div>
           <div className="worksheet-grid">
             {qcdOwners.map(({ key, label, result }) => (
               <div key={key}>
@@ -1416,11 +1467,20 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          {firstQcdYear && (
+            <div className="worksheet-grid">
+              <div><span>First projected QCD year / age</span><strong>{firstQcdYear.year} / {firstQcdYear.age}</strong></div>
+              <div><span>IRA distribution to charity</span><strong>{currency.format(firstQcdYear.qualifiedCharitableDistribution)}</strong></div>
+              <div><span>Excluded from ordinary income</span><strong>{currency.format(firstQcdYear.qcdExcludedFromIncome)}</strong></div>
+              <div><span>Taxable contribution-offset portion</span><strong>{currency.format(firstQcdYear.qcdTaxableAmount)}</strong></div>
+              <div><span>RMD satisfied by QCD</span><strong>{currency.format(firstQcdYear.qcdRmdSatisfied)}</strong></div>
+            </div>
+          )}
           <p className="model-note">
-            <Calculator /> This is a conservative capacity check, not a QCD election. A QCD must be paid directly by the IRA trustee to an eligible charity, and the owner must be at least age 70½ on the distribution date. The 2026 exclusion limit is {currency.format(111_000)} per eligible owner and a QCD can count toward that owner's RMD. The displayed ceiling is before the statutory reduction for deductible IRA contributions made after age 70½. Age 70 requires the exact birth and distribution dates, which this planner does not collect.
+            <Calculator /> A QCD must be paid directly by the IRA trustee to an eligible charity, and the owner must be at least age 70½ on the distribution date. The 2026 exclusion limit is {currency.format(111_000)} per eligible owner and a QCD can count toward that owner's RMD. Age 70 requires the exact birth and distribution dates, which this planner does not collect, so the projection begins no earlier than the first unambiguous eligible year.
           </p>
           <p className="model-note">
-            <Calculator /> Mark eligible IRA sources on the Accounts page. This worksheet does not yet alter projected withdrawals or taxes; that requires a user-entered intended gift, contribution-offset review, charity acknowledgement, and distribution timing.
+            <Calculator /> Mark eligible IRA sources on the Accounts page. The intended gift reduces that IRA balance and may satisfy RMDs, but it is never counted as spendable cash. The entered contribution offset is consumed before any QCD is excluded from income. The known 2026 ceiling is held flat in later years rather than guessing future IRS indexing. Continuing post-70½ deductible contributions, charity eligibility and acknowledgement, split-interest gifts, inherited IRAs, and exact transaction timing remain review items.
           </p>
         </Panel>
         <Panel title="Social Security Taxation Worksheet" eyebrow="FIRST MODELED BENEFIT YEAR">
@@ -1449,6 +1509,10 @@ export default function HomePage() {
               },
               rothWithdrawal: { label: "Roth", color: "#8567e8" },
               hsaWithdrawal: { label: "HSA", color: "#dc5d79" },
+              qualifiedCharitableDistribution: {
+                label: "QCD Gift",
+                color: "#996515",
+              },
             }}
             className="h-[320px] w-full aspect-auto"
           >
@@ -1460,13 +1524,14 @@ export default function HomePage() {
               <Bar name="Tax-Deferred Withdrawal" dataKey="traditionalWithdrawal" stackId="w" fill="var(--color-traditionalWithdrawal)" />
               <Bar name="Taxable Withdrawal" dataKey="taxableWithdrawal" stackId="w" fill="var(--color-taxableWithdrawal)" />
               <Bar name="HSA Withdrawal" dataKey="hsaWithdrawal" stackId="w" fill="var(--color-hsaWithdrawal)" />
+              <Bar name="QCD Gift" dataKey="qualifiedCharitableDistribution" stackId="w" fill="var(--color-qualifiedCharitableDistribution)" />
               <Bar name="Roth Withdrawal" dataKey="rothWithdrawal" stackId="w" fill="var(--color-rothWithdrawal)" radius={[3, 3, 0, 0]} />
               <Legend />
             </BarChart>
           </ChartContainer>
         </Panel>
         <p className="model-note">
-          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. The QCD panel checks 2026 eligibility and capacity but does not yet apply an election to the projection. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, early-distribution penalties, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
+          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. QCD elections use the 2026 statutory ceiling held flat for later-year planning and exclude only the amount remaining after the entered deductible-contribution offset. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, early-distribution penalties, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
           <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">
             IRS Rev. Proc. 2025-32
           </a>

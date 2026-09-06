@@ -1,6 +1,7 @@
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
+import { calculateQcdElection } from "./qcd.ts";
 
 export type AccountKind = "taxable" | "traditional" | "roth" | "cash" | "hsa";
 export type Owner = "you" | "partner" | "joint";
@@ -71,6 +72,12 @@ export interface PlannerData {
     targetOrdinaryIncome: number;
     taxExemptInterest: number;
   };
+  qcdPlanning: {
+    annualGiftYou: number;
+    annualGiftPartner: number;
+    unusedDeductibleContributionOffsetYou: number;
+    unusedDeductibleContributionOffsetPartner: number;
+  };
   housing: {
     homeValue: number;
     assessedPercent: number;
@@ -125,6 +132,12 @@ export interface ProjectionYear {
   requiredMinimumDistribution: number;
   youRmd: number;
   partnerRmd: number;
+  qualifiedCharitableDistribution: number;
+  qcdExcludedFromIncome: number;
+  qcdTaxableAmount: number;
+  qcdRmdSatisfied: number;
+  youQcd: number;
+  partnerQcd: number;
   rothWithdrawal: number;
   hsaWithdrawal: number;
   fundedRatio: number;
@@ -162,6 +175,12 @@ export const DEFAULT_PLAN: PlannerData = {
     taxableGainFraction: 0,
     targetOrdinaryIncome: 0,
     taxExemptInterest: 0,
+  },
+  qcdPlanning: {
+    annualGiftYou: 0,
+    annualGiftPartner: 0,
+    unusedDeductibleContributionOffsetYou: 0,
+    unusedDeductibleContributionOffsetPartner: 0,
   },
   housing: {
     homeValue: 0,
@@ -226,6 +245,14 @@ export function projectPlan(
     partner: 0,
     joint: 0,
   };
+  const qcdEligibleBalances: Record<Exclude<Owner, "joint">, number> = {
+    you: 0,
+    partner: 0,
+  };
+  const qcdEligibleContributions: Record<Exclude<Owner, "joint">, number> = {
+    you: 0,
+    partner: 0,
+  };
   for (const account of data.accounts) {
     balances[account.kind] += Math.max(0, account.balance);
     contributions[account.kind] += Math.max(0, account.annualContribution);
@@ -235,6 +262,13 @@ export function projectPlan(
         0,
         account.annualContribution,
       );
+      if (account.qcdEligibleIra && account.owner !== "joint") {
+        qcdEligibleBalances[account.owner] += Math.max(0, account.balance);
+        qcdEligibleContributions[account.owner] += Math.max(
+          0,
+          account.annualContribution,
+        );
+      }
     }
   }
   const legacyGainFraction = Math.max(
@@ -283,6 +317,35 @@ export function projectPlan(
       traditionalBalances.partner +
       traditionalBalances.joint;
   };
+  const withdrawOwnerTraditional = (
+    owner: Owner,
+    requested: number,
+    eligibleOnly = false,
+  ) => {
+    const available =
+      eligibleOnly && owner !== "joint"
+        ? qcdEligibleBalances[owner]
+        : traditionalBalances[owner];
+    const amount = Math.min(Math.max(0, requested), available);
+    if (amount <= 0) return 0;
+    const eligibleShare =
+      owner !== "joint" && traditionalBalances[owner] > 0
+        ? qcdEligibleBalances[owner] / traditionalBalances[owner]
+        : 0;
+    traditionalBalances[owner] = Math.max(
+      0,
+      traditionalBalances[owner] - amount,
+    );
+    if (owner !== "joint") {
+      qcdEligibleBalances[owner] = Math.max(
+        0,
+        qcdEligibleBalances[owner] -
+          (eligibleOnly ? amount : amount * eligibleShare),
+      );
+    }
+    syncTraditionalBalance();
+    return amount;
+  };
   const withdrawTraditional = (requested: number) => {
     const available =
       traditionalBalances.you +
@@ -290,16 +353,27 @@ export function projectPlan(
       traditionalBalances.joint;
     const amount = Math.min(Math.max(0, requested), available);
     if (available <= 0 || amount <= 0) return 0;
-    for (const owner of ["you", "partner", "joint"] as const) {
-      traditionalBalances[owner] = Math.max(
-        0,
-        traditionalBalances[owner] -
-          amount * (traditionalBalances[owner] / available),
-      );
-    }
-    syncTraditionalBalance();
-    return amount;
+    const allocations = Object.fromEntries(
+      (["you", "partner", "joint"] as const).map((owner) => [
+        owner,
+        amount * (traditionalBalances[owner] / available),
+      ]),
+    ) as Record<Owner, number>;
+    return (["you", "partner", "joint"] as const).reduce(
+      (withdrawn, owner) =>
+        withdrawn + withdrawOwnerTraditional(owner, allocations[owner]),
+      0,
+    );
   };
+
+  let youQcdContributionOffset = Math.max(
+    0,
+    data.qcdPlanning.unusedDeductibleContributionOffsetYou,
+  );
+  let partnerQcdContributionOffset = Math.max(
+    0,
+    data.qcdPlanning.unusedDeductibleContributionOffsetPartner,
+  );
 
   for (let index = 0; index < years; index += 1) {
     const age = data.household.currentAge + index;
@@ -328,6 +402,11 @@ export function projectPlan(
       traditionalBalances[owner] *= 1 + rate;
       if (!fullyRetired)
         traditionalBalances[owner] += traditionalContributions[owner];
+      if (owner !== "joint") {
+        qcdEligibleBalances[owner] *= 1 + rate;
+        if (!fullyRetired)
+          qcdEligibleBalances[owner] += qcdEligibleContributions[owner];
+      }
     }
     syncTraditionalBalance();
     if (!fullyRetired) taxableCostBasis += contributions.taxable;
@@ -402,6 +481,12 @@ export function projectPlan(
     let requiredMinimumDistribution = 0;
     let youRmd = 0;
     let partnerRmd = 0;
+    let qualifiedCharitableDistribution = 0;
+    let qcdExcludedFromIncome = 0;
+    let qcdTaxableAmount = 0;
+    let qcdRmdSatisfied = 0;
+    let youQcd = 0;
+    let partnerQcd = 0;
     let rothWithdrawal = 0;
     let hsaWithdrawal = 0;
     let realizedTaxableGain = 0;
@@ -429,14 +514,62 @@ export function projectPlan(
       partnerRmdCalculation.requiredDistribution,
       traditionalBalances.partner,
     );
-    traditionalBalances.you -= youRmd;
-    traditionalBalances.partner -= partnerRmd;
-    syncTraditionalBalance();
+    const youQcdElection = calculateQcdElection({
+      taxYear: calendarYear,
+      ageOnDistributionDate: age,
+      eligibleIraBalance: qcdEligibleBalances.you,
+      requiredMinimumDistribution: youRmd,
+      intendedDistribution: data.qcdPlanning.annualGiftYou,
+      unusedDeductibleContributionOffset: youQcdContributionOffset,
+    });
+    const partnerQcdElection = calculateQcdElection({
+      taxYear: calendarYear,
+      ageOnDistributionDate: partnerAge,
+      eligibleIraBalance:
+        data.household.maritalStatus === "married"
+          ? qcdEligibleBalances.partner
+          : 0,
+      requiredMinimumDistribution: partnerRmd,
+      intendedDistribution:
+        data.household.maritalStatus === "married"
+          ? data.qcdPlanning.annualGiftPartner
+          : 0,
+      unusedDeductibleContributionOffset: partnerQcdContributionOffset,
+    });
+    youQcd = withdrawOwnerTraditional(
+      "you",
+      youQcdElection.distribution,
+      true,
+    );
+    partnerQcd = withdrawOwnerTraditional(
+      "partner",
+      partnerQcdElection.distribution,
+      true,
+    );
+    youQcdContributionOffset = youQcdElection.contributionOffsetRemaining;
+    partnerQcdContributionOffset =
+      partnerQcdElection.contributionOffsetRemaining;
+    qualifiedCharitableDistribution = youQcd + partnerQcd;
+    qcdExcludedFromIncome =
+      youQcdElection.excludedFromIncome +
+      partnerQcdElection.excludedFromIncome;
+    qcdTaxableAmount =
+      youQcdElection.taxableAmount + partnerQcdElection.taxableAmount;
+    qcdRmdSatisfied =
+      youQcdElection.rmdSatisfied + partnerQcdElection.rmdSatisfied;
+    const youCashRmd = withdrawOwnerTraditional(
+      "you",
+      Math.max(0, youRmd - youQcdElection.rmdSatisfied),
+    );
+    const partnerCashRmd = withdrawOwnerTraditional(
+      "partner",
+      Math.max(0, partnerRmd - partnerQcdElection.rmdSatisfied),
+    );
     requiredMinimumDistribution = youRmd + partnerRmd;
-    traditionalWithdrawal = requiredMinimumDistribution;
-    const rmdUsedForSpending = Math.min(spendingGap, requiredMinimumDistribution);
+    traditionalWithdrawal = youCashRmd + partnerCashRmd;
+    const rmdUsedForSpending = Math.min(spendingGap, traditionalWithdrawal);
     spendingGap -= rmdUsedForSpending;
-    balances.cash += requiredMinimumDistribution - rmdUsedForSpending;
+    balances.cash += traditionalWithdrawal - rmdUsedForSpending;
 
     if (fullyRetired) {
       const nonSocialSecurityIncome = income - socialSecurityIncome;
@@ -449,7 +582,8 @@ export function projectPlan(
           benefits: socialSecurityIncome,
           otherIncome:
             nonSocialSecurityIncome +
-            requiredMinimumDistribution +
+            traditionalWithdrawal +
+            qcdTaxableAmount +
             candidate,
           taxExemptInterest: data.assumptions.taxExemptInterest,
           filingStatus: data.household.filingStatus,
@@ -458,7 +592,8 @@ export function projectPlan(
         }).taxableBenefits;
         if (
           nonSocialSecurityIncome +
-            requiredMinimumDistribution +
+            traditionalWithdrawal +
+            qcdTaxableAmount +
             candidate +
             taxableBenefits <=
           data.assumptions.targetOrdinaryIncome
@@ -515,6 +650,7 @@ export function projectPlan(
         income -
           socialSecurityIncome +
           traditionalWithdrawal +
+          qcdTaxableAmount +
           realizedTaxableGain,
       taxExemptInterest: data.assumptions.taxExemptInterest,
       filingStatus: data.household.filingStatus,
@@ -526,7 +662,8 @@ export function projectPlan(
       income -
         socialSecurityIncome +
         socialSecurityTax.taxableBenefits +
-        traditionalWithdrawal,
+        traditionalWithdrawal +
+        qcdTaxableAmount,
     );
     const federalTax = calculateFederalIncomeTax(
       taxableOrdinary,
@@ -580,6 +717,12 @@ export function projectPlan(
       requiredMinimumDistribution,
       youRmd,
       partnerRmd,
+      qualifiedCharitableDistribution,
+      qcdExcludedFromIncome,
+      qcdTaxableAmount,
+      qcdRmdSatisfied,
+      youQcd,
+      partnerQcd,
       rothWithdrawal,
       hsaWithdrawal,
       fundedRatio:
@@ -751,6 +894,10 @@ export function normalizePlan(input: unknown): PlannerData {
     assumptions: {
       ...candidate.assumptions,
       taxExemptInterest: candidate.assumptions.taxExemptInterest ?? 0,
+    },
+    qcdPlanning: {
+      ...DEFAULT_PLAN.qcdPlanning,
+      ...candidate.qcdPlanning,
     },
   } as PlannerData;
 }

@@ -96,8 +96,9 @@ The highest-value path is to finish the broadly applicable federal-tax correctne
 - [ ] RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
   - [x] Account-level taxable adjusted basis, contribution basis tracking, proportional gain realization, and explicit tax-lot limitations
   - [x] Owner-specific non-inherited RMD projection using optional birth years, prior year-end balances, and the IRS Uniform Lifetime Table, with 1959 and special-rule review states
-  - [x] Effective-dated 2026 QCD source, age, annual-limit, and RMD-capacity check, without guessing through age-70 distribution dates, ongoing SEP/SIMPLE status, or future indexed limits
-  - [ ] Apply intended QCD elections and deductible-contribution offsets to the projection, then add early-withdrawal constraints
+  - [x] Effective-dated QCD source, age, annual-limit, and RMD-capacity check, without guessing through age-70 distribution dates or ongoing SEP/SIMPLE status
+  - [x] Apply owner-specific intended QCDs and entered post-70½ deductible-contribution offsets to IRA balances, RMD satisfaction, taxable income, Social Security provisional income, and distribution charts without treating gifts as spendable cash; hold the known 2026 ceiling flat in later planning years
+  - [ ] Early-withdrawal constraints and penalty exceptions
 - [ ] Roth conversion ladder and bracket-filling comparison
 - [ ] Medicare IRMAA and ACA premium-tax-credit interactions
 - [ ] Replace the manually entered flat capital-gains rate with an effective-dated federal long-term-capital-gains worksheet driven by filing status, ordinary income, realized gains, and applicable surtaxes; retain an explicit override for unmodeled cases
@@ -171,7 +172,7 @@ The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDol
 - Social Security benefit taxation: [IRS Publication 915 (2025)](https://www.irs.gov/pub/irs-pdf/p915.pdf), the latest completed edition checked September 5, 2026 and effective for tax year 2025. The planner applies Worksheet 1's statutory thresholds without inflation indexing and labels unmodeled exceptions.
 - Taxable investment basis and realized gains: [IRS Publication 550 (2025)](https://www.irs.gov/pub/irs-pdf/p550.pdf), dated March 5, 2026 for use in preparing 2025 returns. The projection uses account-level aggregate adjusted basis with proportional allocation; it does not claim to reproduce specific-lot accounting.
 - Required minimum distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf), published January 21, 2026, and the [2024 final Treasury regulations](https://www.irs.gov/irb/2024-33_IRB). The projection uses each named owner's prior year-end non-inherited tax-deferred balance and Table III. It does not guess the reserved 1959 applicable-age rule or silently apply IRA rules to joint, inherited, current-employer, 5%-owner, or younger-spouse cases.
-- Qualified charitable distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf) for source, direct-transfer, age, contribution-offset, and RMD rules, plus [IRS Notice 2025-67](https://www.irs.gov/pub/irs-drop/n-25-67.pdf), effective January 1, 2026, for the $111,000 annual exclusion limit. The current worksheet is a capacity check only and does not alter the projection.
+- Qualified charitable distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf) for source, direct-transfer, age, contribution-offset, and RMD rules, plus [IRS Notice 2025-67](https://www.irs.gov/pub/irs-drop/n-25-67.pdf), effective January 1, 2026, for the $111,000 annual exclusion limit. Owner elections reduce eligible IRA balances, satisfy applicable RMDs, and exclude only the portion remaining after the user-entered contribution offset. The known 2026 ceiling is held flat in later projection years rather than forecasting future indexing.
 
 ## Contributing
 

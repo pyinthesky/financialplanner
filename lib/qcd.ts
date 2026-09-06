@@ -16,12 +16,33 @@ export interface QcdCapacityInput {
   requiredMinimumDistribution: number;
 }
 
+export interface QcdElectionInput extends QcdCapacityInput {
+  intendedDistribution: number;
+  unusedDeductibleContributionOffset: number;
+}
+
 export interface QcdCapacity {
   status: QcdCapacityStatus;
   annualLimit: number | null;
   eligibleIraBalance: number;
   potentialExclusionBeforeContributionOffset: number;
   potentialRmdSatisfied: number;
+}
+
+export interface QcdElection extends QcdCapacity {
+  distribution: number;
+  excludedFromIncome: number;
+  taxableAmount: number;
+  contributionOffsetUsed: number;
+  contributionOffsetRemaining: number;
+  rmdSatisfied: number;
+  limitBasisYear: 2026 | null;
+  limitHeldFlat: boolean;
+}
+
+function planningLimit(taxYear: number) {
+  if (taxYear < 2026) return null;
+  return QCD_LIMITS[2026];
 }
 
 /**
@@ -36,7 +57,7 @@ export function calculateQcdCapacity({
   eligibleIraBalance,
   requiredMinimumDistribution,
 }: QcdCapacityInput): QcdCapacity {
-  const annualLimit = QCD_LIMITS[taxYear as keyof typeof QCD_LIMITS] ?? null;
+  const annualLimit = planningLimit(taxYear);
   const balance = Math.max(0, eligibleIraBalance);
   const rmd = Math.max(0, requiredMinimumDistribution);
 
@@ -58,5 +79,38 @@ export function calculateQcdCapacity({
       potentialExclusionBeforeContributionOffset,
       rmd,
     ),
+  };
+}
+
+/**
+ * Applies a recurring planning election using the known 2026 ceiling as a
+ * conservative nominal cap in later years. It separates the amount leaving the
+ * IRA, the part excluded from income, and the part made taxable by the user's
+ * remaining post-age-70½ deductible-contribution offset.
+ */
+export function calculateQcdElection(input: QcdElectionInput): QcdElection {
+  const capacity = calculateQcdCapacity(input);
+  const requested = Math.max(0, input.intendedDistribution);
+  const offset = Math.max(0, input.unusedDeductibleContributionOffset);
+  const distribution = Math.min(
+    requested,
+    capacity.potentialExclusionBeforeContributionOffset,
+  );
+  const contributionOffsetUsed = Math.min(distribution, offset);
+  const excludedFromIncome = distribution - contributionOffsetUsed;
+
+  return {
+    ...capacity,
+    distribution,
+    excludedFromIncome,
+    taxableAmount: contributionOffsetUsed,
+    contributionOffsetUsed,
+    contributionOffsetRemaining: offset - contributionOffsetUsed,
+    rmdSatisfied: Math.min(
+      distribution,
+      Math.max(0, input.requiredMinimumDistribution),
+    ),
+    limitBasisYear: capacity.annualLimit === null ? null : 2026,
+    limitHeldFlat: input.taxYear > 2026 && capacity.annualLimit !== null,
   };
 }
