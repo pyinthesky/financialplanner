@@ -315,6 +315,10 @@ button, input, select { font: inherit; }
 }
 
 .content-wrap { width: 100%; max-width: 1440px; margin: 0 auto; padding: clamp(1.4rem, 3vw, 2.5rem); }
+.page-flow { display: flex; min-width: 0; flex-direction: column; gap: 1rem; }
+.page-flow > .section-heading { margin-bottom: .8rem; }
+.page-flow > :where(.metric-grid, .overview-grid, .three-column, .debt-topline, .privacy-banner) { margin-bottom: 0; }
+.page-flow > :where(.planner-panel, .model-note, .summary-strip, .calculated-line) { margin-top: 0; }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; margin-bottom: 1.8rem; }
 .section-heading h1 { margin: 0; color: #111d31; font-size: clamp(1.75rem, 3vw, 2.4rem); line-height: 1.08; letter-spacing: -.04em; font-weight: 720; }
 .section-heading p { max-width: 720px; margin: .55rem 0 0; color: #65738a; line-height: 1.65; }
@@ -449,6 +453,8 @@ button, input, select { font: inherit; }
   .topbar-title { min-width: 0; flex: 1; }
   .topbar-title > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .content-wrap { padding: .8rem; }
+  .page-flow { gap: .8rem; }
+  .page-flow > .section-heading { margin-bottom: .35rem; }
   .section-heading { align-items: stretch; flex-direction: column; gap: .8rem; margin-bottom: 1.15rem; }
   .section-heading h1 { font-size: 1.75rem; }
   .section-heading p { margin-top: .4rem; font-size: .94rem; line-height: 1.5; }

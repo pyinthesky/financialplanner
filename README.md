@@ -78,7 +78,7 @@ The work is organized into bounded batches so each batch can ship independently.
 - [x] Apply consistent title case to page headings, panel titles, navigation labels, chart labels, and legends; replace internal keys such as `hsaWithdrawal` with human-readable labels
 - [x] Give every quantitative input a visible, unambiguous unit or currency affix where applicable, while preserving blank zero-value onboarding
 - [x] Add a restrained save-state animation to the unlocked-vault indicator, with reduced-motion support and distinct saving/saved/failed states
-- [ ] Fix the missing separation above Timed Expenses and audit vertical rhythm between every card and section
+- [x] Fix the missing separation above Timed Expenses and audit vertical rhythm between every card and section
 - [ ] Restore the portfolio-projection chart in printed/PDF output and add a print regression check that verifies the chart is rendered rather than merely present in markup
 - [ ] Repeat the mobile audit on real narrow Safari/Chrome viewports: eliminate page-level horizontal scrolling, reduce excessive padding, stack remaining hostile controls, restore missing inter-card gaps, and test long labels and keyboard-open states
 - [ ] Prevent descenders and focus rings from clipping in native selects and other form controls

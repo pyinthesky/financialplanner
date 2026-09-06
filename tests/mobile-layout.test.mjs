@@ -107,6 +107,18 @@ test("vault animation respects reduced-motion preferences", () => {
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*vault-action\[data-save-state="saving"\][\s\S]*animation: none/);
 });
 
+test("page-level cards and sections use one consistent vertical rhythm", () => {
+  assert.match(page, /<div className="page-flow">\{content\}<\/div>/);
+  assert.match(css, /\.page-flow \{ display: flex; min-width: 0; flex-direction: column; gap: 1rem; \}/);
+  assert.match(css, /\.page-flow > :where\(\.metric-grid, \.overview-grid, \.three-column, \.debt-topline, \.privacy-banner\) \{ margin-bottom: 0; \}/);
+  assert.match(css, /\.page-flow > :where\(\.planner-panel, \.model-note, \.summary-strip, \.calculated-line\) \{ margin-top: 0; \}/);
+});
+
+test("mobile page rhythm stays compact while preserving card separation", () => {
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.page-flow \{ gap: \.8rem; \}/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.page-flow > \.section-heading \{ margin-bottom: \.35rem; \}/);
+});
+
 test("primary mobile actions meet a 44px touch target", () => {
   assert.match(css, /\.topbar-actions button \{ width: 2\.75rem;/);
   assert.match(css, /\[data-sidebar="menu-button"\] \{ min-height: 3rem; \}/);

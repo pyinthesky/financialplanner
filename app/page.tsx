@@ -1539,7 +1539,9 @@ export default function HomePage() {
               </Button>
             </div>
           </header>
-          <main className="content-wrap">{content}</main>
+          <main className="content-wrap">
+            <div className="page-flow">{content}</div>
+          </main>
           <footer className="site-footer">
             <span>Educational planning estimate — not financial, tax, legal, or medical advice.</span>
             <span>No ads · No tracking · No accounts</span>
