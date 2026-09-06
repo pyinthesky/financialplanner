@@ -4,6 +4,7 @@ import test from "node:test";
 import { calculateFederalIncomeTax, federalGrossIncomeCeilingForRate } from "../lib/federal-tax.ts";
 import { compareRothConversion } from "../lib/roth-conversion.ts";
 import { calculateMedicareIrmaa } from "../lib/medicare-irmaa.ts";
+import { acaApplicablePercentage, calculateAcaPremiumTaxCredit, povertyGuideline } from "../lib/aca-ptc.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
 import { calculateQcdCapacity, calculateQcdElection } from "../lib/qcd.ts";
@@ -114,6 +115,59 @@ test("married-separate IRMAA category uses the lived-together table", () => {
   assert.equal(result.partDMonthlyIrmaaPerEnrollee, 83.3);
   assert.equal(result.nextTierBoundary, 391_000);
   assert.equal(result.nextTierStartsAtBoundary, true);
+});
+
+test("2026 ACA worksheet uses 2025 poverty guidelines by location", () => {
+  assert.equal(povertyGuideline(4, "contiguous"), 32_150);
+  assert.equal(povertyGuideline(4, "alaska"), 40_190);
+  assert.equal(povertyGuideline(4, "hawaii"), 36_980);
+  assert.equal(povertyGuideline(10, "contiguous"), 65_150);
+});
+
+test("2026 ACA applicable percentages interpolate within IRS bands", () => {
+  assert.equal(acaApplicablePercentage(100), 0.021);
+  assert.equal(acaApplicablePercentage(133), 0.0314);
+  assert.equal(acaApplicablePercentage(200), 0.066);
+  assert.equal(acaApplicablePercentage(350), 0.0996);
+  assert.equal(acaApplicablePercentage(400), 0.0996);
+  assert.equal(acaApplicablePercentage(400.01), null);
+});
+
+test("ACA PTC is capped by the enrolled plan premium", () => {
+  const result = calculateAcaPremiumTaxCredit({
+    householdMagi: 64_300,
+    taxFamilySize: 4,
+    location: "contiguous",
+    annualEnrollmentPremium: 7_000,
+    annualBenchmarkPremium: 12_000,
+  });
+  assert.equal(result.status, "standard-income-range");
+  assert.equal(result.householdIncomePercentOfFpl, 200);
+  assert.equal(result.applicablePercentage, 0.066);
+  assert.equal(result.expectedHouseholdContribution, 4_243.8);
+  assert.equal(result.potentialPremiumTaxCredit, 7_000);
+  assert.equal(result.estimatedNetEnrollmentPremium, 0);
+});
+
+test("ACA PTC does not infer eligibility outside the standard income range", () => {
+  const below = calculateAcaPremiumTaxCredit({
+    householdMagi: 30_000,
+    taxFamilySize: 4,
+    location: "contiguous",
+    annualEnrollmentPremium: 10_000,
+    annualBenchmarkPremium: 12_000,
+  });
+  const above = calculateAcaPremiumTaxCredit({
+    householdMagi: 128_601,
+    taxFamilySize: 4,
+    location: "contiguous",
+    annualEnrollmentPremium: 10_000,
+    annualBenchmarkPremium: 12_000,
+  });
+  assert.equal(below.status, "below-standard-income-range");
+  assert.equal(below.potentialPremiumTaxCredit, 0);
+  assert.equal(above.status, "above-standard-income-range");
+  assert.equal(above.potentialPremiumTaxCredit, 0);
 });
 
 test("print chart builds finite stacked geometry without browser measurement", () => {
@@ -567,6 +621,7 @@ test("legacy plan imports receive a compatible filing status", () => {
     normalized.medicareIrmaaPlanning,
     DEFAULT_PLAN.medicareIrmaaPlanning,
   );
+  assert.deepEqual(normalized.acaPlanning, DEFAULT_PLAN.acaPlanning);
 });
 
 test("blank plans render zero-valued numeric inputs without a visible zero", () => {

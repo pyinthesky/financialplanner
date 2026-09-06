@@ -18,6 +18,7 @@ import { DEFAULT_PLAN, debtPayoffSchedule, estimateSuccessRate, normalizePlan, p
 import { calculateFederalIncomeTax, type FilingStatus } from "@/lib/federal-tax";
 import { compareRothConversion } from "@/lib/roth-conversion";
 import { calculateMedicareIrmaa, type IrmaaFilingCategory } from "@/lib/medicare-irmaa";
+import { calculateAcaPremiumTaxCredit, type PovertyGuidelineLocation } from "@/lib/aca-ptc";
 import { buildPrintPortfolioChart, PRINT_PORTFOLIO_SERIES } from "@/lib/print-chart";
 import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
@@ -384,6 +385,14 @@ export default function HomePage() {
         ...current.medicareIrmaaPlanning,
         [key]: value,
       },
+    }));
+  const setAcaPlanning = (
+    key: keyof PlannerData["acaPlanning"],
+    value: number | PlannerData["acaPlanning"]["location"],
+  ) =>
+    setPlan((current) => ({
+      ...current,
+      acaPlanning: { ...current.acaPlanning, [key]: value },
     }));
   const updateAccount = (id: string, patch: Partial<Account>) =>
     setPlan((current) => ({
@@ -1319,6 +1328,22 @@ export default function HomePage() {
           partDEnrollees: plan.medicareIrmaaPlanning.partDEnrollees,
         })
       : null;
+    const acaPtc =
+      plan.acaPlanning.location && plan.acaPlanning.taxFamilySize > 0
+        ? calculateAcaPremiumTaxCredit({
+            ...plan.acaPlanning,
+            location: plan.acaPlanning.location as PovertyGuidelineLocation,
+          })
+        : null;
+    const acaPtcAfterConversion = acaPtc
+      ? calculateAcaPremiumTaxCredit({
+          ...plan.acaPlanning,
+          householdMagi:
+            plan.acaPlanning.householdMagi +
+            plan.rothConversionPlanning.taxableConversionAmount,
+          location: plan.acaPlanning.location as PovertyGuidelineLocation,
+        })
+      : null;
     const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
     const firstRmdYear = projection.find((row) => row.requiredMinimumDistribution > 0);
     const firstQcdYear = projection.find(
@@ -1581,6 +1606,94 @@ export default function HomePage() {
             <a href="https://www.ssa.gov/benefits/medicare/medicare-premiums.html" target="_blank" rel="noreferrer">SSA 2026 premium tables</a>
             {" · "}
             <a href="https://www.ssa.gov/medicare/lower-irmaa" target="_blank" rel="noreferrer">SSA life-changing-event guidance</a>
+          </p>
+        </Panel>
+        <Panel title="ACA Premium Tax Credit Worksheet" eyebrow="2026 MARKETPLACE ESTIMATE">
+          <div className="form-grid">
+            <Field
+              label="2026 household ACA MAGI"
+              value={plan.acaPlanning.householdMagi}
+              onChange={(value) => setAcaPlanning("householdMagi", value)}
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="Enter expected household MAGI before the planned Roth conversion above. Marketplace MAGI generally adds tax-exempt interest, nontaxable Social Security, and excluded foreign income to AGI."
+            />
+            <Field
+              label="2026 tax family size"
+              value={plan.acaPlanning.taxFamilySize}
+              onChange={(value) => setAcaPlanning("taxFamilySize", value)}
+              suffix="people"
+              max={20}
+              help="Usually the tax filer, spouse, and tax dependents—even family members who do not need Marketplace coverage."
+            />
+            <SelectField
+              label="Poverty-guideline location"
+              value={plan.acaPlanning.location}
+              onChange={(value) =>
+                setAcaPlanning(
+                  "location",
+                  value as PlannerData["acaPlanning"]["location"],
+                )
+              }
+              options={[
+                { value: "", label: "Choose a location" },
+                { value: "contiguous", label: "48 states and Washington, D.C." },
+                { value: "alaska", label: "Alaska" },
+                { value: "hawaii", label: "Hawaii" },
+              ]}
+            />
+            <Field
+              label="Annual enrolled-plan premium"
+              value={plan.acaPlanning.annualEnrollmentPremium}
+              onChange={(value) => setAcaPlanning("annualEnrollmentPremium", value)}
+              prefix="$"
+              suffix="/ year"
+              step={100}
+              help="The unsubsidized premium for the Marketplace plan you expect to enroll in."
+            />
+            <Field
+              label="Annual benchmark SLCSP premium"
+              value={plan.acaPlanning.annualBenchmarkPremium}
+              onChange={(value) => setAcaPlanning("annualBenchmarkPremium", value)}
+              prefix="$"
+              suffix="/ year"
+              step={100}
+              help="Use the annual second-lowest-cost Silver plan premium from the Marketplace for the covered household members, ages, ZIP code, and plan year."
+            />
+          </div>
+          {acaPtc ? (
+            <>
+              <div className="worksheet-grid">
+                <div><span>2025 poverty guideline used</span><strong>{currency.format(acaPtc.povertyGuideline)}</strong></div>
+                <div><span>Household income as FPL</span><strong>{acaPtc.householdIncomePercentOfFpl.toFixed(1)}%</strong></div>
+                <div><span>2026 applicable percentage</span><strong>{acaPtc.applicablePercentage === null ? "Eligibility review" : `${(acaPtc.applicablePercentage * 100).toFixed(2)}%`}</strong></div>
+                <div><span>Expected benchmark contribution</span><strong>{currency.format(acaPtc.expectedHouseholdContribution)}</strong></div>
+                <div><span>Potential annual premium tax credit</span><strong>{currency.format(acaPtc.potentialPremiumTaxCredit)}</strong></div>
+                <div><span>Estimated enrolled-plan premium after PTC</span><strong>{currency.format(acaPtc.estimatedNetEnrollmentPremium)}</strong></div>
+                <div><span>Income room through 400% FPL</span><strong>{currency.format(acaPtc.incomeRoomTo400PercentFpl)}</strong></div>
+                <div>
+                  <span>PTC after planned taxable Roth conversion</span>
+                  <strong>{currency.format(acaPtcAfterConversion?.potentialPremiumTaxCredit ?? 0)}</strong>
+                  <small>
+                    Estimated PTC change: {currency.format((acaPtcAfterConversion?.potentialPremiumTaxCredit ?? 0) - acaPtc.potentialPremiumTaxCredit)}
+                  </small>
+                </div>
+              </div>
+              {acaPtc.status !== "standard-income-range" && (
+                <p className="model-note">
+                  <Calculator /> The entered income is {acaPtc.status === "below-standard-income-range" ? "below 100%" : "above 400%"} of the federal poverty level. This worksheet shows no credit because it only implements the standard 2026 income range. Marketplace, Medicaid, immigration, and other exception rules require an eligibility determination; the planner will not guess through them.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="panel-copy">Enter a tax family size and choose the poverty-guideline location to estimate the 2026 credit.</p>
+          )}
+          <p className="model-note">
+            <Calculator /> This is a potential premium-tax-credit estimate, not an eligibility determination or quote. It uses the 2026 IRS contribution table and the 2025 poverty guidelines used for 2026 Marketplace applications. It assumes otherwise-qualified Marketplace coverage and does not determine employer-plan affordability, minimum value, Medicare/Medicaid/CHIP/TRICARE eligibility, immigration status, married-filing exceptions, tobacco surcharges, cost-sharing reductions, advance-credit reconciliation, or monthly allocation. Enhanced pandemic-era credits ended December 31, 2025.{" "}
+            <a href="https://www.irs.gov/pub/irs-drop/rp-25-25.pdf" target="_blank" rel="noreferrer">IRS Revenue Procedure 2025-25</a>
+            {" · "}
+            <a href="https://www.healthcare.gov/lower-costs/save-on-monthly-premiums/" target="_blank" rel="noreferrer">HealthCare.gov 2026 guidance</a>
           </p>
         </Panel>
         <Panel title="Required Minimum Distribution Worksheet" eyebrow="FIRST MODELED RMD YEAR">

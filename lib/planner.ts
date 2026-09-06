@@ -98,6 +98,13 @@ export interface PlannerData {
     partBEnrollees: number;
     partDEnrollees: number;
   };
+  acaPlanning: {
+    householdMagi: number;
+    taxFamilySize: number;
+    location: "" | "contiguous" | "alaska" | "hawaii";
+    annualEnrollmentPremium: number;
+    annualBenchmarkPremium: number;
+  };
   housing: {
     homeValue: number;
     assessedPercent: number;
@@ -221,6 +228,13 @@ export const DEFAULT_PLAN: PlannerData = {
     filingCategory: "",
     partBEnrollees: 0,
     partDEnrollees: 0,
+  },
+  acaPlanning: {
+    householdMagi: 0,
+    taxFamilySize: 0,
+    location: "",
+    annualEnrollmentPremium: 0,
+    annualBenchmarkPremium: 0,
   },
   housing: {
     homeValue: 0,
@@ -1003,6 +1017,10 @@ export function normalizePlan(input: unknown): PlannerData {
     medicareIrmaaPlanning: {
       ...DEFAULT_PLAN.medicareIrmaaPlanning,
       ...candidate.medicareIrmaaPlanning,
+    },
+    acaPlanning: {
+      ...DEFAULT_PLAN.acaPlanning,
+      ...candidate.acaPlanning,
     },
   } as PlannerData;
 }
