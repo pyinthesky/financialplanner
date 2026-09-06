@@ -254,8 +254,16 @@ button, input, select { font: inherit; }
 [data-sidebar="menu-button"][data-active="true"] { background: linear-gradient(90deg, rgba(47,125,244,.25), rgba(47,125,244,.08)); color: white; box-shadow: inset 3px 0 #4b93f2; }
 [data-sidebar="menu-button"][data-active="true"] svg { color: #6cadff; }
 
-.sidebar-privacy { display: flex; align-items: flex-start; gap: .65rem; border: 1px solid #2b3c56; border-radius: .75rem; background: #16243a; padding: .75rem; }
-.sidebar-privacy svg { width: 1rem; flex: 0 0 auto; color: #53cfac; margin-top: .1rem; }
+.sidebar-privacy { display: flex; align-items: flex-start; gap: .65rem; border: 1px solid #2b3c56; border-radius: .75rem; background: #16243a; padding: .75rem; transition: border-color .2s ease, background-color .2s ease; }
+.vault-status-icon { position: relative; display: grid; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; place-items: center; }
+.vault-status-icon svg { width: 1rem; height: 1rem; }
+.sidebar-privacy .vault-status-icon { color: #8498b4; margin-top: .1rem; }
+.sidebar-privacy[data-save-state="saved"] { border-color: rgba(83,207,172,.45); background: #142a34; }
+.sidebar-privacy[data-save-state="saved"] .vault-status-icon { color: #53cfac; }
+.sidebar-privacy[data-save-state="saving"] { border-color: rgba(108,173,255,.55); background: #172b46; }
+.sidebar-privacy[data-save-state="saving"] .vault-status-icon { color: #6cadff; }
+.sidebar-privacy[data-save-state="failed"] { border-color: rgba(245,126,132,.55); background: #321f2a; }
+.sidebar-privacy[data-save-state="failed"] .vault-status-icon { color: #f57e84; }
 .sidebar-privacy div { display: flex; min-width: 0; flex-direction: column; gap: .15rem; }
 .sidebar-privacy strong { color: #e6edf7; font-size: .74rem; }
 .sidebar-privacy span { color: #8498b4; font-size: .66rem; line-height: 1.4; }
@@ -280,6 +288,31 @@ button, input, select { font: inherit; }
 .topbar-title, .topbar-actions { display: flex; align-items: center; gap: .55rem; }
 .topbar-title { color: #617088; font-size: .86rem; font-weight: 650; }
 .topbar-title > svg { width: 1rem; }
+.vault-action { transition: color .2s ease, background-color .2s ease; }
+.vault-action[data-save-state="saved"] { color: #167562; }
+.vault-action[data-save-state="saving"] { background: #e9f2ff; color: #216dcc; }
+.vault-action[data-save-state="failed"] { background: #fff0f1; color: #b42e3a; }
+.sidebar-privacy[data-save-state="saving"] .vault-status-icon,
+.vault-action[data-save-state="saving"] .vault-status-icon { animation: vault-saving-pulse 1.15s ease-in-out infinite; }
+.sidebar-privacy[data-save-state="saving"] .vault-status-icon::after,
+.vault-action[data-save-state="saving"] .vault-status-icon::after { position: absolute; inset: -.28rem; border: 1px solid currentColor; border-radius: 50%; content: ""; animation: vault-saving-ring 1.15s ease-out infinite; }
+
+@keyframes vault-saving-pulse {
+  0%, 100% { opacity: .65; transform: scale(.94); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes vault-saving-ring {
+  0% { opacity: .5; transform: scale(.65); }
+  75%, 100% { opacity: 0; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-privacy[data-save-state="saving"] .vault-status-icon,
+  .vault-action[data-save-state="saving"] .vault-status-icon,
+  .sidebar-privacy[data-save-state="saving"] .vault-status-icon::after,
+  .vault-action[data-save-state="saving"] .vault-status-icon::after { animation: none; }
+}
 
 .content-wrap { width: 100%; max-width: 1440px; margin: 0 auto; padding: clamp(1.4rem, 3vw, 2.5rem); }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; margin-bottom: 1.8rem; }

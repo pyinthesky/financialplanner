@@ -20,6 +20,7 @@ import { decryptPlan, encryptPlan } from "@/lib/vault";
 
 type SectionId = "overview" | "household" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
 type VaultStatus = "off" | "locked" | "unlocked";
+type SaveStatus = "unsaved" | "locked" | "saving" | "saved" | "failed";
 
 const VAULT_KEY = "open-retirement-planner-vault-v1";
 const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
@@ -256,21 +257,29 @@ export default function HomePage() {
   const [passphrase, setPassphrase] = useState("");
   const [vaultError, setVaultError] = useState("");
   const [saveState, setSaveState] = useState("Blank plan — not saved");
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("unsaved");
   const [confirmErase, setConfirmErase] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const passphraseRef = useRef("");
 
   useEffect(() => {
-    setVaultStatus(localStorage.getItem(VAULT_KEY) ? "locked" : "off");
+    if (localStorage.getItem(VAULT_KEY)) {
+      setVaultStatus("locked");
+      setSaveStatus("locked");
+      setSaveState("Local vault locked");
+    }
   }, []);
   useEffect(() => {
     if (vaultStatus !== "unlocked" || !passphraseRef.current) return;
+    setSaveStatus("saving");
     setSaveState("Saving encrypted…");
     const timer = window.setTimeout(async () => {
       try {
         localStorage.setItem(VAULT_KEY, await encryptPlan(plan, passphraseRef.current));
+        setSaveStatus("saved");
         setSaveState("Saved locally — encrypted");
       } catch {
+        setSaveStatus("failed");
         setSaveState("Could not save vault");
       }
     }, 450);
@@ -343,7 +352,13 @@ export default function HomePage() {
     if (!file) return;
     try {
       setPlan(normalizePlan(JSON.parse(await file.text())));
-      setSaveState(vaultStatus === "unlocked" ? "Imported — saving encrypted…" : "Imported — not saved locally");
+      if (vaultStatus === "unlocked") {
+        setSaveStatus("saving");
+        setSaveState("Imported — saving encrypted…");
+      } else {
+        setSaveStatus("unsaved");
+        setSaveState("Imported — not saved locally");
+      }
     } catch (error) {
       setVaultError(error instanceof Error ? error.message : "The selected file could not be imported.");
       setVaultOpen(true);
@@ -359,6 +374,7 @@ export default function HomePage() {
       else localStorage.setItem(VAULT_KEY, await encryptPlan(plan, passphrase));
       passphraseRef.current = passphrase;
       setVaultStatus("unlocked");
+      setSaveStatus("saved");
       setSaveState("Saved locally — encrypted");
       setPassphrase("");
       setVaultOpen(false);
@@ -369,12 +385,14 @@ export default function HomePage() {
   const lockVault = () => {
     passphraseRef.current = "";
     setVaultStatus("locked");
+    setSaveStatus("locked");
     setSaveState("Local vault locked");
   };
   const eraseVault = () => {
     localStorage.removeItem(VAULT_KEY);
     passphraseRef.current = "";
     setVaultStatus("off");
+    setSaveStatus("unsaved");
     setSaveState("Local vault erased — current plan remains open");
     setConfirmErase(false);
   };
@@ -1483,8 +1501,10 @@ export default function HomePage() {
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter>
-            <div className="sidebar-privacy">
-              <ShieldCheck />
+            <div className="sidebar-privacy" data-save-state={saveStatus} role="status" aria-live="polite">
+              <span className="vault-status-icon">
+                <ShieldCheck />
+              </span>
               <div>
                 <strong>Nothing is uploaded</strong>
                 <span>{saveState}</span>
@@ -1503,9 +1523,11 @@ export default function HomePage() {
               <span>{sections.find((section) => section.id === activeSection)?.label}</span>
             </div>
             <div className="topbar-actions">
-              <Button variant="ghost" aria-label="Open data and privacy" onClick={() => setActiveSection("data")}>
-                {vaultStatus === "unlocked" ? <Unlock /> : <Lock />}
-                <span className="hide-mobile">{vaultStatus === "unlocked" ? "Vault unlocked" : vaultStatus === "locked" ? "Vault locked" : "Not saved"}</span>
+              <Button className="vault-action" data-save-state={saveStatus} variant="ghost" aria-label={`Open data and privacy — ${saveState}`} onClick={() => setActiveSection("data")}>
+                <span className="vault-status-icon">
+                  {vaultStatus === "unlocked" ? <LockKeyhole /> : <Lock />}
+                </span>
+                <span className="hide-mobile">{saveStatus === "saving" ? "Saving encrypted…" : saveStatus === "failed" ? "Save failed" : vaultStatus === "unlocked" ? "Vault unlocked" : vaultStatus === "locked" ? "Vault locked" : "Not saved"}</span>
               </Button>
               <Button variant="outline" aria-label="Export plan data" onClick={exportData}>
                 <Download />

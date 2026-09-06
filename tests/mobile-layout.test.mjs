@@ -93,6 +93,20 @@ test("affixed table inputs stay bounded on narrow screens", () => {
   assert.match(css, /\.mobile-card-table \.input-affix \{ width: 100%; min-width: 0; \}/);
 });
 
+test("encrypted vault saving has explicit, accessible visual states", () => {
+  assert.match(page, /type SaveStatus = "unsaved" \| "locked" \| "saving" \| "saved" \| "failed"/);
+  assert.match(page, /data-save-state=\{saveStatus\} role="status" aria-live="polite"/);
+  assert.match(page, /setSaveStatus\("saving"\)/);
+  assert.match(page, /setSaveStatus\("saved"\)/);
+  assert.match(page, /setSaveStatus\("failed"\)/);
+  assert.match(css, /@keyframes vault-saving-pulse/);
+  assert.match(css, /@keyframes vault-saving-ring/);
+});
+
+test("vault animation respects reduced-motion preferences", () => {
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*vault-action\[data-save-state="saving"\][\s\S]*animation: none/);
+});
+
 test("primary mobile actions meet a 44px touch target", () => {
   assert.match(css, /\.topbar-actions button \{ width: 2\.75rem;/);
   assert.match(css, /\[data-sidebar="menu-button"\] \{ min-height: 3rem; \}/);
