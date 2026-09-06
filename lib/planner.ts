@@ -83,6 +83,11 @@ export interface PlannerData {
     annualConfirmedExceptionYou: number;
     annualConfirmedExceptionPartner: number;
   };
+  rothConversionPlanning: {
+    baselineGrossOrdinaryIncome: number;
+    taxableConversionAmount: number;
+    targetBracketRate: number;
+  };
   housing: {
     homeValue: number;
     assessedPercent: number;
@@ -195,6 +200,11 @@ export const DEFAULT_PLAN: PlannerData = {
   earlyWithdrawalPlanning: {
     annualConfirmedExceptionYou: 0,
     annualConfirmedExceptionPartner: 0,
+  },
+  rothConversionPlanning: {
+    baselineGrossOrdinaryIncome: 0,
+    taxableConversionAmount: 0,
+    targetBracketRate: 0,
   },
   housing: {
     homeValue: 0,
@@ -969,6 +979,10 @@ export function normalizePlan(input: unknown): PlannerData {
     earlyWithdrawalPlanning: {
       ...DEFAULT_PLAN.earlyWithdrawalPlanning,
       ...candidate.earlyWithdrawalPlanning,
+    },
+    rothConversionPlanning: {
+      ...DEFAULT_PLAN.rothConversionPlanning,
+      ...candidate.rothConversionPlanning,
     },
   } as PlannerData;
 }

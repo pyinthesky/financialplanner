@@ -23,6 +23,9 @@ export interface FederalTaxResult {
   effectiveRate: number;
 }
 
+export const FEDERAL_BRACKET_RATES = [0.1, 0.12, 0.22, 0.24, 0.32, 0.35] as const;
+export type FederalBracketRate = (typeof FEDERAL_BRACKET_RATES)[number];
+
 export const FEDERAL_TAX_BASE_YEAR = 2026;
 
 // IRS Rev. Proc. 2025-32, sections 4.01 and 4.14, effective for tax year 2026.
@@ -77,6 +80,22 @@ const TABLES: Record<FilingStatus, FederalTaxTable> = {
     ],
   },
 };
+
+export function federalGrossIncomeCeilingForRate(
+  filingStatus: FilingStatus,
+  targetRate: number,
+  inflationFactor = 1,
+): number | null {
+  const factor = Number.isFinite(inflationFactor)
+    ? Math.max(0, inflationFactor)
+    : 1;
+  const table = TABLES[filingStatus];
+  const bracket = table.brackets.find(
+    (candidate) => candidate.rate === targetRate,
+  );
+  if (!bracket || bracket.ceiling === null) return null;
+  return (table.standardDeduction + bracket.ceiling) * factor;
+}
 
 export function calculateFederalIncomeTax(
   grossOrdinaryIncome: number,

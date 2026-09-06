@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
+import { calculateFederalIncomeTax, federalGrossIncomeCeilingForRate } from "../lib/federal-tax.ts";
+import { compareRothConversion } from "../lib/roth-conversion.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
 import { calculateQcdCapacity, calculateQcdElection } from "../lib/qcd.ts";
@@ -22,6 +23,43 @@ import {
 } from "../lib/planner.ts";
 
 const copyPlan = () => structuredClone(DEFAULT_PLAN);
+
+test("2026 bracket ceiling includes the standard deduction", () => {
+  assert.equal(federalGrossIncomeCeilingForRate("marriedJoint", 0.12), 133_000);
+  assert.equal(federalGrossIncomeCeilingForRate("single", 0.37), null);
+  assert.equal(federalGrossIncomeCeilingForRate("single", 0), null);
+});
+
+test("Roth conversion comparison identifies room inside a chosen bracket", () => {
+  const result = compareRothConversion({
+    filingStatus: "marriedJoint",
+    baselineGrossOrdinaryIncome: 80_000,
+    taxableConversionAmount: 40_000,
+    targetBracketRate: 0.12,
+  });
+  assert.equal(result.targetGrossIncomeCeiling, 133_000);
+  assert.equal(result.roomToTargetBeforeConversion, 53_000);
+  assert.equal(result.conversionWithinTarget, 40_000);
+  assert.equal(result.amountAboveTarget, 0);
+  assert.equal(
+    result.incrementalFederalTax,
+    calculateFederalIncomeTax(120_000, "marriedJoint").tax -
+      calculateFederalIncomeTax(80_000, "marriedJoint").tax,
+  );
+});
+
+test("Roth conversion comparison surfaces the amount above a target bracket", () => {
+  const result = compareRothConversion({
+    filingStatus: "marriedJoint",
+    baselineGrossOrdinaryIncome: 120_000,
+    taxableConversionAmount: 30_000,
+    targetBracketRate: 0.12,
+  });
+  assert.equal(result.roomToTargetBeforeConversion, 13_000);
+  assert.equal(result.conversionWithinTarget, 13_000);
+  assert.equal(result.amountAboveTarget, 17_000);
+  assert.equal(result.resultingMarginalRate, 0.22);
+});
 
 test("print chart builds finite stacked geometry without browser measurement", () => {
   const geometry = buildPrintPortfolioChart([
@@ -465,6 +503,10 @@ test("legacy plan imports receive a compatible filing status", () => {
   assert.deepEqual(
     normalized.earlyWithdrawalPlanning,
     DEFAULT_PLAN.earlyWithdrawalPlanning,
+  );
+  assert.deepEqual(
+    normalized.rothConversionPlanning,
+    DEFAULT_PLAN.rothConversionPlanning,
   );
 });
 

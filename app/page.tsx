@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DEFAULT_PLAN, debtPayoffSchedule, estimateSuccessRate, normalizePlan, projectPlan, propertyTaxAnnual, totalPortfolio, type Account, type Debt, type IncomeStream, type PlannerData, type RecurringCost } from "@/lib/planner";
 import { calculateFederalIncomeTax, type FilingStatus } from "@/lib/federal-tax";
+import { compareRothConversion } from "@/lib/roth-conversion";
 import { buildPrintPortfolioChart, PRINT_PORTFOLIO_SERIES } from "@/lib/print-chart";
 import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
@@ -358,6 +359,17 @@ export default function HomePage() {
       ...current,
       earlyWithdrawalPlanning: {
         ...current.earlyWithdrawalPlanning,
+        [key]: value,
+      },
+    }));
+  const setRothConversionPlanning = (
+    key: keyof PlannerData["rothConversionPlanning"],
+    value: number,
+  ) =>
+    setPlan((current) => ({
+      ...current,
+      rothConversionPlanning: {
+        ...current.rothConversionPlanning,
         [key]: value,
       },
     }));
@@ -1282,6 +1294,10 @@ export default function HomePage() {
   const renderTaxes = () => {
     const withdrawalRows = projection.filter((row) => row.age >= plan.household.retirementAge);
     const targetTax = calculateFederalIncomeTax(plan.assumptions.targetOrdinaryIncome, plan.household.filingStatus);
+    const rothConversionComparison = compareRothConversion({
+      filingStatus: plan.household.filingStatus,
+      ...plan.rothConversionPlanning,
+    });
     const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
     const firstRmdYear = projection.find((row) => row.requiredMinimumDistribution > 0);
     const firstQcdYear = projection.find(
@@ -1407,6 +1423,71 @@ export default function HomePage() {
             </ol>
           </Panel>
         </div>
+        <Panel title="Roth Conversion Bracket Check" eyebrow="2026 FEDERAL ESTIMATE">
+          <div className="form-grid">
+            <Field
+              label="Baseline gross ordinary income"
+              value={plan.rothConversionPlanning.baselineGrossOrdinaryIncome}
+              onChange={(value) =>
+                setRothConversionPlanning("baselineGrossOrdinaryIncome", value)
+              }
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="Before the conversion and before the standard deduction. Include taxable wages, pensions, interest, distributions, and the taxable share of Social Security you expect on the return."
+            />
+            <Field
+              label="Taxable Roth conversion amount"
+              value={plan.rothConversionPlanning.taxableConversionAmount}
+              onChange={(value) =>
+                setRothConversionPlanning("taxableConversionAmount", value)
+              }
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="Enter the taxable portion only. If you have nondeductible IRA basis, determine the taxable amount under Form 8606 and the pro-rata rule before using this estimate."
+            />
+            <SelectField
+              label="Target federal bracket"
+              value={String(plan.rothConversionPlanning.targetBracketRate)}
+              onChange={(value) =>
+                setRothConversionPlanning("targetBracketRate", Number(value))
+              }
+              options={[
+                { value: "0", label: "Choose a target bracket" },
+                { value: "0.1", label: "10%" },
+                { value: "0.12", label: "12%" },
+                { value: "0.22", label: "22%" },
+                { value: "0.24", label: "24%" },
+                { value: "0.32", label: "32%" },
+                { value: "0.35", label: "35%" },
+              ]}
+            />
+          </div>
+          <div className="worksheet-grid">
+            <div>
+              <span>Top of target bracket · gross income</span>
+              <strong>
+                {rothConversionComparison.targetGrossIncomeCeiling === null
+                  ? "Choose a bracket"
+                  : currency.format(rothConversionComparison.targetGrossIncomeCeiling)}
+              </strong>
+            </div>
+            <div><span>Room before conversion</span><strong>{currency.format(rothConversionComparison.roomToTargetBeforeConversion)}</strong></div>
+            <div><span>Conversion within target</span><strong>{currency.format(rothConversionComparison.conversionWithinTarget)}</strong></div>
+            <div><span>Conversion above target</span><strong>{currency.format(rothConversionComparison.amountAboveTarget)}</strong></div>
+            <div><span>Federal tax before conversion</span><strong>{currency.format(rothConversionComparison.baselineFederalTax)}</strong></div>
+            <div><span>Incremental federal tax</span><strong>{currency.format(rothConversionComparison.incrementalFederalTax)}</strong></div>
+            <div><span>Average federal rate on conversion</span><strong>{(rothConversionComparison.averageFederalRateOnConversion * 100).toFixed(1)}%</strong></div>
+            <div><span>Resulting marginal federal rate</span><strong>{(rothConversionComparison.resultingMarginalRate * 100).toFixed(0)}%</strong></div>
+          </div>
+          <p className="model-note">
+            <Calculator /> This is a current-year bracket comparison, not a conversion recommendation. It uses the 2026 ordinary-income brackets and basic standard deduction and does not move money between accounts. The real cost can change with IRA basis and the pro-rata rule, taxable Social Security, capital gains, credits, state tax, ACA subsidies, Medicare IRMAA, NIIT, itemized deductions, and transaction timing. Conversions after 2017 generally cannot be recharacterized. Decide the taxable portion and confirm eligibility before acting.{" "}
+            <a href="https://www.irs.gov/pub/irs-pdf/p590a.pdf" target="_blank" rel="noreferrer">IRS Publication 590-A (2025)</a>
+            {" · "}
+            <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">2026 IRS brackets</a>
+          </p>
+        </Panel>
         <Panel title="Required Minimum Distribution Worksheet" eyebrow="FIRST MODELED RMD YEAR">
           {firstRmdYear ? (
             <div className="worksheet-grid">
@@ -1606,7 +1687,7 @@ export default function HomePage() {
           </ChartContainer>
         </Panel>
         <p className="model-note">
-          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. QCD elections use the 2026 statutory ceiling held flat for later-year planning and exclude only the amount remaining after the entered deductible-contribution offset. The early-distribution estimate applies the 10% additional tax to modeled, taxable, owner-assigned withdrawals before age 59½ after a user-confirmed exception amount; it does not determine exception eligibility or Roth ordering. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, IRMAA, ACA interactions, specific-lot accounting, and Roth conversions are not yet included.{" "}
+          <Calculator /> Federal ordinary-income tax uses published 2026 IRS brackets and the basic standard deduction, inflation-indexed by your general inflation assumption in later projection years. The Roth conversion worksheet compares a user-entered taxable conversion with the current-year brackets but does not yet alter the projection. Social Security taxation uses the latest completed IRS Publication 915 worksheet (tax year 2025) with its statutory thresholds held flat. RMDs use the 2025 Publication 590-B Uniform Lifetime Table. QCD elections use the 2026 statutory ceiling held flat for later-year planning and exclude only the amount remaining after the entered deductible-contribution offset. The early-distribution estimate applies the 10% additional tax to modeled, taxable, owner-assigned withdrawals before age 59½ after a user-confirmed exception amount; it does not determine exception eligibility or Roth ordering. Taxable-account gains use aggregate adjusted basis and average-basis allocation as a planning estimate. State and capital-gains rates remain editable estimates. Credits, itemized and additional deductions, AMT, NIIT, IRMAA, ACA interactions, specific-lot accounting, and projected Roth conversion ladders are not yet included.{" "}
           <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">
             IRS Rev. Proc. 2025-32
           </a>
