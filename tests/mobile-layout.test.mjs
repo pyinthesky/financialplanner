@@ -158,3 +158,11 @@ test("the PDF portfolio chart uses precomputed SVG geometry instead of hidden re
   assert.doesNotMatch(page, /initialDimension=\{\{ width: 900, height: 310 \}\}/);
   assert.match(css, /\.report-portfolio-chart \{ display: block; width: 100%; height: auto;/);
 });
+
+test("plan summary uses prioritized signals without duplicate navigation", () => {
+  assert.match(page, /className="planning-signal-list"/);
+  assert.match(page, /<b>Next:<\/b>/);
+  assert.match(page, /Signals use only the values currently in this plan and are estimates, not guarantees/);
+  assert.doesNotMatch(page, /Review assumptions/i);
+  assert.match(css, /\.planning-signal-list li\[data-tone="attention"\]/);
+});

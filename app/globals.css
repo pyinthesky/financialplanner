@@ -352,16 +352,22 @@ button, input, select { font: inherit; }
 .chart-panel { overflow: hidden; }
 .chart-panel [data-slot="chart"] { margin-left: -.65rem; width: calc(100% + .65rem); }
 .insight-panel { display: flex; flex-direction: column; }
-.plan-signal { border-radius: .85rem; padding: 1rem; margin-bottom: 1rem; }
-.signal-good { background: #eaf8f4; color: #116d5c; }
-.signal-warn { background: #fff5e6; color: #8b5a12; }
-.plan-signal > span { display: block; font-size: .69rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
-.plan-signal strong { display: block; margin-top: .38rem; font-size: 1.4rem; letter-spacing: -.03em; }
-.plan-signal p { margin: .35rem 0 0; color: currentColor; opacity: .78; font-size: .79rem; line-height: 1.5; }
 .insight-list { display: grid; flex: 1; gap: .85rem; margin: 0 0 1rem; padding: 0; list-style: none; color: #5f6d82; font-size: .83rem; line-height: 1.55; }
 .insight-list li { display: grid; grid-template-columns: 1rem 1fr; gap: .35rem; }
 .insight-list svg { width: .85rem; color: #2f7df4; margin-top: .25rem; }
 .insight-list strong { color: #26344a; }
+.planning-signal-list { display: grid; gap: .7rem; margin: 0; padding: 0; list-style: none; }
+.planning-signal-list li { display: grid; min-width: 0; grid-template-columns: 1.55rem minmax(0, 1fr); gap: .7rem; border: 1px solid #e1e8f1; border-radius: .8rem; background: #f8fafc; padding: .8rem; }
+.planning-signal-list li[data-tone="positive"] { border-color: #cce9e0; background: #f0faf7; }
+.planning-signal-list li[data-tone="attention"] { border-color: #f0dfbd; background: #fffaf0; }
+.signal-rank { display: grid; width: 1.55rem; height: 1.55rem; place-items: center; border-radius: 50%; background: #e4edf9; color: #2865b8; font-size: .7rem; font-weight: 800; }
+.planning-signal-list li[data-tone="positive"] .signal-rank { background: #d5f0e7; color: #13705d; }
+.planning-signal-list li[data-tone="attention"] .signal-rank { background: #f7e8c9; color: #80581a; }
+.planning-signal-list strong { color: #26364d; font-size: .82rem; line-height: 1.35; }
+.planning-signal-list p { margin: .25rem 0 0; color: #69778c; font-size: .73rem; line-height: 1.48; }
+.planning-signal-list small { display: block; margin-top: .4rem; color: #53647c; font-size: .7rem; line-height: 1.45; }
+.planning-signal-list small b { color: #334965; }
+.signal-footnote { margin: .85rem 0 0; color: #8692a3; font-size: .68rem; line-height: 1.45; }
 
 .model-note { display: flex; align-items: flex-start; gap: .6rem; margin: 1rem 0 0; border-radius: .75rem; background: #eaf0f8; padding: .8rem 1rem; color: #607087; font-size: .78rem; line-height: 1.55; }
 .model-note svg { width: 1rem; flex: 0 0 auto; color: #2f7df4; margin-top: .1rem; }

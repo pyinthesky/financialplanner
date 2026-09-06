@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DEFAULT_PLAN, debtPayoffSchedule, estimateSuccessRate, normalizePlan, projectPlan, propertyTaxAnnual, totalPortfolio, type Account, type Debt, type IncomeStream, type PlannerData, type RecurringCost } from "@/lib/planner";
 import { calculateFederalIncomeTax, type FilingStatus } from "@/lib/federal-tax";
 import { buildPrintPortfolioChart, PRINT_PORTFOLIO_SERIES } from "@/lib/print-chart";
+import { buildPlanningSignals } from "@/lib/planning-signals";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
 type SectionId = "overview" | "household" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
@@ -309,6 +310,10 @@ export default function HomePage() {
   const finalRow = projection.at(-1)!;
   const shortfall = projection.find((row) => row.age >= fullRetirementAge && row.fundedRatio < 0.995);
   const payoffMonths = debtSchedule.at(-1)?.month ?? 0;
+  const planningSignalSummary = buildPlanningSignals(plan, {
+    shortfallAge: shortfall?.age,
+    payoffMonths,
+  });
   const totalDebt = plan.debts.reduce((sum, debt) => sum + debt.balance, 0);
 
   const setHousehold = (key: keyof PlannerData["household"], value: string | number | boolean) =>
@@ -417,9 +422,9 @@ export default function HomePage() {
       <SectionHeading title="Plan Summary" description="A living projection from today through the end of your planning horizon." />
       <div className="metric-grid">
         <div className="metric-card primary-metric">
-          <span>Plan range</span>
-          <strong>{successRate}%</strong>
-          <p>240 simulated market paths</p>
+          <span>{planningSignalSummary.ready ? "Plan range" : "Plan readiness"}</span>
+          <strong>{planningSignalSummary.ready ? `${successRate}%` : "Needs inputs"}</strong>
+          <p>{planningSignalSummary.ready ? "240 simulated market paths" : "Complete the priorities below"}</p>
         </div>
         <div className="metric-card">
           <span>Portfolio today</span>
@@ -485,28 +490,19 @@ export default function HomePage() {
           </ChartContainer>
         </Panel>
         <Panel title="What the Plan Says" eyebrow="PLANNING SIGNALS" className="insight-panel">
-          <div className={`plan-signal ${shortfall ? "signal-warn" : "signal-good"}`}>
-            <span>{shortfall ? "Funding gap" : "Fully funded"}</span>
-            <strong>{shortfall ? `Age ${shortfall.age}` : `Through age ${plan.household.planToAge}`}</strong>
-            <p>{shortfall ? "Review spending, retirement timing, or contributions." : "The baseline path covers all modeled spending."}</p>
-          </div>
-          <ul className="insight-list">
-            <li>
-              <ChevronRight />
-              Debt is projected to be paid off in <strong>{payoffMonths} months</strong>.
-            </li>
-            <li>
-              <ChevronRight />
-              Guaranteed income includes <strong>{plan.income.filter((stream) => stream.kind === "pension").length} pension plan(s)</strong> and {plan.income.filter((stream) => stream.kind === "socialSecurity").length} Social Security estimate(s).
-            </li>
-            <li>
-              <ChevronRight />
-              The model reserves <strong>{currency.format(plan.healthcare.longTermCareAnnual * plan.healthcare.longTermCareYears)}</strong> before inflation for long-term care.
-            </li>
-          </ul>
-          <Button variant="outline" className="w-full" onClick={() => setActiveSection("household")}>
-            Review assumptions <ChevronRight />
-          </Button>
+          <ol className="planning-signal-list">
+            {planningSignalSummary.signals.map((signal, index) => (
+              <li key={signal.title} data-tone={signal.tone}>
+                <span className="signal-rank">{index + 1}</span>
+                <div>
+                  <strong>{signal.title}</strong>
+                  <p>{signal.reason}</p>
+                  <small><b>Next:</b> {signal.nextAction}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className="signal-footnote">Signals use only the values currently in this plan and are estimates, not guarantees.</p>
         </Panel>
       </div>
       <Panel title="Retirement Cash Flow" eyebrow="INCOME + WITHDRAWALS">

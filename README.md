@@ -82,8 +82,8 @@ The work is organized into bounded batches so each batch can ship independently.
 - [x] Restore the portfolio-projection chart in printed/PDF output with deterministic SVG geometry and regression checks that verify finite, non-degenerate stacked areas rather than merely chart markup
 - [ ] Repeat the mobile audit on real narrow Safari/Chrome viewports: eliminate page-level horizontal scrolling, reduce excessive padding, stack remaining hostile controls, restore missing inter-card gaps, and test long labels and keyboard-open states
 - [x] Prevent descenders and focus rings from clipping in native selects; constrain long option labels and affixed controls so they cannot widen narrow pages
-- [ ] Remove redundant in-content navigation actions such as **Review Assumptions** when the primary menu already provides the destination
-- [ ] Reshape rough Planning Signals cards into a calm, prioritized summary with a plain-language reason and next useful action for each signal
+- [x] Remove redundant in-content navigation actions such as **Review Assumptions** when the primary menu already provides the destination
+- [x] Reshape rough Planning Signals cards into a calm, prioritized summary with a plain-language reason and next useful action for each signal; never label an untouched plan as funded
 
 ### Batch 2 — Federal tax engine (in progress)
 

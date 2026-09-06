@@ -5,6 +5,7 @@ import { calculateFederalIncomeTax } from "../lib/federal-tax.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
 import { buildPrintPortfolioChart } from "../lib/print-chart.ts";
+import { buildPlanningSignals } from "../lib/planning-signals.ts";
 import {
   formatNumericInputValue,
   reconcileNumericInputValue,
@@ -291,4 +292,33 @@ test("numeric input text preserves a user-entered zero but follows model resets"
   assert.equal(reconcileNumericInputValue("0", 0), "0");
   assert.equal(reconcileNumericInputValue("1250", 0), "");
   assert.equal(reconcileNumericInputValue("1250.00", 1250), "1250.00");
+});
+
+test("an untouched plan asks for inputs instead of claiming it is fully funded", () => {
+  const summary = buildPlanningSignals(DEFAULT_PLAN, { payoffMonths: 0 });
+
+  assert.equal(summary.ready, false);
+  assert.deepEqual(summary.signals.map((signal) => signal.title), [
+    "Complete the planning timeline",
+    "Add a retirement spending baseline",
+    "Add the accounts funding the plan",
+  ]);
+  assert.ok(summary.signals.every((signal) => signal.tone === "attention"));
+});
+
+test("a populated baseline prioritizes funding before supporting checks", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 50;
+  plan.household.retirementAge = 65;
+  plan.household.planToAge = 95;
+  plan.assumptions.annualSpending = 70_000;
+  plan.accounts = [{ id: "ira", name: "IRA", kind: "traditional", owner: "you", balance: 500_000, annualContribution: 10_000 }];
+
+  const summary = buildPlanningSignals(plan, { shortfallAge: 82, payoffMonths: 0 });
+
+  assert.equal(summary.ready, true);
+  assert.equal(summary.signals[0].title, "Modeled funding gap begins at age 82");
+  assert.equal(summary.signals[0].tone, "attention");
+  assert.match(summary.signals[1].title, /No debt payoff/);
+  assert.match(summary.signals[2].title, /Guaranteed income has not been added/);
 });
