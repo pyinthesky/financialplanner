@@ -93,6 +93,24 @@ test("affixed table inputs stay bounded on narrow screens", () => {
   assert.match(css, /\.mobile-card-table \.input-affix \{ width: 100%; min-width: 0; \}/);
 });
 
+test("native selects remain bounded and leave room for text descenders", async () => {
+  const nativeSelect = await readFile(new URL("../components/ui/native-select.tsx", import.meta.url), "utf8");
+
+  assert.match(nativeSelect, /relative w-full min-w-0 max-w-full/);
+  assert.match(nativeSelect, /min-h-11 w-full min-w-0 max-w-full/);
+  assert.match(nativeSelect, /py-2\.5[^\n]*leading-5/);
+  assert.doesNotMatch(nativeSelect, /\bh-9\b/);
+  assert.doesNotMatch(nativeSelect, /\bw-fit\b/);
+});
+
+test("narrow layouts contain long controls without hiding card content", () => {
+  assert.match(css, /html, body \{[\s\S]*overflow-x: clip;/);
+  assert.match(css, /\.app-shell \{ min-width: 0; max-width: 100%; overflow-x: clip;/);
+  assert.match(css, /\.page-flow > \*,[\s\S]*\.threat-grid\) > \* \{ min-width: 0; \}/);
+  assert.match(css, /@media \(max-width: 767px\)[\s\S]*\.mobile-card-table td \{ white-space: normal; \}/);
+  assert.match(css, /\.mobile-card-table \[data-slot="native-select-wrapper"\] \{ width: 100%; min-width: 0; max-width: 100%; \}/);
+});
+
 test("encrypted vault saving has explicit, accessible visual states", () => {
   assert.match(page, /type SaveStatus = "unsaved" \| "locked" \| "saving" \| "saved" \| "failed"/);
   assert.match(page, /data-save-state=\{saveStatus\} role="status" aria-live="polite"/);
@@ -115,8 +133,10 @@ test("page-level cards and sections use one consistent vertical rhythm", () => {
 });
 
 test("mobile page rhythm stays compact while preserving card separation", () => {
-  assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.page-flow \{ gap: \.8rem; \}/);
-  assert.match(css, /@media \(max-width: 760px\)[\s\S]*\.page-flow > \.section-heading \{ margin-bottom: \.35rem; \}/);
+  assert.match(css, /@media \(max-width: 767px\)[\s\S]*\.page-flow \{ gap: \.8rem; \}/);
+  assert.match(css, /@media \(max-width: 767px\)[\s\S]*\.page-flow > \.section-heading \{ margin-bottom: \.35rem; \}/);
+  assert.match(css, /@media \(max-width: 460px\)[\s\S]*\.page-flow \{ gap: \.7rem; \}/);
+  assert.match(css, /@media \(max-width: 460px\)[\s\S]*\.planner-panel \{ padding: \.85rem; \}/);
 });
 
 test("primary mobile actions meet a 44px touch target", () => {
