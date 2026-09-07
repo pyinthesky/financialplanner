@@ -1,4 +1,5 @@
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
+import { budgetTotals, EMPTY_BUDGET, normalizeBudget, type BudgetData } from "./budget.ts";
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
 import { calculateQcdElection } from "./qcd.ts";
@@ -58,7 +59,8 @@ export interface RecurringCost {
 }
 
 export interface PlannerData {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
+  budget: BudgetData;
   household: {
     maritalStatus: "single" | "married";
     filingStatus: FilingStatus;
@@ -224,7 +226,8 @@ export interface DebtMonth {
 }
 
 export const DEFAULT_PLAN: PlannerData = {
-  schemaVersion: 1,
+  schemaVersion: 2,
+  budget: structuredClone(EMPTY_BUDGET),
   household: {
     maritalStatus: "single",
     filingStatus: "single",
@@ -556,7 +559,9 @@ export function projectPlan(
     }
 
     const baseSpending =
-      data.assumptions.annualSpending * Math.pow(1 + inflation, index);
+      (data.budget?.retirementSpendingSource === "worksheet"
+        ? budgetTotals(data.budget, true).spending
+        : data.assumptions.annualSpending) * Math.pow(1 + inflation, index);
     const recurring = data.recurringCosts.reduce((sum, cost) => {
       if (age < cost.startAge || age > cost.endAge) return sum;
       return (
@@ -1175,7 +1180,7 @@ export function normalizePlan(input: unknown): PlannerData {
   if (!input || typeof input !== "object")
     throw new Error("This file does not contain a retirement plan.");
   const candidate = input as Partial<PlannerData>;
-  if (candidate.schemaVersion !== 1)
+  if (candidate.schemaVersion !== 1 && candidate.schemaVersion !== 2)
     throw new Error("This plan uses an unsupported file version.");
   if (
     !candidate.household ||
@@ -1190,6 +1195,8 @@ export function normalizePlan(input: unknown): PlannerData {
     (maritalStatus === "married" ? "marriedJoint" : "single");
   return {
     ...candidate,
+    schemaVersion: 2,
+    budget: normalizeBudget(candidate.budget),
     accounts: candidate.accounts.map((account) => ({
       ...account,
       qcdEligibleIra:

@@ -1,4 +1,5 @@
 import type { PlannerData } from "./planner.ts";
+import { budgetTotals } from "./budget.ts";
 
 export type PlanningSignalTone = "positive" | "attention" | "informational";
 
@@ -33,11 +34,13 @@ export function buildPlanningSignals(
     });
   }
 
-  if (data.assumptions.annualSpending <= 0) {
+  const worksheet = data.budget?.retirementSpendingSource === 'worksheet';
+  const budget = data.budget ? budgetTotals(data.budget, true) : null;
+  if (worksheet ? (!data.budget.reviewed || budget!.missing > 0 || data.budget.lines.length === 0) : data.assumptions.annualSpending <= 0) {
     missing.push({
       title: "Add a retirement spending baseline",
       reason: "The plan cannot judge whether assets and income cover retirement until annual spending is included.",
-      nextAction: "Enter annual retirement spending under Household.",
+      nextAction: "Complete and review the Retirement Budget, or enter an aggregate baseline under Household.",
       tone: "attention",
     });
   }

@@ -557,3 +557,37 @@ button, input, select { font: inherit; }
   .print-report { display: block; width: auto; background: white; color: #17243b; padding: 0; font-family: Inter, ui-sans-serif, sans-serif; }
   .report-chart { break-inside: avoid; }
 }
+
+.budget-flow { display: grid; gap: 1.25rem; min-width: 0; }
+.budget-flow .section-heading { display: block; }
+.budget-flow .panel { border: 1px solid #dbe4ee; border-radius: 18px; background: #fff; padding: 24px; min-width: 0; }
+.budget-flow h2 { font-size: 1.2rem; font-weight: 650; color: #17243b; }
+.budget-flow p { color: #63718a; line-height: 1.6; overflow-wrap: anywhere; }
+.budget-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.budget-metrics > div { min-width: 0; background: #f0f5fb; padding: 18px; border-radius: 12px; }
+.budget-metrics span, .budget-metrics dt { color: #63718a; font-size: .8rem; display: block; }
+.budget-metrics strong, .budget-metrics dd { display: block; font-size: 1.55rem; font-weight: 650; margin-top: .5rem; overflow-wrap: anywhere; }
+.budget-card { border: 1px solid #dbe4ee; border-radius: 12px; padding: 18px; display: grid; gap: 1rem; min-width: 0; }
+.budget-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: end; }
+.budget-field { min-width: 0; display: grid; gap: .4rem; font-size: .86rem; }
+.budget-field input, .budget-field select { min-width: 0; width: 100%; max-width: 100%; font-size: 16px; }
+.budget-field select { min-height: 44px; padding: 8px; line-height: 1.5; border: 1px solid #b9c8da; border-radius: 8px; background: #f5f8fc; }
+.budget-field input[type="date"] { appearance: none; min-height: 44px; }
+.budget-check { display: flex; align-items: center; gap: .7rem; min-height: 44px; font-size: .9rem; }
+.budget-check input { width: 20px; height: 20px; flex-shrink: 0; }
+.budget-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
+.budget-flow button { min-height: 44px; max-width: 100%; white-space: normal; }
+.budget-flow summary { cursor: pointer; padding: 10px 0; }
+.budget-calendar-row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .6rem; border-bottom: 1px solid #dbe4ee; padding: .7rem 0; overflow-wrap: anywhere; }
+.report-budget { margin: 20px 0; }
+.report-budget table { width: 100%; border-collapse: collapse; font-size: 10px; }
+.report-budget th, .report-budget td { text-align: left; padding: 6px; border-bottom: 1px solid #dbe4ee; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .budget-metrics, .budget-fields { grid-template-columns: minmax(0, 1fr); }
+  .budget-flow .panel, .budget-card { padding: 14px; }
+  .budget-flow { gap: 1rem; }
+}
+@media print {
+  .report-budget tr { break-inside: avoid; }
+  .report-budget thead { display: table-header-group; }
+}

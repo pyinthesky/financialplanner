@@ -27,6 +27,19 @@ jobs:
       - run: npm test
       - run: npx tsc --noEmit
       - run: npm run build:pages
+      - name: Install Browser Test Runtime
+        run: |
+          npm install --prefix /tmp/planner-browser --no-package-lock --no-save playwright@1.62.1
+          /tmp/planner-browser/node_modules/.bin/playwright install --with-deps chromium webkit
+      - name: Check Mobile Budget Journey and PDF
+        run: node scripts/browser-check.cjs
+        env:
+          PLAYWRIGHT_MODULE_PATH: /tmp/planner-browser/node_modules/playwright
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: synthetic-browser-evidence
+          path: browser-evidence
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

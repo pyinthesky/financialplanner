@@ -2,6 +2,14 @@
 
 Updated: September 7, 2026. This is the starting point for the next implementation turn.
 
+## Latest implementation
+
+- Funding release `ea22a0dab4a19f6c9b05f9cb6d35f722969be52c`: deployed successfully, Pages `34079855430`.
+- Budget entry foundation implemented: `lib/budget.ts`, `components/budget-editor.tsx`, `tests/budget.test.mjs`. Plan schema 2 migrates schema 1 to a legacy spending selection; blank and explicit zero are distinct in new fields.
+- 92 calculation/regression tests, TypeScript, build, and whitespace checks pass locally. Browser binaries could not download in this workspace (network timeout); `scripts/browser-check.cjs` is added to Pages CI with Chromium/WebKit at six widths and a synthetic PDF/export/import journey. Record the actual CI outcome before claiming rendered verification.
+- Retirement worksheet changes feed the existing annual projection only after explicit source selection; PDF reads the same values. Current bills and take-home pay support a worksheet margin and due calendar. The monthly tax/account ledger, working-year payroll bridge, staggered retirement, and timed-cost projection are NOT finished. UI states these limits.
+- Next independent user outcome: corrected debt ledger/cascade (5C.2/5C.3), followed by completing 5A.2/5B integration before scenario ranking. Housing escrow and conversion-access gates remain required.
+
 - Current reviewed application release: `6328a5fe12fb5a160c75d7be23e93fecc583462d`.
 - Current work: 5A.1 funding repair implemented and verified with 84 tests, TypeScript, and production build. Cash draws count as funding, surplus is retained, tax-paying draws are reassessed, unpaid taxes are exposed, and gross/taxable ordinary income are separate. Pages now gates deployment on tests and type checking.
 - Canonical product/development contract: [Batch 5 plan](batch-5-plan.md).

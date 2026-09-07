@@ -5,6 +5,8 @@ import { Activity, BriefcaseBusiness, Building2, Calculator, ChevronRight, Circl
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
+import { BudgetEditor } from "@/components/budget-editor";
+import { annualize, budgetTotals, retirementAmount } from "@/lib/budget";
 import { NumericInput } from "@/components/numeric-input";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,7 +27,7 @@ import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
-type SectionId = "overview" | "household" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
+type SectionId = "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
 type VaultStatus = "off" | "locked" | "unlocked";
 type SaveStatus = "unsaved" | "locked" | "saving" | "saved" | "failed";
 
@@ -33,6 +35,8 @@ const VAULT_KEY = "open-retirement-planner-vault-v1";
 const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "data", label: "Data & Privacy", icon: ShieldCheck },
   { id: "household", label: "Household", icon: Home },
+  { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
+  { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
   { id: "portfolio", label: "Accounts", icon: BriefcaseBusiness },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
   { id: "spending", label: "Spending & Housing", icon: ReceiptText },
@@ -210,6 +214,12 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
           <strong>{compactCurrency.format(last.portfolio)}</strong>
         </div>
       </div>
+      {data.budget.lines.length > 0 && <section className="report-budget">
+        <h2>Current & Retirement Everyday Budget</h2>
+        <p>Monthly averages in today's dollars. Housing, debt and entered healthcare remain separate. Projection uses {data.budget.retirementSpendingSource === 'worksheet' ? 'the linked worksheet' : 'the legacy aggregate baseline'}.</p>
+        <table><thead><tr><th>Cost</th><th>Current / Month</th><th>Retirement / Month</th><th>Choice</th></tr></thead><tbody>{data.budget.lines.map(line => <tr key={line.id}><td>{line.name || line.category}</td><td>{line.retirement.rule === 'retirementOnly' ? currency.format(0) : line.amount === null ? 'Not Entered' : currency.format(annualize(line.amount, line.frequency)! / 12)}</td><td>{retirementAmount(line) === null ? 'Not Entered' : currency.format(annualize(retirementAmount(line), line.frequency)! / 12)}</td><td>{line.retirement.rule}</td></tr>)}</tbody></table>
+        <p>Everyday retirement total: {currency.format(budgetTotals(data.budget, true).spending)} / year. Budget timing and net pay are not yet a complete working-year tax projection.</p>
+      </section>}
       <section className="report-chart">
         <h2>Portfolio Projection</h2>
         <svg className="report-portfolio-chart" viewBox={`0 0 ${printChart.width} ${printChart.height}`} role="img" aria-labelledby="print-portfolio-chart-title">
@@ -252,7 +262,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
             </div>
             <div>
               <dt>Annual retirement spending</dt>
-              <dd>{currency.format(data.assumptions.annualSpending)}</dd>
+              <dd>{currency.format(data.budget.retirementSpendingSource === 'worksheet' ? budgetTotals(data.budget, true).spending : data.assumptions.annualSpending)}</dd>
             </div>
             <div>
               <dt>Inflation / return</dt>
@@ -2234,7 +2244,9 @@ export default function HomePage() {
     </>
   );
 
-  const content = activeSection === "overview" ? renderOverview() : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+  const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
+    ? <BudgetEditor budget={plan.budget} onChange={budget => setPlan(current => ({ ...current, budget }))} retirement={activeSection === "retirementBudget"} married={plan.household.maritalStatus === "married"} legacyAnnual={plan.assumptions.annualSpending} linkedAnnual={{ housing: propertyTaxAnnual(plan) + plan.housing.annualInsurance, debt: debtPayoffSchedule(plan).slice(1, 13).reduce((sum, m) => sum + m.principalPaid + m.interestPaid, 0), health: plan.household.currentAge < 65 ? plan.healthcare.preMedicareAnnual : plan.healthcare.medicareAnnual }} />
+    : activeSection === "overview" ? renderOverview() : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>

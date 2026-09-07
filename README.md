@@ -138,6 +138,9 @@ See [the implementation plan and acceptance examples](docs/batch-5-plan.md). All
 
 - [ ] **5A — Reliable foundation:** cash and tax-funding reconciliation, monthly/annual ledger, conversion constraints, independent fixtures, and CI verification
   - [x] **5A.1 annual funding repair:** cash withdrawals, retained surplus, iterative tax funding and unpaid-tax results; gross/taxable labels; full-horizon conversion tax comparison; tests and type checks in Pages CI. Verified with 84 tests and production build. Monthly timing and conversion access remain open.
+  - Published as `ea22a0d`; Pages run `34079855430` succeeded.
+  - [x] **5B entry foundation:** blank Current Budget and linked Retirement Budget, six payment frequencies, due-date calendar, explicit retirement overrides, linked housing/debt/health amounts, schema-2 migration, worksheet-to-retirement-projection selection, and PDF budget table. Verified locally with 92 tests, type checks, and build. Browser/PDF checks are now a required CI gate.
+  - [ ] **5A.2 / remaining 5B integration:** monthly account/tax ledger, earnings-to-savings reconciliation, spouse/month transitions, timed-cost integration, and full current-budget coverage. Net pay currently belongs to the current worksheet, not a fabricated gross-income tax estimate. Do not mark 5B complete.
 - [ ] **5B — Linked budgets:** current earnings and monthly bills, retirement changes by category and owner timeline, quick/detail entry, shared inputs, and a reconciled summary
 - [ ] **5C — Housing and debt:** P&I/escrow reconciliation, mill rate or annual tax, correct Snowball/Avalanche rollover and Custom extra, per-debt ledgers and a visible minimum-payment cascade
 - [ ] **5D — Optional reference choices:** sourced historical/national/cohort/state values where appropriate, local ZIP assistance when defensible, provenance, undo, and overrides; zero prefilled financial values
