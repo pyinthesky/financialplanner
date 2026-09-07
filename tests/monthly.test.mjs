@@ -113,3 +113,10 @@ test('benefit withholding changes deposit timing but is credited once against an
  assert.equal(normalizePlan(JSON.parse(JSON.stringify(p))).income[0].withholdingPercent,10);
  p.income[0].withholdingPercent=101;assert.throws(()=>normalizePlan(p),/withholding/);assert.equal(projectMonthly(p).months.length,0);
 });
+
+test('dependable benefit coverage uses the deposited amount after withholding',()=>{
+ const p=plan();p.income=[{id:'pension',name:'Synthetic Pension',owner:'you',kind:'pension',startAge:60,annualAmount:1200,cola:0,survivorPercent:0,withholdingPercent:10}];
+ p.laboratory.settings.cashCoverageMonths=6;p.laboratory.settings.dependableIncomeSource='benefits';
+ close(projectMonthly(p).months[0].cashTarget,60); // Six bills of 100 less six deposits of 90.
+ p.household.maritalStatus='married';p.household.partnerAge=0;assert.equal(projectMonthly(p).months.length,0);
+});

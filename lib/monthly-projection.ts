@@ -65,6 +65,8 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   if ((overrides.spendingChangePercent??0)<-100 || (overrides.inflation??data.assumptions.inflation)<=-100) issues.add('Spending cannot fall below zero and inflation must exceed −100%.');
   if (!start || start < 2026 || start > 2100 || !Number.isInteger(start)) issues.add('Enter the opening-balance year (January 1, 2026 or later).');
   if (data.household.currentAge <= 0 || horizon < data.household.currentAge || horizon > 120) issues.add('Complete current age and a planning horizon no later than age 120.');
+  if(data.household.maritalStatus==='married'&&(!Number.isInteger(data.household.partnerAge)||data.household.partnerAge<=0))issues.add('Enter your partner’s current age before comparing a joint household projection.');
+  if(data.income.some(s=>s.annualAmount>0&&s.startAge<=0))issues.add('Enter the start age for each funded benefit stream; a blank start is not assumed to mean today.');
   if (budget.retirementSpendingSource !== 'worksheet' || !budget.reviewed) issues.add('Select and review the linked Retirement Budget before using monthly projections.');
   if (data.housing.statement?.enabled && !activeMortgageStatement(data)) issues.add('Reconcile the active mortgage statement.');
   if (data.housing.payoffMortgageAtRetirement) issues.add('The legacy mortgage-payoff flag is unsupported in the monthly engine. Turn it off; a funded payoff event needs a separate comparison.');
@@ -300,7 +302,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
         const futureTimed=sum(data.recurringCosts.filter(c=>futureAge>=c.startAge&&futureAge<=c.endAge).map(c=>c.annualAmount*(c.inflationLinked?scale(fy):1)/12));
         const futureDebt=debt[futureIndex+1];
         const futureHousing=movedYear!==null&&homeMove?(homeMove.newMonthlyHousing!+(homeMove.newAnnualPropertyTax!+homeMove.newAnnualInsurance!)/12)*Math.pow(1+Math.max(-0.99,infl),startYear+fy-movedYear):(propertyTaxAnnual(data)+homeInsuranceAnnual(data))*scale(fy)/12+(statement&&futureDebt?.payments.some(p=>p.id===statement.debtId&&p.openingBalance>0)?nonnegative(statement.mortgageInsurance)+nonnegative(statement.otherEscrow):0);
-        const dependable=settings.dependableIncomeSource==='benefits'?sum(data.income.filter(s=>(married||s.owner==='you')&&getAge(s.owner,fy)>=s.startAge).map(s=>s.annualAmount*Math.pow(1+s.cola/100,getAge(s.owner,fy)-s.startAge)/12)):nonnegative(settings.dependableIncomeMonthly);
+        const dependable=settings.dependableIncomeSource==='benefits'?sum(data.income.filter(s=>(married||s.owner==='you')&&getAge(s.owner,fy)>=s.startAge).map(s=>s.annualAmount*Math.pow(1+s.cola/100,getAge(s.owner,fy)-s.startAge)*(1-(s.withholdingPercent??0)/100)/12)):nonnegative(settings.dependableIncomeMonthly);
         const futureEvents=sum(events.filter(e=>e.kind==='expense'&&(e.month===future.month||e.throughMonth&&future.month>e.month&&future.month<=e.throughMonth)).map(e=>e.amount!));
         const gap=Math.max(0,everyday+futureHousing+futureHealth+futureTimed+futureEvents+(futureDebt?.principalPaid??0)+(futureDebt?.interestPaid??0)-dependable);
         cashTarget+=gap*Math.min(1,coverageMonths-next+1);
