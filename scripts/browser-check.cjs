@@ -166,6 +166,14 @@ const server = http.createServer((req, res) => {
           await navigate('Plan Summary');
           await page.getByRole('heading',{name:'Monthly Planning Summary',exact:true}).waitFor();
           await page.getByRole('heading',{name:'Where the Money Goes',exact:true}).waitFor();
+          const assetChart=page.locator('.monthly-results .recharts-wrapper').first();
+          await assetChart.scrollIntoViewIfNeeded();
+          // Capture the finished user-visible animation, not its empty first frame.
+          await page.waitForTimeout(1800);
+          assert.ok(await assetChart.locator('.recharts-area-area').evaluateAll(paths=>paths.some(p=>p.getBBox().width>0&&p.getBBox().height>0)), 'Funded portfolio draws a visible area');
+          await page.locator('.monthly-results .recharts-wrapper').nth(1).scrollIntoViewIfNeeded();
+          await page.waitForTimeout(1800);
+          await page.evaluate(()=>window.scrollTo(0,0));
           await noOverflow('monthly summary');
           await page.screenshot({path:path.join(out,`${name}-${width}-monthly-summary.png`),fullPage:true});
         }
