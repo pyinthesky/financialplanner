@@ -120,3 +120,8 @@ test('dependable benefit coverage uses the deposited amount after withholding',(
  close(projectMonthly(p).months[0].cashTarget,60); // Six bills of 100 less six deposits of 90.
  p.household.maritalStatus='married';p.household.partnerAge=0;assert.equal(projectMonthly(p).months.length,0);
 });
+
+test('jointly labeled Roth assets do not inherit one spouses qualified-distribution status',()=>{
+ const p=plan();p.accounts=[{id:'roth',name:'Synthetic Roth',kind:'roth',owner:'joint',balance:10000,annualContribution:0,rothQualifiedFromYear:2026}];
+ const result=projectMonthly(p);assert.equal(result.months.length,0);assert.ok(result.issues.some(i=>i.includes('individual owner')));
+});

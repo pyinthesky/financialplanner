@@ -81,7 +81,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   if (new Set(accountIds).size !== accountIds.length || accountIds.length === 0) issues.add('Add uniquely identified opening account balances.');
   for (const a of data.accounts) {
     if (!Number.isFinite(a.balance) || a.balance < 0) issues.add('Account balances must be finite and nonnegative.');
-    if (a.kind === 'traditional' && a.owner === 'joint' && a.balance > 0) issues.add('Assign each tax-deferred account to its individual owner.');
+    if (['traditional','roth'].includes(a.kind) && a.owner === 'joint' && a.balance > 0) issues.add('Assign each tax-deferred or Roth account to its individual owner before applying distribution rules.');
     if (a.kind === 'traditional' && a.balance > 0 && !(a.owner === 'partner' ? data.household.partnerBirthYear : data.household.birthYear)) issues.add('Birth years are required for owners of tax-deferred accounts so RMDs are not omitted.');
   }
   if (issues.size) return empty();
