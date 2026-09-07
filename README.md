@@ -14,7 +14,8 @@ The live site is published at <https://pyinthesky.github.io/financialplanner/>. 
 - Healthcare, Medicare-years, healthcare inflation, and a long-term-care stress reserve
 - Home value, assessment percentage, mill rate, home insurance, and a mortgage-payoff scenario
 - Debt avalanche and debt snowball schedules with payment rollover
-- Transparent withdrawal order with owner-specific RMDs, 2026 progressive federal brackets, and editable state/capital-gains estimates
+- Transparent withdrawal order with owner-specific RMDs/QCDs, early-distribution checks, 2026 progressive federal and long-term-capital-gains tax, NIIT, and an editable state estimate
+- Owner-specific Roth conversion ladder with taxable Social Security, LTCG/NIIT, and clearly labeled 2026-rule ACA/IRMAA sensitivities
 - Deterministic projections and a seeded 240-path Monte Carlo planning range
 - Interactive Recharts visualizations
 - Print-optimized PDF report through the browser's **Save as PDF** flow
@@ -52,7 +53,7 @@ The workflow in `.github/workflows/pages.yml` builds `dist-pages` and deploys it
 
 ## Calculation boundaries
 
-This is an educational planning estimate, not tax, investment, legal, insurance, or medical advice. Values are nominal. Federal ordinary-income tax uses the published 2026 brackets and basic standard deductions for all four filing statuses, with planning-only inflation indexing in later years. It is not yet a complete tax-return engine; state and capital-gains inputs remain simplified estimates. Social Security and pension benefits are entered from official statements rather than inferred from earnings histories.
+This is an educational planning estimate, not tax, investment, legal, insurance, or medical advice. Values are nominal. Federal ordinary-income and long-term-capital-gains tax use published 2026 thresholds for all four filing statuses, with planning-only inflation indexing of indexed amounts in later years. It is not a complete tax-return engine: state tax remains a user-entered effective estimate, and the federal worksheets explicitly identify excluded forms, elections, special gain categories, credits, deductions, and eligibility rules. Social Security and pension benefits are entered from official statements rather than inferred from earnings histories.
 
 ## Delivery roadmap
 
@@ -89,7 +90,7 @@ The highest-value path is to finish the broadly applicable federal-tax correctne
 - [x] Remove redundant in-content navigation actions such as **Review Assumptions** when the primary menu already provides the destination
 - [x] Reshape rough Planning Signals cards into a calm, prioritized summary with a plain-language reason and next useful action for each signal; never label an untouched plan as funded
 
-### Batch 2 — Federal tax engine (in progress)
+### Batch 2 — Federal tax engine (complete)
 
 - [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
 - [x] Social Security taxation worksheet using provisional income, filing-status thresholds, tax-exempt interest, and the married-filing-separately lived-apart distinction
@@ -99,15 +100,15 @@ The highest-value path is to finish the broadly applicable federal-tax correctne
   - [x] Effective-dated QCD source, age, annual-limit, and RMD-capacity check, without guessing through age-70 distribution dates or ongoing SEP/SIMPLE status
   - [x] Apply owner-specific intended QCDs and entered post-70½ deductible-contribution offsets to IRA balances, RMD satisfaction, taxable income, Social Security provisional income, and distribution charts without treating gifts as spendable cash; hold the known 2026 ceiling flat in later planning years
   - [x] Owner-specific pre-59½ traditional-account distribution check with a 10% additional-tax estimate, user-confirmed annual exception amounts, age-59 date review, and explicit unassigned-account/Roth review states; exception eligibility is never inferred
-- [ ] Roth conversion ladder and bracket-filling comparison
+- [x] Roth conversion ladder and bracket-filling comparison
   - [x] Current-year 2026 bracket-fill comparison showing gross-income capacity, incremental federal tax, resulting marginal rate, and explicit IRA-basis and interaction limitations
-  - [ ] Apply owner-specific conversions to account balances and a year-by-year ladder after Social Security, Medicare IRMAA, ACA PTC, and capital-gains interactions are available
-- [ ] Medicare IRMAA and ACA premium-tax-credit interactions
+  - [x] Apply owner-specific conversions to account balances and a year-by-year ladder that recomputes taxable Social Security, ordinary tax, LTCG/NIIT, and the entered state estimate, with separately labeled 2026-rule ACA PTC and IRMAA sensitivities rather than forecasts
+- [x] Medicare IRMAA and ACA premium-tax-credit interactions
   - [x] Exact 2026 Medicare Part B and Part D IRMAA worksheet using 2024 Medicare MAGI, filing-category boundaries, separate enrollee counts, annual household costs, and next-tier distance
-  - [ ] Integrate IRMAA sensitivity into future-year income and Roth-conversion comparisons without presenting unknown future thresholds as law
+  - [x] Integrate published 2026 IRMAA tiers into the conversion ladder as a clearly labeled current-law sensitivity; actual future thresholds, premiums, and two-year lookback results are not projected as law
   - [x] Add an effective-dated 2026 ACA premium-tax-credit worksheet using 2025 poverty guidelines, household MAGI, tax-family size, location, enrolled and benchmark premiums, standard 100%–400% FPL eligibility limits, and the planned taxable Roth conversion's estimated subsidy impact; do not infer non-income eligibility
-- [ ] Replace the manually entered flat capital-gains rate with an effective-dated federal long-term-capital-gains worksheet driven by filing status, ordinary income, realized gains, and applicable surtaxes; retain an explicit override for unmodeled cases
-- [ ] Replace ambiguous labels such as **VA effective rate** with the full jurisdiction and **estimated effective state income-tax rate**, including a short explanation of what income the estimate applies to
+- [x] Replace the manually entered flat capital-gains rate with an effective-dated 2026 federal long-term-capital-gains worksheet that stacks realized gains above ordinary taxable income, applies unused standard deduction and the 0% / 15% / 20% bands, separately calculates the 3.8% NIIT, feeds projections, and retains an explicit override for unmodeled regular-gain cases
+- [x] Replace ambiguous labels such as **VA effective rate** with **estimated effective state income-tax rate** and explain that the input applies only to modeled ordinary taxable income, not jurisdiction-specific deductions, credits, exclusions, capital gains, or conversion rules
 
 ### Batch 3 — Social Security and pension decisions
 
@@ -179,9 +180,10 @@ The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDol
 - Required minimum distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf), published January 21, 2026, and the [2024 final Treasury regulations](https://www.irs.gov/irb/2024-33_IRB). The projection uses each named owner's prior year-end non-inherited tax-deferred balance and Table III. It does not guess the reserved 1959 applicable-age rule or silently apply IRA rules to joint, inherited, current-employer, 5%-owner, or younger-spouse cases.
 - Qualified charitable distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf) for source, direct-transfer, age, contribution-offset, and RMD rules, plus [IRS Notice 2025-67](https://www.irs.gov/pub/irs-drop/n-25-67.pdf), effective January 1, 2026, for the $111,000 annual exclusion limit. Owner elections reduce eligible IRA balances, satisfy applicable RMDs, and exclude only the portion remaining after the user-entered contribution offset. The known 2026 ceiling is held flat in later projection years rather than forecasting future indexing.
 - Early retirement-account distributions: the IRS [Retirement Topics exception table](https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-exceptions-to-tax-on-early-distributions), updated December 11, 2025; [Topic 558](https://www.irs.gov/taxtopics/tc558), updated May 27, 2026; and [Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf). The projection estimates the 10% additional tax on taxable, owner-assigned traditional withdrawals before age 59½ after a user-entered confirmed exception amount. It does not infer exception eligibility, resolve date-sensitive age 59, or apply IRA rules to unassigned and Roth withdrawals.
-- Roth conversions: [IRS Publication 590-A (2025)](https://www.irs.gov/pub/irs-pdf/p590a.pdf), published January 15, 2026, for conversion inclusion, IRA basis, and recharacterization rules, combined with [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf) for 2026 brackets. The current-year worksheet accepts only a user-determined taxable conversion amount, compares it with the selected bracket, and does not yet move account balances or claim to model Form 8606, the pro-rata rule, Medicare IRMAA, ACA PTC, state tax, or future years.
-- Medicare IRMAA: the [SSA 2026 Medicare premium tables](https://www.ssa.gov/benefits/medicare/medicare-premiums.html) and [CMS 2026 premium fact sheet](https://www.cms.gov/newsroom/fact-sheets/2026-medicare-parts-b-premiums-deductibles), released November 14, 2025. The worksheet uses the published 2026 Part B and Part D tiers with 2024 MAGI, defined by SSA as adjusted gross income plus tax-exempt interest. It calculates each enrolled person's adjustment and does not extrapolate future thresholds or include Part D plan premiums.
+- Roth conversions: [IRS Publication 590-A (2025)](https://www.irs.gov/pub/irs-pdf/p590a.pdf), published January 15, 2026, for conversion inclusion, IRA basis, and recharacterization rules, combined with [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf) for 2026 brackets. The current-year worksheet accepts a user-determined taxable amount. The ladder transfers only available owner-assigned tax-deferred balances after RMDs, includes the conversion in taxable income and related calculations, and does not determine Form 8606 basis, pro-rata taxability, eligibility, five-year rules, withholding, or future law.
+- Medicare IRMAA: the [SSA 2026 Medicare premium tables](https://www.ssa.gov/benefits/medicare/medicare-premiums.html) and [CMS 2026 premium fact sheet](https://www.cms.gov/newsroom/fact-sheets/2026-medicare-parts-b-premiums-deductibles), released November 14, 2025. The worksheet uses the published 2026 Part B and Part D tiers with 2024 MAGI, defined by SSA as adjusted gross income plus tax-exempt interest. The conversion ladder reuses those tiers only as a current-law income sensitivity; it does not extrapolate future thresholds, premiums, two-year lookback determinations, or Part D plan premiums.
 - ACA premium tax credit: [IRS Revenue Procedure 2025-25](https://www.irs.gov/pub/irs-drop/rp-25-25.pdf), effective for taxable and plan years beginning in 2026, for the applicable-percentage table; [2025 HHS poverty guidelines](https://www.federalregister.gov/documents/2025/01/17/2025-01377/annual-update-of-the-hhs-poverty-guidelines), which CMS continues using for all 2026 Marketplace applications; and [HealthCare.gov's 2026 premium guidance](https://www.healthcare.gov/lower-costs/save-on-monthly-premiums/), confirming the enhanced pandemic-era credits ended December 31, 2025. The worksheet calculates only a potential credit within the standard 100%–400% FPL range and does not infer Marketplace eligibility or fetch location-specific premiums.
+- Long-term capital gains and NIIT: [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf), effective for taxable years beginning in 2026, for the 0% / 15% / 20% taxable-income ceilings, and the IRS [Net Investment Income Tax guidance](https://www.irs.gov/individuals/net-investment-income-tax), updated July 1, 2026, for the 3.8% surtax and fixed filing-status thresholds. The planner applies unused basic standard deduction, stacks net long-term gain above ordinary taxable income, and separately estimates NIIT. It excludes qualified dividends, special 25%/28% gain categories, detailed loss/basis rules, itemized deductions, and state treatment.
 
 ## Contributing
 

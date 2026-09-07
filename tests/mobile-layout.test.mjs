@@ -12,10 +12,16 @@ test("mobile charts fit their panel instead of forcing horizontal scrolling", ()
 });
 
 test("data-entry tables switch to labeled cards on mobile", () => {
-  for (const className of ["accounts-table", "income-table", "costs-table", "debts-table"]) {
+  for (const className of ["accounts-table", "income-table", "costs-table", "debts-table", "conversion-table"]) {
     assert.match(page, new RegExp(`mobile-card-table ${className}`));
-    assert.match(css, new RegExp(`\\.${className} td:nth-child`));
+    assert.match(css, new RegExp(`\\.${className} td(?::nth-child|::before)`));
   }
+});
+
+test("state tax input describes its limited planning scope", () => {
+  assert.match(page, /Estimated effective state income-tax rate/);
+  assert.match(page, /applied only to modeled ordinary taxable income/);
+  assert.doesNotMatch(page, /\$\{plan\.household\.state \|\| "State"\} effective rate/);
 });
 
 test("mobile navigation closes after selecting a planning section", () => {

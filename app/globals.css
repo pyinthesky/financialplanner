@@ -512,6 +512,9 @@ button, input, select { font: inherit; }
   .accounts-table td:nth-child(5)::before { content: "Adjusted cost basis"; }
   .accounts-table td:nth-child(6)::before { content: "Annual contribution"; }
   .accounts-table td:nth-child(7)::before { content: "QCD-eligible IRA"; }
+  .conversion-table td::before { content: attr(data-label); }
+  .conversion-table td:last-child { display: grid; justify-content: initial; border-bottom: 0; padding-block: .65rem; }
+  .conversion-table td:last-child::before { content: attr(data-label); }
   .income-table td:nth-child(1)::before { content: "Income source"; }
   .income-table td:nth-child(2)::before { content: "Type"; }
   .income-table td:nth-child(3)::before { content: "Owner"; }

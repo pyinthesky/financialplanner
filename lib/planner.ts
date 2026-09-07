@@ -3,6 +3,16 @@ import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
 import { calculateQcdElection } from "./qcd.ts";
 import { calculateEarlyDistributionTax } from "./early-distribution.ts";
+import { calculateCapitalGainsTax } from "./capital-gains-tax.ts";
+import {
+  calculateAcaPremiumTaxCredit,
+  type AcaPtcStatus,
+  type PovertyGuidelineLocation,
+} from "./aca-ptc.ts";
+import {
+  calculateMedicareIrmaa,
+  type IrmaaFilingCategory,
+} from "./medicare-irmaa.ts";
 
 export type AccountKind = "taxable" | "traditional" | "roth" | "cash" | "hsa";
 export type Owner = "you" | "partner" | "joint";
@@ -87,6 +97,12 @@ export interface PlannerData {
     baselineGrossOrdinaryIncome: number;
     taxableConversionAmount: number;
     targetBracketRate: number;
+    annualConversionYou: number;
+    startAgeYou: number;
+    endAgeYou: number;
+    annualConversionPartner: number;
+    startAgePartner: number;
+    endAgePartner: number;
   };
   medicareIrmaaPlanning: {
     magi2024: number;
@@ -104,6 +120,12 @@ export interface PlannerData {
     location: "" | "contiguous" | "alaska" | "hawaii";
     annualEnrollmentPremium: number;
     annualBenchmarkPremium: number;
+  };
+  capitalGainsPlanning: {
+    grossOrdinaryIncome: number;
+    netLongTermCapitalGain: number;
+    modifiedAdjustedGrossIncome: number;
+    netInvestmentIncome: number;
   };
   housing: {
     homeValue: number;
@@ -147,6 +169,17 @@ export interface ProjectionYear {
   federalTaxes: number;
   stateTaxes: number;
   capitalGainsTaxes: number;
+  regularCapitalGainsTaxes: number;
+  netInvestmentIncomeTax: number;
+  taxableLongTermCapitalGain: number;
+  rothConversion: number;
+  youRothConversion: number;
+  partnerRothConversion: number;
+  modifiedAdjustedGrossIncome: number;
+  acaModifiedAdjustedGrossIncome: number;
+  currentLawAcaPremiumTaxCredit: number | null;
+  currentLawAcaStatus: AcaPtcStatus | null;
+  currentLawIrmaaAnnual: number | null;
   taxableOrdinaryIncome: number;
   taxableCostBasis: number;
   realizedTaxableGain: number;
@@ -222,6 +255,12 @@ export const DEFAULT_PLAN: PlannerData = {
     baselineGrossOrdinaryIncome: 0,
     taxableConversionAmount: 0,
     targetBracketRate: 0,
+    annualConversionYou: 0,
+    startAgeYou: 0,
+    endAgeYou: 0,
+    annualConversionPartner: 0,
+    startAgePartner: 0,
+    endAgePartner: 0,
   },
   medicareIrmaaPlanning: {
     magi2024: 0,
@@ -235,6 +274,12 @@ export const DEFAULT_PLAN: PlannerData = {
     location: "",
     annualEnrollmentPremium: 0,
     annualBenchmarkPremium: 0,
+  },
+  capitalGainsPlanning: {
+    grossOrdinaryIncome: 0,
+    netLongTermCapitalGain: 0,
+    modifiedAdjustedGrossIncome: 0,
+    netInvestmentIncome: 0,
   },
   housing: {
     homeValue: 0,
@@ -422,6 +467,23 @@ export function projectPlan(
       0,
     );
   };
+  const convertOwnerTraditional = (
+    owner: Exclude<Owner, "joint">,
+    requested: number,
+  ) => {
+    const available = traditionalBalances[owner];
+    const amount = Math.min(Math.max(0, requested), available);
+    if (available <= 0 || amount <= 0) return 0;
+    const eligibleShare = qcdEligibleBalances[owner] / available;
+    traditionalBalances[owner] = Math.max(0, available - amount);
+    qcdEligibleBalances[owner] = Math.max(
+      0,
+      qcdEligibleBalances[owner] - amount * eligibleShare,
+    );
+    balances.roth += amount;
+    syncTraditionalBalance();
+    return amount;
+  };
   let traditionalWithdrawalsByOwner: Record<Owner, number> | null = null;
 
   let youQcdContributionOffset = Math.max(
@@ -553,6 +615,8 @@ export function projectPlan(
     let rothWithdrawal = 0;
     let hsaWithdrawal = 0;
     let realizedTaxableGain = 0;
+    let youRothConversion = 0;
+    let partnerRothConversion = 0;
     traditionalWithdrawalsByOwner = { you: 0, partner: 0, joint: 0 };
 
     const youRmdCalculation = calculateRmd({
@@ -708,6 +772,33 @@ export function projectPlan(
       spendingGap -= rothWithdrawal;
     }
 
+    const youConversionIsActive =
+      data.rothConversionPlanning.startAgeYou > 0 &&
+      data.rothConversionPlanning.endAgeYou >=
+        data.rothConversionPlanning.startAgeYou &&
+      age >= data.rothConversionPlanning.startAgeYou &&
+      age <= data.rothConversionPlanning.endAgeYou;
+    const partnerConversionIsActive =
+      data.household.maritalStatus === "married" &&
+      data.rothConversionPlanning.startAgePartner > 0 &&
+      data.rothConversionPlanning.endAgePartner >=
+        data.rothConversionPlanning.startAgePartner &&
+      partnerAge >= data.rothConversionPlanning.startAgePartner &&
+      partnerAge <= data.rothConversionPlanning.endAgePartner;
+    youRothConversion = youConversionIsActive
+      ? convertOwnerTraditional(
+          "you",
+          data.rothConversionPlanning.annualConversionYou,
+        )
+      : 0;
+    partnerRothConversion = partnerConversionIsActive
+      ? convertOwnerTraditional(
+          "partner",
+          data.rothConversionPlanning.annualConversionPartner,
+        )
+      : 0;
+    const rothConversion = youRothConversion + partnerRothConversion;
+
     const youEarlyDistribution = calculateEarlyDistributionTax({
       ageOnDistributionDate: age,
       taxableDistribution: traditionalWithdrawalsByOwner.you,
@@ -749,6 +840,7 @@ export function projectPlan(
           socialSecurityIncome +
           traditionalWithdrawal +
           qcdTaxableAmount +
+          rothConversion +
           realizedTaxableGain,
       taxExemptInterest: data.assumptions.taxExemptInterest,
       filingStatus: data.household.filingStatus,
@@ -761,17 +853,60 @@ export function projectPlan(
         socialSecurityIncome +
         socialSecurityTax.taxableBenefits +
         traditionalWithdrawal +
-        qcdTaxableAmount,
+        qcdTaxableAmount +
+        rothConversion,
     );
-    const federalTax = calculateFederalIncomeTax(
+    const inflationFactor = Math.pow(1 + inflation, index);
+    const federalTaxResult = calculateFederalIncomeTax(
       taxableOrdinary,
       data.household.filingStatus,
-      Math.pow(1 + inflation, index),
-    ).tax;
+      inflationFactor,
+    );
+    const federalTax = federalTaxResult.tax;
     const stateTaxes =
       taxableOrdinary * pct(data.assumptions.stateEffectiveTaxRate);
-    const capitalGainsTaxes =
-      realizedTaxableGain * pct(data.assumptions.capitalGainsRate);
+    const capitalGainsTax = calculateCapitalGainsTax({
+      filingStatus: data.household.filingStatus,
+      grossOrdinaryIncome: taxableOrdinary,
+      netLongTermCapitalGain: realizedTaxableGain,
+      modifiedAdjustedGrossIncome: taxableOrdinary + realizedTaxableGain,
+      netInvestmentIncome: realizedTaxableGain,
+      inflationFactor,
+      overrideRatePercent: data.assumptions.capitalGainsRate,
+    });
+    const capitalGainsTaxes = capitalGainsTax.totalCapitalGainsTax;
+    const modifiedAdjustedGrossIncome =
+      taxableOrdinary +
+      realizedTaxableGain +
+      data.assumptions.taxExemptInterest;
+    const acaModifiedAdjustedGrossIncome =
+      income +
+      traditionalWithdrawal +
+      qcdTaxableAmount +
+      rothConversion +
+      realizedTaxableGain +
+      data.assumptions.taxExemptInterest;
+    const currentLawAca =
+      data.acaPlanning.location && data.acaPlanning.taxFamilySize > 0
+        ? calculateAcaPremiumTaxCredit({
+            householdMagi: acaModifiedAdjustedGrossIncome,
+            taxFamilySize: data.acaPlanning.taxFamilySize,
+            location: data.acaPlanning.location as PovertyGuidelineLocation,
+            annualEnrollmentPremium:
+              data.acaPlanning.annualEnrollmentPremium,
+            annualBenchmarkPremium:
+              data.acaPlanning.annualBenchmarkPremium,
+          })
+        : null;
+    const currentLawIrmaa = data.medicareIrmaaPlanning.filingCategory
+      ? calculateMedicareIrmaa({
+          magi: modifiedAdjustedGrossIncome,
+          filingCategory: data.medicareIrmaaPlanning
+            .filingCategory as IrmaaFilingCategory,
+          partBEnrollees: data.medicareIrmaaPlanning.partBEnrollees,
+          partDEnrollees: data.medicareIrmaaPlanning.partDEnrollees,
+        })
+      : null;
     const taxes =
       federalTax +
       stateTaxes +
@@ -807,6 +942,18 @@ export function projectPlan(
       federalTaxes: federalTax,
       stateTaxes,
       capitalGainsTaxes,
+      regularCapitalGainsTaxes: capitalGainsTax.regularCapitalGainsTax,
+      netInvestmentIncomeTax: capitalGainsTax.niitTax,
+      taxableLongTermCapitalGain: capitalGainsTax.taxableLongTermCapitalGain,
+      rothConversion,
+      youRothConversion,
+      partnerRothConversion,
+      modifiedAdjustedGrossIncome,
+      acaModifiedAdjustedGrossIncome,
+      currentLawAcaPremiumTaxCredit:
+        currentLawAca?.potentialPremiumTaxCredit ?? null,
+      currentLawAcaStatus: currentLawAca?.status ?? null,
+      currentLawIrmaaAnnual: currentLawIrmaa?.annualHouseholdIrmaa ?? null,
       taxableOrdinaryIncome: taxableOrdinary,
       taxableCostBasis,
       realizedTaxableGain,
@@ -1021,6 +1168,10 @@ export function normalizePlan(input: unknown): PlannerData {
     acaPlanning: {
       ...DEFAULT_PLAN.acaPlanning,
       ...candidate.acaPlanning,
+    },
+    capitalGainsPlanning: {
+      ...DEFAULT_PLAN.capitalGainsPlanning,
+      ...candidate.capitalGainsPlanning,
     },
   } as PlannerData;
 }

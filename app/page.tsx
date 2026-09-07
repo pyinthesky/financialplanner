@@ -19,6 +19,7 @@ import { calculateFederalIncomeTax, type FilingStatus } from "@/lib/federal-tax"
 import { compareRothConversion } from "@/lib/roth-conversion";
 import { calculateMedicareIrmaa, type IrmaaFilingCategory } from "@/lib/medicare-irmaa";
 import { calculateAcaPremiumTaxCredit, type PovertyGuidelineLocation } from "@/lib/aca-ptc";
+import { calculateCapitalGainsTax } from "@/lib/capital-gains-tax";
 import { buildPrintPortfolioChart, PRINT_PORTFOLIO_SERIES } from "@/lib/print-chart";
 import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
@@ -315,6 +316,12 @@ export default function HomePage() {
   }, [plan, vaultStatus]);
 
   const projection = useMemo(() => projectPlan(plan), [plan]);
+  const projectionWithoutPlannedConversions = useMemo(() => {
+    const baseline = structuredClone(plan);
+    baseline.rothConversionPlanning.annualConversionYou = 0;
+    baseline.rothConversionPlanning.annualConversionPartner = 0;
+    return projectPlan(baseline);
+  }, [plan]);
   const debtSchedule = useMemo(() => debtPayoffSchedule(plan), [plan]);
   const successRate = useMemo(() => estimateSuccessRate(plan), [plan]);
   const fullRetirementAge = Math.max(plan.household.retirementAge, plan.household.maritalStatus === "married" ? plan.household.currentAge + Math.max(0, plan.household.partnerRetirementAge - plan.household.partnerAge) : plan.household.retirementAge);
@@ -393,6 +400,17 @@ export default function HomePage() {
     setPlan((current) => ({
       ...current,
       acaPlanning: { ...current.acaPlanning, [key]: value },
+    }));
+  const setCapitalGainsPlanning = (
+    key: keyof PlannerData["capitalGainsPlanning"],
+    value: number,
+  ) =>
+    setPlan((current) => ({
+      ...current,
+      capitalGainsPlanning: {
+        ...current.capitalGainsPlanning,
+        [key]: value,
+      },
     }));
   const updateAccount = (id: string, patch: Partial<Account>) =>
     setPlan((current) => ({
@@ -1344,6 +1362,46 @@ export default function HomePage() {
           location: plan.acaPlanning.location as PovertyGuidelineLocation,
         })
       : null;
+    const capitalGainsWorksheet = calculateCapitalGainsTax({
+      filingStatus: plan.household.filingStatus,
+      ...plan.capitalGainsPlanning,
+      overrideRatePercent: plan.assumptions.capitalGainsRate,
+    });
+    const conversionRows = projection.filter((row) => row.rothConversion > 0);
+    const baselineByYear = new Map(
+      projectionWithoutPlannedConversions.map((row) => [row.year, row]),
+    );
+    const totalPlannedConversions = conversionRows.reduce(
+      (sum, row) => sum + row.rothConversion,
+      0,
+    );
+    const projectedTaxDifference = conversionRows.reduce((sum, row) => {
+      const baseline = baselineByYear.get(row.year);
+      return sum + (baseline ? row.taxes - baseline.taxes : 0);
+    }, 0);
+    const currentLawAcaCreditDifference = conversionRows.reduce((sum, row) => {
+      const baseline = baselineByYear.get(row.year);
+      return (
+        sum +
+        (baseline &&
+        baseline.currentLawAcaPremiumTaxCredit !== null &&
+        row.currentLawAcaPremiumTaxCredit !== null
+          ? row.currentLawAcaPremiumTaxCredit -
+            baseline.currentLawAcaPremiumTaxCredit
+          : 0)
+      );
+    }, 0);
+    const currentLawIrmaaDifference = conversionRows.reduce((sum, row) => {
+      const baseline = baselineByYear.get(row.year);
+      return (
+        sum +
+        (baseline &&
+        baseline.currentLawIrmaaAnnual !== null &&
+        row.currentLawIrmaaAnnual !== null
+          ? row.currentLawIrmaaAnnual - baseline.currentLawIrmaaAnnual
+          : 0)
+      );
+    }, 0);
     const socialSecurityYear = projection.find((row) => row.socialSecurityIncome > 0);
     const firstRmdYear = projection.find((row) => row.requiredMinimumDistribution > 0);
     const firstQcdYear = projection.find(
@@ -1400,8 +1458,8 @@ export default function HomePage() {
                   },
                 ]}
               />
-              <Field label={`${plan.household.state || "State"} effective rate`} value={plan.assumptions.stateEffectiveTaxRate} onChange={(value) => setAssumption("stateEffectiveTaxRate", value)} suffix="%" step={0.1} max={20} />
-              <Field label="Capital gains rate" value={plan.assumptions.capitalGainsRate} onChange={(value) => setAssumption("capitalGainsRate", value)} suffix="%" step={0.1} max={50} />
+              <Field label="Estimated effective state income-tax rate" value={plan.assumptions.stateEffectiveTaxRate} onChange={(value) => setAssumption("stateEffectiveTaxRate", value)} suffix="%" step={0.1} max={20} help="Optional planning estimate applied only to modeled ordinary taxable income. It does not calculate jurisdiction-specific deductions, credits, retirement-income exclusions, or state treatment of capital gains and Roth conversions." />
+              <Field label="Capital-gains override rate" value={plan.assumptions.capitalGainsRate} onChange={(value) => setAssumption("capitalGainsRate", value)} suffix="%" step={0.1} max={50} help="Optional. Leave blank to use the 2026 federal 0% / 15% / 20% worksheet. A nonzero rate replaces those regular LTCG bands but does not replace NIIT." />
               <Field label="Annual tax-exempt interest" value={plan.assumptions.taxExemptInterest} onChange={(value) => setAssumption("taxExemptInterest", value)} prefix="$" suffix="/ year" step={100} help="Municipal-bond interest can increase taxable Social Security even though the interest itself is federally tax-exempt." />
               <Field label="Ordinary-income target" value={plan.assumptions.targetOrdinaryIncome} onChange={(value) => setAssumption("targetOrdinaryIncome", value)} prefix="$" suffix="/ year" step={1000} help="The model fills this band with tax-deferred withdrawals before drawing taxable assets." />
             </div>
@@ -1449,7 +1507,7 @@ export default function HomePage() {
                 <span>3</span>
                 <div>
                   <strong>Use taxable assets for the remaining gap</strong>
-                  <p>Only the gain fraction is assessed at the capital-gains rate.</p>
+                  <p>Apply cost basis, remaining deduction, federal long-term-gain bands, and NIIT where modeled.</p>
                 </div>
               </li>
               <li>
@@ -1469,6 +1527,76 @@ export default function HomePage() {
             </ol>
           </Panel>
         </div>
+        <Panel title="Long-Term Capital Gains Worksheet" eyebrow="2026 FEDERAL ESTIMATE">
+          <div className="form-grid">
+            <Field
+              label="Gross ordinary income"
+              value={plan.capitalGainsPlanning.grossOrdinaryIncome}
+              onChange={(value) =>
+                setCapitalGainsPlanning("grossOrdinaryIncome", value)
+              }
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="Before the standard deduction and before long-term capital gains. Include taxable wages, pensions, interest, distributions, and taxable Social Security."
+            />
+            <Field
+              label="Net long-term capital gain"
+              value={plan.capitalGainsPlanning.netLongTermCapitalGain}
+              onChange={(value) =>
+                setCapitalGainsPlanning("netLongTermCapitalGain", value)
+              }
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="Enter the net gain after basis and loss netting. Short-term gains belong with ordinary income."
+            />
+            <Field
+              label="Modified AGI for NIIT"
+              value={plan.capitalGainsPlanning.modifiedAdjustedGrossIncome}
+              onChange={(value) =>
+                setCapitalGainsPlanning("modifiedAdjustedGrossIncome", value)
+              }
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="For most households this begins with AGI. Special foreign-income and controlled-foreign-corporation adjustments are not determined here."
+            />
+            <Field
+              label="Net investment income"
+              value={plan.capitalGainsPlanning.netInvestmentIncome}
+              onChange={(value) =>
+                setCapitalGainsPlanning("netInvestmentIncome", value)
+              }
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="For the 3.8% NIIT only. This can include investment interest, dividends, gains, rents, and royalties after allowed investment deductions."
+            />
+          </div>
+          <div className="worksheet-grid">
+            <div><span>2026 standard deduction</span><strong>{currency.format(capitalGainsWorksheet.standardDeduction)}</strong></div>
+            <div><span>Ordinary taxable income</span><strong>{currency.format(capitalGainsWorksheet.ordinaryTaxableIncome)}</strong></div>
+            <div><span>Taxable long-term gain</span><strong>{currency.format(capitalGainsWorksheet.taxableLongTermCapitalGain)}</strong><small>{currency.format(capitalGainsWorksheet.unusedStandardDeduction)} of unused deduction applied</small></div>
+            <div><span>Gain taxed at 0%</span><strong>{currency.format(capitalGainsWorksheet.zeroRateGain)}</strong><small>Combined taxable-income ceiling: {currency.format(capitalGainsWorksheet.zeroRateCeiling)}</small></div>
+            <div><span>Gain taxed at 15%</span><strong>{currency.format(capitalGainsWorksheet.fifteenRateGain)}</strong><small>Combined taxable-income ceiling: {currency.format(capitalGainsWorksheet.fifteenRateCeiling)}</small></div>
+            <div><span>Gain taxed at 20%</span><strong>{currency.format(capitalGainsWorksheet.twentyRateGain)}</strong></div>
+            <div>
+              <span>Regular federal LTCG tax</span>
+              <strong>{currency.format(capitalGainsWorksheet.regularCapitalGainsTax)}</strong>
+              {capitalGainsWorksheet.overrideApplied && <small>Manual override applied; statutory result would be {currency.format(capitalGainsWorksheet.statutoryRegularCapitalGainsTax)}</small>}
+            </div>
+            <div><span>NIIT base / tax</span><strong>{currency.format(capitalGainsWorksheet.niitBase)} / {currency.format(capitalGainsWorksheet.niitTax)}</strong><small>3.8% on the lesser of net investment income or MAGI above {currency.format(capitalGainsWorksheet.niitThreshold)}</small></div>
+            <div><span>Total LTCG tax plus NIIT</span><strong>{currency.format(capitalGainsWorksheet.totalCapitalGainsTax)}</strong></div>
+            <div><span>Effective rate on taxable LTCG</span><strong>{(capitalGainsWorksheet.effectiveRate * 100).toFixed(1)}%</strong></div>
+          </div>
+          <p className="model-note">
+            <Calculator /> This estimate stacks net long-term capital gain above ordinary taxable income, applies the basic standard deduction, and separately calculates NIIT. It does not model qualified dividends, short-term gains, capital-loss carryovers, itemized deductions, the home-sale exclusion, AMT, state tax, collectibles or qualified-small-business-stock gains taxed up to 28%, unrecaptured section 1250 gain taxed up to 25%, trusts, estates, or transaction-specific basis rules. Projection years planning-index the regular LTCG ceilings with inflation; the NIIT thresholds remain fixed under current law.{" "}
+            <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">IRS Revenue Procedure 2025-32</a>
+            {" · "}
+            <a href="https://www.irs.gov/individuals/net-investment-income-tax" target="_blank" rel="noreferrer">IRS NIIT guidance</a>
+          </p>
+        </Panel>
         <Panel title="Roth Conversion Bracket Check" eyebrow="2026 FEDERAL ESTIMATE">
           <div className="form-grid">
             <Field
@@ -1532,6 +1660,117 @@ export default function HomePage() {
             <a href="https://www.irs.gov/pub/irs-pdf/p590a.pdf" target="_blank" rel="noreferrer">IRS Publication 590-A (2025)</a>
             {" · "}
             <a href="https://www.irs.gov/pub/irs-drop/rp-25-32.pdf" target="_blank" rel="noreferrer">2026 IRS brackets</a>
+          </p>
+        </Panel>
+        <Panel title="Roth Conversion Ladder" eyebrow="OWNER-SPECIFIC PROJECTION">
+          <div className="form-grid">
+            <Field
+              label="Your annual conversion"
+              value={plan.rothConversionPlanning.annualConversionYou}
+              onChange={(value) =>
+                setRothConversionPlanning("annualConversionYou", value)
+              }
+              prefix="$"
+              suffix="/ year"
+              step={1000}
+              help="Moves available dollars from your assigned tax-deferred accounts into the household Roth balance. RMD dollars are distributed first and are not converted."
+            />
+            <Field
+              label="Your conversion start age"
+              value={plan.rothConversionPlanning.startAgeYou}
+              onChange={(value) =>
+                setRothConversionPlanning("startAgeYou", value)
+              }
+              suffix="years old"
+              max={120}
+            />
+            <Field
+              label="Your conversion end age"
+              value={plan.rothConversionPlanning.endAgeYou}
+              onChange={(value) =>
+                setRothConversionPlanning("endAgeYou", value)
+              }
+              suffix="years old"
+              max={120}
+            />
+            {plan.household.maritalStatus === "married" && (
+              <Field
+                label="Partner annual conversion"
+                value={plan.rothConversionPlanning.annualConversionPartner}
+                onChange={(value) =>
+                  setRothConversionPlanning("annualConversionPartner", value)
+                }
+                prefix="$"
+                suffix="/ year"
+                step={1000}
+                help="Uses only tax-deferred accounts assigned to your partner."
+              />
+            )}
+            {plan.household.maritalStatus === "married" && (
+              <Field
+                label="Partner conversion start age"
+                value={plan.rothConversionPlanning.startAgePartner}
+                onChange={(value) =>
+                  setRothConversionPlanning("startAgePartner", value)
+                }
+                suffix="years old"
+                max={120}
+              />
+            )}
+            {plan.household.maritalStatus === "married" && (
+              <Field
+                label="Partner conversion end age"
+                value={plan.rothConversionPlanning.endAgePartner}
+                onChange={(value) =>
+                  setRothConversionPlanning("endAgePartner", value)
+                }
+                suffix="years old"
+                max={120}
+              />
+            )}
+          </div>
+          <div className="worksheet-grid">
+            <div><span>Total modeled conversions</span><strong>{currency.format(totalPlannedConversions)}</strong></div>
+            <div><span>Projected tax change in conversion years</span><strong>{currency.format(projectedTaxDifference)}</strong><small>Federal ordinary tax, LTCG/NIIT, entered state estimate, and early-distribution tax</small></div>
+            <div><span>2026-rule ACA credit sensitivity</span><strong>{currency.format(currentLawAcaCreditDifference)}</strong><small>With conversion minus no-conversion baseline</small></div>
+            <div><span>2026-rule annual IRMAA sensitivity</span><strong>{currency.format(currentLawIrmaaDifference)}</strong><small>Income-year comparison; actual Medicare premiums generally use a two-year lookback</small></div>
+            <div><span>Final tax-deferred balance change</span><strong>{currency.format((projection.at(-1)?.traditional ?? 0) - (projectionWithoutPlannedConversions.at(-1)?.traditional ?? 0))}</strong></div>
+            <div><span>Final Roth balance change</span><strong>{currency.format((projection.at(-1)?.roth ?? 0) - (projectionWithoutPlannedConversions.at(-1)?.roth ?? 0))}</strong></div>
+          </div>
+          {conversionRows.length > 0 ? (
+            <div className="table-wrap mobile-card-table conversion-table">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Year / Age</TableHead>
+                    <TableHead>Conversion</TableHead>
+                    <TableHead>Taxable Ordinary Income</TableHead>
+                    <TableHead>Taxable LTCG</TableHead>
+                    <TableHead>Projected Taxes</TableHead>
+                    <TableHead>ACA PTC · 2026 Rules</TableHead>
+                    <TableHead>IRMAA · 2026 Rules</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {conversionRows.map((row) => (
+                    <TableRow key={row.year}>
+                      <TableCell data-label="Year / Age">{row.year} / {row.age}</TableCell>
+                      <TableCell data-label="Conversion">{currency.format(row.rothConversion)}</TableCell>
+                      <TableCell data-label="Taxable Ordinary Income">{currency.format(row.taxableOrdinaryIncome)}</TableCell>
+                      <TableCell data-label="Taxable LTCG">{currency.format(row.taxableLongTermCapitalGain)}</TableCell>
+                      <TableCell data-label="Projected Taxes">{currency.format(row.taxes)}</TableCell>
+                      <TableCell data-label="ACA PTC · 2026 Rules">{row.currentLawAcaPremiumTaxCredit === null ? "Not configured" : currency.format(row.currentLawAcaPremiumTaxCredit)}</TableCell>
+                      <TableCell data-label="IRMAA · 2026 Rules">{row.currentLawIrmaaAnnual === null ? "Not configured" : currency.format(row.currentLawIrmaaAnnual)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <p className="panel-copy">Enter an owner-specific annual amount and valid start/end ages to build the ladder.</p>
+          )}
+          <p className="model-note">
+            <Calculator /> This ladder changes account balances and recomputes taxable Social Security, ordinary federal tax, long-term capital gains, NIIT, and the entered state estimate each year. ACA and IRMAA columns are sensitivities using the published 2026 rules and today&apos;s entered premium/enrollee assumptions—not forecasts or amounts included in projected cash flow. Future ACA contribution tables, poverty guidelines, Medicare thresholds, premiums, and tax law are unknown. The model does not determine IRA basis or pro-rata taxability, conversion eligibility, five-year rules, withholding, estimated-tax timing, state conversion rules, or whether taxes should be paid from outside funds. Confirm the taxable amount before acting.
           </p>
         </Panel>
         <Panel title="Medicare IRMAA Worksheet" eyebrow="2026 PREMIUMS · 2024 LOOKBACK">

@@ -5,6 +5,7 @@ import { calculateFederalIncomeTax, federalGrossIncomeCeilingForRate } from "../
 import { compareRothConversion } from "../lib/roth-conversion.ts";
 import { calculateMedicareIrmaa } from "../lib/medicare-irmaa.ts";
 import { acaApplicablePercentage, calculateAcaPremiumTaxCredit, povertyGuideline } from "../lib/aca-ptc.ts";
+import { calculateCapitalGainsTax } from "../lib/capital-gains-tax.ts";
 import { calculateTaxableSocialSecurity } from "../lib/social-security-tax.ts";
 import { calculateRmd, rmdApplicableAge } from "../lib/rmd.ts";
 import { calculateQcdCapacity, calculateQcdElection } from "../lib/qcd.ts";
@@ -170,6 +171,77 @@ test("ACA PTC does not infer eligibility outside the standard income range", () 
   assert.equal(above.potentialPremiumTaxCredit, 0);
 });
 
+test("2026 LTCG worksheet stacks gains above ordinary taxable income", () => {
+  const result = calculateCapitalGainsTax({
+    filingStatus: "single",
+    grossOrdinaryIncome: 56_100,
+    netLongTermCapitalGain: 20_000,
+    modifiedAdjustedGrossIncome: 76_100,
+    netInvestmentIncome: 20_000,
+  });
+  assert.equal(result.ordinaryTaxableIncome, 40_000);
+  assert.equal(result.zeroRateGain, 9_450);
+  assert.equal(result.fifteenRateGain, 10_550);
+  assert.equal(result.twentyRateGain, 0);
+  assert.equal(result.regularCapitalGainsTax, 1_582.5);
+});
+
+test("2026 LTCG worksheet applies the 20 percent band above the joint ceiling", () => {
+  const result = calculateCapitalGainsTax({
+    filingStatus: "marriedJoint",
+    grossOrdinaryIncome: 132_200,
+    netLongTermCapitalGain: 600_000,
+    modifiedAdjustedGrossIncome: 732_200,
+    netInvestmentIncome: 0,
+  });
+  assert.equal(result.ordinaryTaxableIncome, 100_000);
+  assert.equal(result.zeroRateGain, 0);
+  assert.equal(result.fifteenRateGain, 513_700);
+  assert.equal(result.twentyRateGain, 86_300);
+});
+
+test("unused standard deduction shields long-term capital gain", () => {
+  const result = calculateCapitalGainsTax({
+    filingStatus: "single",
+    grossOrdinaryIncome: 6_100,
+    netLongTermCapitalGain: 20_000,
+    modifiedAdjustedGrossIncome: 26_100,
+    netInvestmentIncome: 20_000,
+  });
+  assert.equal(result.unusedStandardDeduction, 10_000);
+  assert.equal(result.taxableLongTermCapitalGain, 10_000);
+  assert.equal(result.zeroRateGain, 10_000);
+  assert.equal(result.totalCapitalGainsTax, 0);
+});
+
+test("NIIT uses the lesser of net investment income or MAGI excess", () => {
+  const result = calculateCapitalGainsTax({
+    filingStatus: "marriedJoint",
+    grossOrdinaryIncome: 75_000,
+    netLongTermCapitalGain: 225_000,
+    modifiedAdjustedGrossIncome: 300_000,
+    netInvestmentIncome: 225_000,
+  });
+  assert.equal(result.niitThreshold, 250_000);
+  assert.equal(result.niitBase, 50_000);
+  assert.equal(result.niitTax, 1_900);
+});
+
+test("manual LTCG rate overrides regular bands but not NIIT", () => {
+  const result = calculateCapitalGainsTax({
+    filingStatus: "single",
+    grossOrdinaryIncome: 36_100,
+    netLongTermCapitalGain: 100_000,
+    modifiedAdjustedGrossIncome: 250_000,
+    netInvestmentIncome: 100_000,
+    overrideRatePercent: 10,
+  });
+  assert.equal(result.overrideApplied, true);
+  assert.equal(result.regularCapitalGainsTax, 10_000);
+  assert.equal(result.niitTax, 1_900);
+  assert.equal(result.totalCapitalGainsTax, 11_900);
+});
+
 test("print chart builds finite stacked geometry without browser measurement", () => {
   const geometry = buildPrintPortfolioChart([
     { age: 40, traditional: 100_000, taxable: 80_000, roth: 30_000, cash: 20_000, hsa: 5_000 },
@@ -333,12 +405,29 @@ test("taxable withdrawals realize only the gain above allocated cost basis", () 
   plan.household.currentAge = 67;
   plan.household.retirementAge = 67;
   plan.household.planToAge = 67;
-  plan.assumptions.annualSpending = 50_000;
+  plan.assumptions.annualSpending = 70_000;
   plan.assumptions.capitalGainsRate = 20;
+  plan.income = [{ id: "pension", name: "Pension", owner: "you", kind: "pension", startAge: 67, annualAmount: 20_000, cola: 0, survivorPercent: 0 }];
   plan.accounts = [{ id: "brokerage", name: "Brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 80_000 }];
   const row = projectPlan(plan)[0];
   assert.ok(Math.abs(row.realizedTaxableGain - 10_000) < 0.01);
   assert.ok(Math.abs(row.capitalGainsTaxes - 2_000) < 0.01);
+});
+
+test("projection uses statutory LTCG bands when no override is entered", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 67;
+  plan.household.retirementAge = 67;
+  plan.household.planToAge = 67;
+  plan.assumptions.annualSpending = 110_000;
+  plan.income = [{ id: "pension", name: "Pension", owner: "you", kind: "pension", startAge: 67, annualAmount: 60_000, cola: 0, survivorPercent: 0 }];
+  plan.accounts = [{ id: "brokerage", name: "Brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 80_000 }];
+  const row = projectPlan(plan)[0];
+  assert.ok(Math.abs(row.realizedTaxableGain - 10_000) < 0.01);
+  assert.ok(Math.abs(row.taxableLongTermCapitalGain - 10_000) < 0.01);
+  assert.ok(Math.abs(row.regularCapitalGainsTaxes - 667.5) < 0.01);
+  assert.equal(row.netInvestmentIncomeTax, 0);
+  assert.ok(Math.abs(row.capitalGainsTaxes - 667.5) < 0.01);
 });
 
 test("taxable contributions increase adjusted basis", () => {
@@ -589,6 +678,99 @@ test("unassigned early tax-deferred withdrawals are flagged rather than penalize
   assert.equal(row.earlyDistributionReviewAmount, 10_000);
 });
 
+test("owner-specific Roth ladder moves balances and includes conversions in income", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 60;
+  plan.household.retirementAge = 60;
+  plan.household.planToAge = 61;
+  plan.rothConversionPlanning.annualConversionYou = 20_000;
+  plan.rothConversionPlanning.startAgeYou = 60;
+  plan.rothConversionPlanning.endAgeYou = 61;
+  plan.accounts = [
+    { id: "ira", name: "IRA", kind: "traditional", owner: "you", balance: 100_000, annualContribution: 0 },
+    { id: "tax-cash", name: "Tax reserve", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 100_000 },
+  ];
+  const rows = projectPlan(plan);
+  assert.equal(rows[0].youRothConversion, 20_000);
+  assert.equal(rows[0].rothConversion, 20_000);
+  assert.equal(rows[0].taxableOrdinaryIncome, 20_000);
+  assert.equal(rows[0].traditional, 80_000);
+  assert.equal(rows[0].roth, 20_000);
+  assert.equal(rows[1].traditional, 60_000);
+  assert.equal(rows[1].roth, 40_000);
+});
+
+test("a Roth conversion cannot consume another owner's or joint balance", () => {
+  const plan = copyPlan();
+  plan.household.maritalStatus = "married";
+  plan.household.currentAge = 60;
+  plan.household.partnerAge = 60;
+  plan.household.retirementAge = 60;
+  plan.household.partnerRetirementAge = 60;
+  plan.household.planToAge = 60;
+  plan.rothConversionPlanning.annualConversionYou = 20_000;
+  plan.rothConversionPlanning.startAgeYou = 60;
+  plan.rothConversionPlanning.endAgeYou = 60;
+  plan.accounts = [
+    { id: "your-ira", name: "Your IRA", kind: "traditional", owner: "you", balance: 10_000, annualContribution: 0 },
+    { id: "partner-ira", name: "Partner IRA", kind: "traditional", owner: "partner", balance: 50_000, annualContribution: 0 },
+    { id: "unassigned", name: "Unassigned", kind: "traditional", owner: "joint", balance: 40_000, annualContribution: 0 },
+    { id: "tax-cash", name: "Tax reserve", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 100_000 },
+  ];
+  const row = projectPlan(plan)[0];
+  assert.equal(row.youRothConversion, 10_000);
+  assert.equal(row.partnerRothConversion, 0);
+  assert.equal(row.traditional, 90_000);
+  assert.equal(row.roth, 10_000);
+});
+
+test("RMD dollars are distributed before an oversized Roth conversion", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 75;
+  plan.household.birthYear = 1951;
+  plan.household.retirementAge = 75;
+  plan.household.planToAge = 75;
+  plan.rothConversionPlanning.annualConversionYou = 250_000;
+  plan.rothConversionPlanning.startAgeYou = 75;
+  plan.rothConversionPlanning.endAgeYou = 75;
+  plan.accounts = [
+    { id: "ira", name: "IRA", kind: "traditional", owner: "you", balance: 246_000, annualContribution: 0 },
+  ];
+  const row = projectPlan(plan)[0];
+  assert.ok(Math.abs(row.requiredMinimumDistribution - 10_000) < 0.01);
+  assert.ok(Math.abs(row.rothConversion - 236_000) < 0.01);
+  assert.equal(row.traditional, 0);
+  assert.ok(Math.abs(row.roth - 236_000) < 0.01);
+});
+
+test("conversion ladder exposes Social Security, ACA, and IRMAA sensitivities", () => {
+  const plan = copyPlan();
+  plan.household.currentAge = 67;
+  plan.household.retirementAge = 67;
+  plan.household.planToAge = 67;
+  plan.rothConversionPlanning.annualConversionYou = 30_000;
+  plan.rothConversionPlanning.startAgeYou = 67;
+  plan.rothConversionPlanning.endAgeYou = 67;
+  plan.medicareIrmaaPlanning.filingCategory = "individual";
+  plan.medicareIrmaaPlanning.partBEnrollees = 1;
+  plan.medicareIrmaaPlanning.partDEnrollees = 1;
+  plan.acaPlanning = {
+    householdMagi: 0,
+    taxFamilySize: 1,
+    location: "contiguous",
+    annualEnrollmentPremium: 10_000,
+    annualBenchmarkPremium: 12_000,
+  };
+  plan.income = [{ id: "ss", name: "Social Security", owner: "you", kind: "socialSecurity", startAge: 67, annualAmount: 20_000, cola: 0, survivorPercent: 0 }];
+  plan.accounts = [{ id: "ira", name: "IRA", kind: "traditional", owner: "you", balance: 50_000, annualContribution: 0 }];
+  const row = projectPlan(plan)[0];
+  assert.ok(row.taxableSocialSecurity > 0);
+  assert.ok(row.taxableOrdinaryIncome > row.rothConversion);
+  assert.equal(row.currentLawAcaStatus, "standard-income-range");
+  assert.ok(row.currentLawAcaPremiumTaxCredit !== null);
+  assert.ok(row.currentLawIrmaaAnnual !== null);
+});
+
 test("plan normalization clears invalid QCD source designations", () => {
   const plan = copyPlan();
   plan.accounts = [
@@ -622,6 +804,10 @@ test("legacy plan imports receive a compatible filing status", () => {
     DEFAULT_PLAN.medicareIrmaaPlanning,
   );
   assert.deepEqual(normalized.acaPlanning, DEFAULT_PLAN.acaPlanning);
+  assert.deepEqual(
+    normalized.capitalGainsPlanning,
+    DEFAULT_PLAN.capitalGainsPlanning,
+  );
 });
 
 test("blank plans render zero-valued numeric inputs without a visible zero", () => {
