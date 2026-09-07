@@ -20,7 +20,10 @@ const server = http.createServer((req, res) => {
 (async () => {
   await new Promise(resolve => server.listen(4173, '127.0.0.1', resolve));
   const evidence = [];
-  for (const [name, engine] of Object.entries({ chromium, webkit })) {
+  const engines={chromium,webkit};
+  const requested=process.env.PLANNER_BROWSER;
+  if(requested&&!Object.hasOwn(engines,requested))throw new Error('Unknown browser test engine');
+  for (const [name, engine] of Object.entries(requested?{[requested]:engines[requested]}:engines)) {
     for (const width of [320, 375, 390, 430, 768, 1280]) {
       const browser = await engine.launch({ headless: true });
       try {
@@ -34,6 +37,11 @@ const server = http.createServer((req, res) => {
         const navigate = async label => {
           const nav = page.getByRole('button', { name: label, exact: true });
           if (!await nav.isVisible()) await page.getByRole('button', { name: 'Toggle Sidebar' }).click();
+          if(width<768){
+            const drawer=page.locator('[data-mobile="true"][data-state="open"]');
+            await drawer.waitFor({state:'visible'});
+            await drawer.evaluate(async el=>{await Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{})));});
+          }
           await page.getByRole('button', { name: label, exact: true }).click();
           const heading = label === 'Household' ? 'Household & Assumptions' : label;
           await page.getByRole('heading', { name: heading, exact: true }).first().waitFor();
