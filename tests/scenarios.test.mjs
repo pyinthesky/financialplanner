@@ -22,6 +22,8 @@ test('a stale scenario keeps its own baseline and refresh is explicit',()=>{
   p.budget.lines[0].amount=20;assert.equal(scenarioIsStale(p,s),true);assert.deepEqual(scenarioChanges(p,s),['Budgets & Payroll']);
   assert.equal(Math.round(comparison(p,[s]).scenarios[0].deltaPortfolio),-120);
   const imported=normalizePlan(JSON.parse(JSON.stringify(p)));assert.equal(imported.laboratory.scenarios[0].baseline,s.baseline);
+  const fresh=plan();fresh.laboratory.scenarios=[{id:'fresh',name:'',baseline:baselineSnapshot(fresh),overrides:{}}];
+  const roundTrip=normalizePlan(JSON.parse(JSON.stringify(fresh)));assert.equal(scenarioIsStale(roundTrip,roundTrip.laboratory.scenarios[0]),false);
 });
 test('explicit sequence stresses use the same returns and expose order effects',()=>{
   const p=plan(),base=baselineSnapshot(p);

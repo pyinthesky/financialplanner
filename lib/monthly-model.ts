@@ -17,6 +17,7 @@ export interface PlanEvent {
   confirmedCashTreatment: boolean;
 }
 export interface ScenarioOverrides {
+  mortgagePayoff?: { debtId: string; month: string; destination: 'cash' | 'invest'; accountId: string };
   retirementMonthYou?: string;
   retirementMonthPartner?: string;
   spendingChangePercent?: number;
@@ -67,6 +68,7 @@ export function normalizeLaboratory(input: unknown): Laboratory {
     if (!scenario.id || ids.has(scenario.id) || typeof scenario.name !== 'string' || typeof scenario.baseline !== 'string' || scenario.baseline.length > 2_000_000 || !scenario.overrides) throw new Error('Invalid scenario.');
     ids.add(scenario.id);
     const o = scenario.overrides;
+    if (o.mortgagePayoff && (typeof o.mortgagePayoff.debtId !== 'string' || !(o.mortgagePayoff.month === '' || month(o.mortgagePayoff.month)) || !['cash','invest'].includes(o.mortgagePayoff.destination) || typeof o.mortgagePayoff.accountId !== 'string')) throw new Error('Invalid mortgage-payoff scenario.');
     if (o.retirementMonthYou !== undefined && !month(o.retirementMonthYou) || o.retirementMonthPartner !== undefined && !month(o.retirementMonthPartner)) throw new Error('Invalid scenario timeline.');
     for (const key of ['spendingChangePercent', 'inflation', 'planToAge', 'cashCoverageMonths', 'guardrailFloor', 'discretionaryCutPercent'] as const) if (o[key] !== undefined && (!Number.isFinite(o[key]) || o[key]! < (key === 'spendingChangePercent' ? -100 : key === 'inflation' ? -99 : 0))) throw new Error('Invalid scenario assumption.');
     if ((o.discretionaryCutPercent ?? 0) > 100 || (o.planToAge ?? 0) > 120) throw new Error('Scenario assumption out of range.');

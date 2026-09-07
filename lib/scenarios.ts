@@ -10,7 +10,7 @@ function sorted(value: unknown): unknown {
 export function baselineSnapshot(plan: PlannerData): string {
   const copy = structuredClone(plan);
   copy.laboratory = { ...(copy.laboratory ?? structuredClone(EMPTY_LAB)), scenarios: [] };
-  return JSON.stringify(sorted(copy));
+  return JSON.stringify(sorted(normalizePlan(copy)));
 }
 export function scenarioIsStale(plan: PlannerData, scenario: SavedScenario) { return baselineSnapshot(plan) !== scenario.baseline; }
 export function scenarioChanges(plan: PlannerData, scenario: SavedScenario): string[] {
@@ -24,6 +24,6 @@ export function comparison(plan: PlannerData, scenarios: SavedScenario[]) {
   return { baseline, scenarios: scenarios.map(s=>{
     const result=evaluateScenario(s), ownBaseline=projectMonthly(normalizePlan(JSON.parse(s.baseline)));
     const totalTax=(r:typeof result)=>r.years.reduce((n,y)=>n+y.taxes,0);
-    return { scenario:s, result, stale:scenarioIsStale(plan,s), deltaPortfolio:(result.years.at(-1)?.portfolio??0)-(ownBaseline.years.at(-1)?.portfolio??0), deltaTax:totalTax(result)-totalTax(ownBaseline), comparable:result.supported&&ownBaseline.supported, baseline:ownBaseline };
+    return { scenario:s, result, stale:scenarioIsStale(plan,s), deltaPortfolio:(result.years.at(-1)?.portfolio??0)-(ownBaseline.years.at(-1)?.portfolio??0), deltaFinancialNetWorth:(result.years.at(-1)?.financialNetWorth??0)-(ownBaseline.years.at(-1)?.financialNetWorth??0), deltaTax:totalTax(result)-totalTax(ownBaseline), comparable:result.supported&&ownBaseline.supported, baseline:ownBaseline };
   }) };
 }

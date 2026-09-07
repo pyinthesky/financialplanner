@@ -567,6 +567,8 @@ button, input, select { font: inherit; }
 .budget-comparison { display: grid; grid-template-columns: minmax(0,1.5fr) repeat(2,minmax(0,1fr)); gap: .75rem; align-items: start; }
 .budget-comparison span { color: #63718a; font-size: .82rem; }
 .budget-comparison b { display: block; color: #17243b; font-variant-numeric: tabular-nums; }
+.budget-quick-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; align-items: end; }
+.budget-line-details > summary { color: #63718a; font-size: .85rem; }
 .budget-calendar-row small { display: block; margin-top: .3rem; }
 .budget-calendar-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem 1rem; }
 .monthly-table-wrap { min-width: 0; }
@@ -616,7 +618,8 @@ button, input, select { font: inherit; }
 .report-budget table { width: 100%; border-collapse: collapse; font-size: 10px; }
 .report-budget th, .report-budget td { text-align: left; padding: 6px; border-bottom: 1px solid #dbe4ee; overflow-wrap: anywhere; }
 @media (max-width: 600px) {
-  .budget-metrics, .budget-fields { grid-template-columns: minmax(0, 1fr); }
+  .budget-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .budget-fields { grid-template-columns: minmax(0, 1fr); }
   .budget-flow .panel, .budget-card { padding: 14px; }
   .budget-flow { gap: 1rem; }
 }

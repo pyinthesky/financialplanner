@@ -21,9 +21,9 @@ const server = http.createServer((req, res) => {
   await new Promise(resolve => server.listen(4173, '127.0.0.1', resolve));
   const evidence = [];
   for (const [name, engine] of Object.entries({ chromium, webkit })) {
-    const browser = await engine.launch({ headless: true });
-    try {
-      for (const width of [320, 375, 390, 430, 768, 1280]) {
+    for (const width of [320, 375, 390, 430, 768, 1280]) {
+      const browser = await engine.launch({ headless: true });
+      try {
         const page = await browser.newPage({ viewport: { width, height: 900 } });
         page.setDefaultTimeout(30000);
         const errors = [];
@@ -49,6 +49,7 @@ const server = http.createServer((req, res) => {
         await page.getByLabel('Frequency', { exact: true }).selectOption('biweekly');
         await page.getByRole('button', { name: 'Food', exact: true }).click();
         await page.getByLabel('Current Amount').fill('10');
+        await page.locator('summary').filter({hasText:'Edit Bill Details'}).click();
         await page.getByLabel('Description', { exact: true }).fill('Synthetic Bill');
         await noOverflow('current budget');
         await navigate('Retirement Budget');
@@ -110,6 +111,10 @@ const server = http.createServer((req, res) => {
           await page.getByRole('button',{name:'Create Scenario',exact:true}).click();
           await page.getByLabel('Scenario Name',{exact:true}).fill('Synthetic Scenario');
           await page.getByLabel('Everyday Spending Change / %',{exact:true}).fill('50');
+          await page.locator('summary').filter({hasText:'Mortgage Payoff versus Keeping the Loan'}).click();
+          await page.getByRole('checkbox',{name:'Include a Funded Mortgage Payoff',exact:true}).check();
+          await page.getByLabel('Mortgage to Pay Off',{exact:true}).selectOption('C');
+          await page.getByLabel('Payoff Month',{exact:true}).fill('2026-03');
           await page.getByRole('heading',{name:'Selected Scenario Results',exact:true}).waitFor();
           await noOverflow('scenario laboratory');
           await page.screenshot({path:path.join(out,`${name}-${width}-scenarios.png`),fullPage:true});
@@ -118,6 +123,7 @@ const server = http.createServer((req, res) => {
           const exported=JSON.parse(fs.readFileSync(await (await save).path(),'utf8'));
           assert.equal(exported.laboratory.scenarios[0].overrides.spendingChangePercent,50);
           assert.equal(exported.laboratory.settings.enabled,true);
+          assert.equal(exported.laboratory.scenarios[0].overrides.mortgagePayoff.month,'2026-03');
           await navigate('Data & Privacy');
           await page.locator('input[type=file]').setInputFiles({name:'synthetic-scenarios.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))});
           await page.getByRole('button',{name:/Open data and privacy — Imported/}).waitFor();
@@ -133,8 +139,8 @@ const server = http.createServer((req, res) => {
         assert.deepEqual(errors, [], `${name} ${width} has no uncaught errors`);
         evidence.push({ engine: name, width, status: 'passed' });
         await page.close();
-      }
-    } finally { await browser.close(); }
+      } finally { await browser.close(); }
+    }
   }
   fs.writeFileSync(path.join(out, 'results.json'), JSON.stringify(evidence, null, 2));
   console.log(JSON.stringify(evidence));
