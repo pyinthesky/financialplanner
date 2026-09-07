@@ -72,7 +72,7 @@ const server = http.createServer((req, res) => {
           const fixture = JSON.parse(fs.readFileSync(await downloaded.path(), 'utf8'));
           Object.assign(fixture.household, { currentAge: 60, retirementAge: 60, planToAge: 80 });
           fixture.accounts = [{ id: 'synthetic-cash', name: 'Synthetic Cash', owner: 'you', kind: 'cash', balance: 10000, annualContribution: 0 }];
-          fixture.debts = [['A',100,50],['B',400,100],['C',1000,100]].map(([id,balance,minimumPayment]) => ({ id, name: id, kind: 'other', balance, minimumPayment, interestRate: 0 }));
+          fixture.debts = [['A',100,50],['B',400,100],['C',1000,100]].map(([id,balance,minimumPayment]) => ({ id, name: id, kind: id === 'C' ? 'mortgage' : 'other', balance, minimumPayment, interestRate: 0 }));
           fixture.debtStrategy = { method: 'snowball', extraMonthlyPayment: 50 };
           await navigate('Data & Privacy');
           await page.locator('input[type=file]').setInputFiles({ name: 'synthetic-plan.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fixture)) });
@@ -83,6 +83,19 @@ const server = http.createServer((req, res) => {
           await noOverflow('debt cascade');
           await page.getByText('A ($50.00/month) is paid off.', { exact: false }).waitFor();
           await page.screenshot({ path: path.join(out, `${name}-${width}-debt.png`), fullPage: true });
+          await navigate('Spending & Housing');
+          await page.getByLabel('Mortgage Account', { exact: true }).selectOption('C');
+          for (const [label, value] of [['Total Statement Payment','130'],['Principal & Interest','100'],['Property Tax Escrow','20'],['Home Insurance Escrow','10'],['Mortgage Insurance','0'],['Other Escrow','0']]) await page.getByLabel(label, { exact: true }).fill(value);
+          await page.getByRole('checkbox', { name: 'Use This Statement in the Plan', exact: true }).check();
+          await noOverflow('mortgage statement');
+          await page.screenshot({ path: path.join(out, `${name}-${width}-housing.png`), fullPage: true });
+          await navigate('Household');
+          await page.locator('summary').filter({ hasText: 'Use a Historical Inflation Reference' }).click();
+          await page.getByRole('button', { name: /^Use .*Historical Reference$/ }).click();
+          assert.ok(+(await page.getByLabel('General inflation', { exact: true }).inputValue()) > 2.5);
+          await page.getByRole('button', { name: 'Undo Reference', exact: true }).click();
+          assert.equal(await page.getByLabel('General inflation', { exact: true }).inputValue(), '');
+          await noOverflow('historical reference');
         }
         if (name === 'chromium' && width === 1280) {
           await page.emulateMedia({ media: 'print' });

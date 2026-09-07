@@ -1,6 +1,8 @@
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
 import { budgetTotals, EMPTY_BUDGET, normalizeBudget, type BudgetData } from "./budget.ts";
 import { buildDebtLedger, type DebtLedgerMonth } from "./debt-ledger.ts";
+import { reconcileMortgage, type MortgageStatement } from "./housing.ts";
+import type { InflationReceipt } from "./references.ts";
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
 import { calculateQcdElection } from "./qcd.ts";
@@ -63,6 +65,7 @@ export interface RecurringCost {
 export interface PlannerData {
   schemaVersion: 1 | 2;
   budget: BudgetData;
+  inflationReference?: InflationReceipt;
   household: {
     maritalStatus: "single" | "married";
     filingStatus: FilingStatus;
@@ -81,6 +84,7 @@ export interface PlannerData {
     inflation: number;
     preRetirementReturn: number;
     retirementReturn: number;
+    cashReturn?: number;
     stateEffectiveTaxRate: number;
     capitalGainsRate: number;
     taxableGainFraction: number;
@@ -132,6 +136,9 @@ export interface PlannerData {
     netInvestmentIncome: number;
   };
   housing: {
+    propertyTaxMode?: 'mills' | 'annual';
+    annualPropertyTax?: number;
+    statement?: MortgageStatement;
     homeValue: number;
     assessedPercent: number;
     millRate: number;
@@ -243,6 +250,7 @@ export const DEFAULT_PLAN: PlannerData = {
     inflation: 0,
     preRetirementReturn: 0,
     retirementReturn: 0,
+    cashReturn: 0,
     stateEffectiveTaxRate: 0,
     capitalGainsRate: 0,
     taxableGainFraction: 0,
@@ -324,11 +332,26 @@ export function totalPortfolio(data: PlannerData) {
 }
 
 export function propertyTaxAnnual(data: PlannerData) {
+  if (data.housing.statement?.enabled) return (activeMortgageStatement(data)?.propertyTax ?? 0) * 12;
+  if (data.housing.propertyTaxMode === 'annual') return Math.max(0, data.housing.annualPropertyTax ?? 0);
   return (
     data.housing.homeValue *
     (data.housing.assessedPercent / 100) *
     (data.housing.millRate / 1000)
   );
+}
+
+export function activeMortgageStatement(data: PlannerData) {
+  const s = data.housing.statement;
+  return s?.enabled && reconcileMortgage(s).reconciled && data.debts.some(d => d.id === s.debtId && d.kind === 'mortgage') ? s : null;
+}
+export function homeInsuranceAnnual(data: PlannerData) {
+  return data.housing.statement?.enabled ? (activeMortgageStatement(data)?.insurance ?? 0) * 12 : data.housing.annualInsurance;
+}
+export function mortgageAncillaryAnnual(data: PlannerData, yearIndex = 0, schedule?: DebtMonth[]) {
+  const s = activeMortgageStatement(data);
+  if (!s) return 0;
+  return (schedule ?? debtPayoffSchedule(data)).slice(yearIndex * 12 + 1, yearIndex * 12 + 13).filter(row => row.payments.some(p => p.id === s.debtId && p.openingBalance > 0)).length * ((s.mortgageInsurance ?? 0) + (s.otherEscrow ?? 0));
 }
 
 export function projectPlan(
@@ -521,9 +544,10 @@ export function projectPlan(
       );
 
     const priorTraditionalBalances = { ...traditionalBalances };
+    const cashInterest = balances.cash * Math.max(0, data.assumptions.cashReturn ?? 0) / 100;
     for (const kind of kinds) {
       if (kind === "traditional") continue;
-      balances[kind] *= 1 + rate;
+      if (kind !== 'cash') balances[kind] *= 1 + rate;
       if (!fullyRetired) balances[kind] += contributions[kind];
     }
     for (const owner of ["you", "partner", "joint"] as const) {
@@ -539,7 +563,8 @@ export function projectPlan(
     syncTraditionalBalance();
     if (!fullyRetired) taxableCostBasis += contributions.taxable;
 
-    let income = 0;
+    // Cash interest enters income once and is either spent or saved as surplus.
+    let income = cashInterest;
     let socialSecurityIncome = 0;
     for (const stream of data.income) {
       const ownerAge = stream.owner === "partner" ? partnerAge : age;
@@ -581,7 +606,7 @@ export function projectPlan(
         : 0;
     const housing =
       propertyTaxAnnual(data) * Math.pow(1 + inflation, index) +
-      data.housing.annualInsurance * Math.pow(1 + inflation, index);
+      homeInsuranceAnnual(data) * Math.pow(1 + inflation, index) + mortgageAncillaryAnnual(data, index, debtSchedule);
     const scheduledDebtService = debtSchedule
       .slice(index * 12 + 1, index * 12 + 13)
       .reduce(
@@ -885,7 +910,7 @@ export function projectPlan(
       grossOrdinaryIncome: taxableOrdinary,
       netLongTermCapitalGain: realizedTaxableGain,
       modifiedAdjustedGrossIncome: taxableOrdinary + realizedTaxableGain,
-      netInvestmentIncome: realizedTaxableGain,
+      netInvestmentIncome: realizedTaxableGain + cashInterest,
       inflationFactor,
       overrideRatePercent: data.assumptions.capitalGainsRate,
     });
@@ -1050,7 +1075,10 @@ export function projectPlan(
 }
 
 export function debtPayoffSchedule(data: PlannerData): DebtMonth[] {
-  return buildDebtLedger(data.debts, data.debtStrategy.method, data.debtStrategy.extraMonthlyPayment);
+  const s = data.housing.statement;
+  const active = activeMortgageStatement(data);
+  const debts = data.debts.map(d => s?.enabled && d.id === s.debtId ? { ...d, minimumPayment: active?.principalInterest ?? 0 } : d);
+  return buildDebtLedger(debts, data.debtStrategy.method, data.debtStrategy.extraMonthlyPayment);
 }
 
 function remainingLoanBalance(debt: Debt, months: number) {

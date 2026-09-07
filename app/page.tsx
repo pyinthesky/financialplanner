@@ -7,6 +7,9 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, L
 import { Button } from "@/components/ui/button";
 import { BudgetEditor } from "@/components/budget-editor";
 import { DebtCascade } from "@/components/debt-cascade";
+import { MortgageStatementEditor } from "@/components/mortgage-statement";
+import { homeInsuranceAnnual, mortgageAncillaryAnnual } from "@/lib/planner";
+import { applyInflationReference, canUndoInflationReference, INFLATION_REFERENCE, inflationReferenceValue } from "@/lib/references";
 import { annualize, budgetTotals, retirementAmount } from "@/lib/budget";
 import { NumericInput } from "@/components/numeric-input";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
@@ -200,7 +203,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
       <div className="report-metrics">
         <div>
           <span>Monte Carlo range</span>
-          <strong>{successRate}%</strong>
+          <strong>{buildPlanningSignals(data, { payoffMonths: debtMonths }).ready ? `${successRate}%` : 'Needs Inputs'}</strong>
         </div>
         <div>
           <span>Portfolio today</span>
@@ -231,7 +234,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
               <text x={printChart.plot.left - 9} y={line.y + 3} textAnchor="end" fill="#718096" fontSize="10">{compactCurrency.format(line.value)}</text>
             </g>
           ))}
-          {printChart.polygons.map((series) => (
+          {printChart.polygons.filter((series) => projection.some(row => row[series.key] > 0)).map((series) => (
             <g key={series.key}>
               <polygon points={series.points} fill={series.color} fillOpacity="0.76" />
               <polyline points={series.topPoints} fill="none" stroke={series.color} strokeWidth="1.2" />
@@ -354,9 +357,10 @@ export default function HomePage() {
   const setAssumption = (key: keyof PlannerData["assumptions"], value: number) =>
     setPlan((current) => ({
       ...current,
+      inflationReference: key === 'inflation' ? undefined : current.inflationReference,
       assumptions: { ...current.assumptions, [key]: value },
     }));
-  const setHousing = (key: keyof PlannerData["housing"], value: number | boolean) =>
+  const setHousing = <K extends keyof PlannerData["housing"]>(key: K, value: PlannerData["housing"][K]) =>
     setPlan((current) => ({
       ...current,
       housing: { ...current.housing, [key]: value },
@@ -644,8 +648,14 @@ export default function HomePage() {
         <Panel title="Economic Assumptions" eyebrow="ALL VALUES EDITABLE">
           <div className="form-grid">
             <Field label="General inflation" value={plan.assumptions.inflation} onChange={(value) => setAssumption("inflation", value)} suffix="%" step={0.1} max={20} />
+            <details className="budget-flow"><summary>Use a Historical Inflation Reference</summary>
+              <p>{INFLATION_REFERENCE.title}: <strong>{inflationReferenceValue().toFixed(2)}% / year</strong>. {INFLATION_REFERENCE.geography}. {INFLATION_REFERENCE.limitation}</p>
+              <p className="field-help">{INFLATION_REFERENCE.method}. Source reviewed {INFLATION_REFERENCE.reviewedOn}. <a href={INFLATION_REFERENCE.url} target="_blank" rel="noreferrer">BLS source table</a>.</p>
+              {canUndoInflationReference(plan.assumptions.inflation, plan.inflationReference) ? <><p className="field-help">Applied from BLS. Edit the inflation field to override it.</p><Button variant="outline" onClick={() => setAssumption('inflation', plan.inflationReference!.previousValue)}>Undo Reference</Button></> : <Button variant="outline" onClick={() => setPlan(current => { const result = applyInflationReference(current.assumptions.inflation); return { ...current, assumptions: { ...current.assumptions, inflation: result.value }, inflationReference: result.receipt }; })}>Use {inflationReferenceValue().toFixed(2)}% Historical Reference</Button>}
+            </details>
             <Field label="Return before retirement" value={plan.assumptions.preRetirementReturn} onChange={(value) => setAssumption("preRetirementReturn", value)} suffix="%" step={0.1} max={30} />
             <Field label="Return in retirement" value={plan.assumptions.retirementReturn} onChange={(value) => setAssumption("retirementReturn", value)} suffix="%" step={0.1} max={30} />
+            <Field label="Cash interest rate" value={plan.assumptions.cashReturn ?? 0} onChange={(value) => setAssumption("cashReturn", value)} suffix="%" step={0.1} max={30} help="Cash uses this separate rate, with interest included in ordinary income. Simulated market returns do not apply to cash." />
             <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" suffix="/ year" step={1000} help="Excludes healthcare, housing tax/insurance, debts, and recurring costs entered elsewhere." />
           </div>
         </Panel>
@@ -1002,7 +1012,10 @@ export default function HomePage() {
           </div>
         </Panel>
         <Panel title="Home Carrying Costs" eyebrow="HOUSING">
+          {plan.housing.statement?.enabled && <p className="panel-copy">The active mortgage statement supplies property tax and home insurance. Manual amounts below are retained for use if you turn it off.</p>}
           <div className="form-grid">
+            <SelectField label="Property tax entry method" value={plan.housing.propertyTaxMode ?? 'mills'} onChange={value => setHousing('propertyTaxMode', value as 'mills' | 'annual')} options={[{ value: 'annual', label: 'Annual Dollar Amount' }, { value: 'mills', label: 'Assessment and Mill Rate' }]} />
+            {plan.housing.propertyTaxMode === 'annual' && <Field label="Annual property tax" value={plan.housing.annualPropertyTax ?? 0} onChange={value => setHousing('annualPropertyTax', value)} prefix="$" suffix="/ year" />}
             <Field label="Home market value" value={plan.housing.homeValue} onChange={(value) => setHousing("homeValue", value)} prefix="$" step={5000} />
             <Field label="Assessed percent" value={plan.housing.assessedPercent} onChange={(value) => setHousing("assessedPercent", value)} suffix="%" step={1} max={200} />
             <Field label="Mill rate" value={plan.housing.millRate} onChange={(value) => setHousing("millRate", value)} suffix="mills" step={0.1} help="One mill is $1 per $1,000 of assessed value." />
@@ -1028,6 +1041,7 @@ export default function HomePage() {
           </label>
         </Panel>
       </div>
+      <MortgageStatementEditor statement={plan.housing.statement} debts={plan.debts} onChange={statement => setHousing('statement', statement)} />
       <Panel title="Large Recurring Costs" eyebrow="TIMED EXPENSES">
         <div className="table-wrap mobile-card-table costs-table">
           <Table>
@@ -2248,7 +2262,7 @@ export default function HomePage() {
   );
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
-    ? <BudgetEditor budget={plan.budget} onChange={budget => setPlan(current => ({ ...current, budget }))} retirement={activeSection === "retirementBudget"} married={plan.household.maritalStatus === "married"} legacyAnnual={plan.assumptions.annualSpending} linkedAnnual={{ housing: propertyTaxAnnual(plan) + plan.housing.annualInsurance, debt: debtPayoffSchedule(plan).slice(1, 13).reduce((sum, m) => sum + m.principalPaid + m.interestPaid, 0), health: plan.household.currentAge < 65 ? plan.healthcare.preMedicareAnnual : plan.healthcare.medicareAnnual }} />
+    ? <BudgetEditor budget={plan.budget} onChange={budget => setPlan(current => ({ ...current, budget }))} retirement={activeSection === "retirementBudget"} married={plan.household.maritalStatus === "married"} legacyAnnual={plan.assumptions.annualSpending} linkedAnnual={{ housing: propertyTaxAnnual(plan) + homeInsuranceAnnual(plan) + mortgageAncillaryAnnual(plan), debt: debtPayoffSchedule(plan).slice(1, 13).reduce((sum, m) => sum + m.principalPaid + m.interestPaid, 0), health: plan.household.currentAge < 65 ? plan.healthcare.preMedicareAnnual : plan.healthcare.medicareAnnual }} />
     : activeSection === "overview" ? renderOverview() : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (

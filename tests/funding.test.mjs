@@ -17,6 +17,27 @@ test('cash consumption is reported as funding and reconciles assets', () => {
   close(row.fundedRatio, 1); close(row.unfundedSpending, 0);
 });
 
+test('cash is isolated from market paths and its interest is counted once', () => {
+  const p = plan(10_000, 'cash', 100);
+  p.assumptions.retirementReturn = 25;
+  const calm = projectPlan(p, [0.45])[0];
+  const crash = projectPlan(p, [-0.45])[0];
+  close(calm.portfolio, 9_900); close(crash.portfolio, 9_900);
+  p.assumptions.cashReturn = 2;
+  const withInterest = projectPlan(p)[0];
+  close(withInterest.income, 200); close(withInterest.portfolio, 10_100);
+  close(withInterest.grossOrdinaryIncome, 200);
+});
+
+test('taxable cash interest participates in NIIT above the single threshold', () => {
+  const p = plan(1_000_000, 'cash', 0);
+  p.assumptions.cashReturn = 25;
+  const row = projectPlan(p)[0];
+  close(row.netInvestmentIncomeTax, 1_900);
+  close(row.realizedTaxableGain, 0);
+  close(row.portfolio, 1_250_000 - row.taxesPaid);
+});
+
 test('income surplus pays tax first and the remaining cash is retained', () => {
   const p = plan(0, 'cash', 10_000);
   p.income = [{ id: 'p', name: 'Synthetic', kind: 'pension', owner: 'you', annualAmount: 30_000, startAge: 60, cola: 0, survivorPercent: 0 }];
