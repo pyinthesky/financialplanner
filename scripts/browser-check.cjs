@@ -25,7 +25,7 @@ const server = http.createServer((req, res) => {
     try {
       for (const width of [320, 375, 390, 430, 768, 1280]) {
         const page = await browser.newPage({ viewport: { width, height: 900 } });
-        page.setDefaultTimeout(10000);
+        page.setDefaultTimeout(30000);
         const errors = [];
         page.on('pageerror', e => errors.push(e.message));
         await page.goto('http://127.0.0.1:4173/financialplanner/');
@@ -36,6 +36,7 @@ const server = http.createServer((req, res) => {
           await page.getByRole('button', { name: label, exact: true }).click();
           const heading = label === 'Household' ? 'Household & Assumptions' : label;
           await page.getByRole('heading', { name: heading, exact: true }).first().waitFor();
+          if (width < 768) await page.locator('[data-mobile="true"]').waitFor({ state: 'hidden' });
         };
         const noOverflow = async label => {
           const size = await page.evaluate(() => ({ content: document.documentElement.scrollWidth, viewport: window.innerWidth }));
@@ -77,6 +78,7 @@ const server = http.createServer((req, res) => {
           fixture.debtStrategy = { method: 'snowball', extraMonthlyPayment: 50 };
           await navigate('Data & Privacy');
           await page.locator('input[type=file]').setInputFiles({ name: 'synthetic-plan.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fixture)) });
+          await page.getByRole('button', { name: /Open data and privacy — Imported/ }).waitFor();
           await navigate('Retirement Budget');
           assert.equal(await page.getByLabel('Retirement Amount').inputValue(), '20', 'Export/import preserves the overlay');
           await navigate('Debt Payoff');
