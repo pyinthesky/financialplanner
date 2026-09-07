@@ -487,6 +487,14 @@ button, input, select { font: inherit; }
   [data-sidebar="menu-button"] { min-height: 3rem; }
   .chart-panel [data-slot="chart"] { min-width: 0; height: 17rem; margin-left: 0; width: 100%; }
   .chart-panel { overflow: hidden; }
+  .summary-strip, .calculated-line { align-items: flex-start; flex-direction: column; gap: .35rem; }
+  .switch-row > span { min-width: 0; }
+  .button-stack > button, .inline-confirm > button { max-width: 100%; height: auto; min-height: 2.75rem; white-space: normal; }
+  .site-footer { flex-direction: column; }
+}
+
+/* Data-entry tables need cards while the desktop sidebar shares a tablet viewport. */
+@media (max-width: 1100px) {
   .table-wrap.mobile-card-table { overflow: visible; }
   .mobile-card-table table, .mobile-card-table tbody, .mobile-card-table tr, .mobile-card-table td { display: block; width: 100%; min-width: 0; }
   .mobile-card-table table { min-width: 0; }
@@ -532,10 +540,6 @@ button, input, select { font: inherit; }
   .debts-table td:nth-child(3)::before { content: "Balance"; }
   .debts-table td:nth-child(4)::before { content: "APR"; }
   .debts-table td:nth-child(5)::before { content: "Minimum / month"; }
-  .summary-strip, .calculated-line { align-items: flex-start; flex-direction: column; gap: .35rem; }
-  .switch-row > span { min-width: 0; }
-  .button-stack > button, .inline-confirm > button { max-width: 100%; height: auto; min-height: 2.75rem; white-space: normal; }
-  .site-footer { flex-direction: column; }
 }
 
 @media (max-width: 460px) {
