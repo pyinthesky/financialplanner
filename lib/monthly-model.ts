@@ -1,4 +1,5 @@
 import type { HomeMove } from './home-move.ts';
+import type { SimulationInputs } from './stochastic.ts';
 export interface MonthlySettings {
   enabled: boolean;
   cashCoverageMonths: number | null;
@@ -41,6 +42,7 @@ export interface SavedScenario {
   overrides: ScenarioOverrides;
 }
 export interface Laboratory {
+  simulation?:SimulationInputs;
   version: 1;
   settings: MonthlySettings;
   events: PlanEvent[];
@@ -66,6 +68,7 @@ export function normalizeLaboratory(input: unknown): Laboratory {
   if (input === undefined) return structuredClone(EMPTY_LAB);
   if (!input || typeof input !== 'object') throw new Error('Invalid scenario laboratory.');
   const lab = input as Laboratory, s = lab.settings;
+  if(lab.simulation&&['mean','volatility','fee','samples','seed'].some(k=>!(lab.simulation![k as keyof SimulationInputs]===null||typeof lab.simulation![k as keyof SimulationInputs]==='number'&&Number.isFinite(lab.simulation![k as keyof SimulationInputs]))))throw new Error('Invalid simulation inputs.');
   if (lab.version !== 1 || !s || !['enabled', 'refillCash', 'legacyRealDollars'].every(k => typeof s[k as keyof MonthlySettings] === 'boolean') || !['cashCoverageMonths', 'dependableIncomeMonthly', 'reserveExtra', 'guardrailFloor', 'discretionaryCutPercent', 'legacyTarget'].every(k => amount(s[k as keyof MonthlySettings])) || (s.discretionaryCutPercent ?? 0) > 100) throw new Error('Invalid monthly settings.');
   if(s.dependableIncomeSource!==undefined&&!['manual','benefits'].includes(s.dependableIncomeSource))throw new Error('Invalid dependable income source.');
   validateEvents(lab.events);

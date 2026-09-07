@@ -145,6 +145,10 @@ const server = http.createServer((req, res) => {
           await scenarioEvents.getByLabel('Repeat Expense through Month',{exact:true}).fill('2026-08');
           await scenarioEvents.getByLabel('Event Amount',{exact:true}).fill('50');
           await page.getByRole('heading',{name:'Selected Scenario Results',exact:true}).waitFor();
+          await page.locator('summary').filter({hasText:'Uncertainty: Compare Matching Market Paths'}).click();
+          for(const [label,value] of [['Simulation Mean Annual Return / %','0'],['Annual Return Standard Deviation / %','0'],['Annual Investment Fee / %','0'],['Number of Paths','3'],['Repeatable Integer Seed','1']])await page.getByLabel(label,{exact:true}).fill(value);
+          await page.getByRole('button',{name:'Run Local Simulation',exact:true}).click();
+          await page.getByText('Simulation Complete',{exact:true}).waitFor();
           await noOverflow('scenario laboratory');
           await page.screenshot({path:path.join(out,`${name}-${width}-scenarios.png`),fullPage:true});
           const save=page.waitForEvent('download');
@@ -152,6 +156,7 @@ const server = http.createServer((req, res) => {
           const exported=JSON.parse(fs.readFileSync(await (await save).path(),'utf8'));
           assert.equal(exported.laboratory.scenarios[0].overrides.spendingChangePercent,50);
           assert.equal(exported.laboratory.settings.enabled,true);
+          assert.equal(exported.laboratory.simulation.samples,3);
           assert.equal(exported.laboratory.scenarios[1].overrides.homeMove.salePrice,2500);
           assert.equal(exported.laboratory.scenarios[1].overrides.events[0].throughMonth,'2026-08');
           assert.equal(exported.laboratory.scenarios[0].overrides.mortgagePayoff.month,'2026-03');
@@ -166,7 +171,8 @@ const server = http.createServer((req, res) => {
         }
         if (name === 'chromium' && width === 1280) {
           await page.emulateMedia({ media: 'print' });
-          assert.ok(await page.locator('.monthly-print svg').isVisible(), 'Monthly print chart renders');
+          assert.ok(await page.getByRole('img',{name:'Monthly Engine Portfolio Projection',exact:true}).isVisible(), 'Monthly print chart renders');
+          assert.ok(await page.getByRole('img',{name:'Saved Scenarios on Shared Axes',exact:true}).isVisible(), 'Scenario print chart renders');
           await page.pdf({ path: path.join(out, 'synthetic-budget-report.pdf'), format: 'Letter', printBackground: true });
         }
         assert.deepEqual(errors, [], `${name} ${width} has no uncaught errors`);

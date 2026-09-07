@@ -4,6 +4,7 @@ import { Area, AreaChart, Bar, CartesianGrid, ComposedChart, Legend, Line, XAxis
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { UncertaintyLaboratory } from '@/components/uncertainty-laboratory';
 import { MonthlyFunding } from '@/components/monthly-funding';
 import { HomeMoveEditor } from '@/components/home-move-editor';
 import { Amount } from '@/components/budget-editor';
@@ -73,6 +74,7 @@ export function ScenarioLaboratory({plan,onChange}:{plan:PlannerData;onChange:(p
     <div className="budget-actions"><Button variant="outline" onClick={()=>{const id=crypto.randomUUID();write({scenarios:[...lab.scenarios,{...structuredClone(scenario),id,name:scenario.name?`${scenario.name} Copy`:''}]});setSelected(id);}}>Duplicate Scenario</Button><Button variant="outline" onClick={()=>edit({overrides:{}})}>Reset Overrides</Button><Button variant="ghost" onClick={()=>{write({scenarios:lab.scenarios.filter(s=>s.id!==scenario.id)});setSelected('');}}>Delete Scenario</Button></div>
     {compared.scenarios.map(c=><div key={c.scenario.id}><div className="budget-metrics"><div><span>Ending Portfolio Change vs Saved Baseline</span><strong>{c.comparable?money(c.deltaPortfolio):'Needs Review'}</strong></div><div><span>Net Worth Change (Includes Home)</span><strong>{c.comparable?money(c.deltaNetWorth):'Needs Review'}</strong></div><div><span>Assets Minus Debt Change (Excludes Home)</span><strong>{c.comparable?money(c.deltaFinancialNetWorth):'Needs Review'}</strong></div><div><span>Full-Horizon Tax Change</span><strong>{c.comparable?money(c.deltaTax):'Needs Review'}</strong></div></div><MonthlyResults result={c.result} title="Selected Scenario Results"/></div>)}</>}
     </section><ScenarioComparison plan={plan}/><MonthlyResults result={baseline}/>
+    <UncertaintyLaboratory plan={plan} onChange={onChange}/>
     <details className="panel"><summary>Remaining Specialized Comparisons</summary><p>Automatic Social Security claiming/survivor transitions, move-state tax rules, special home-sale cases and inherited retirement accounts remain explicit dependencies. Do not simulate them by moving unchanged benefits, adding gross sale proceeds, or assuming zero tax. This laboratory currently supports budget/timing changes, user-entered inflation/return stresses, cash coverage, spending guardrails, funded mortgage payoff, standard home-sale/cash-downsize estimates, confirmed cash events, and a legacy target.</p></details>
   </div>;
 }

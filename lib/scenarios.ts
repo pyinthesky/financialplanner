@@ -10,6 +10,7 @@ function sorted(value: unknown): unknown {
 export function baselineSnapshot(plan: PlannerData): string {
   const copy = structuredClone(plan);
   copy.laboratory = { ...(copy.laboratory ?? structuredClone(EMPTY_LAB)), scenarios: [] };
+  delete copy.laboratory.simulation;
   return JSON.stringify(sorted(normalizePlan(copy)));
 }
 export function scenarioIsStale(plan: PlannerData, scenario: SavedScenario) { return baselineSnapshot(plan) !== scenario.baseline; }
