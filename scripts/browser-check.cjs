@@ -51,7 +51,7 @@ const server = http.createServer((req, res) => {
         await page.getByLabel('Current Amount').fill('10');
         await page.locator('summary').filter({hasText:'Use a Public Reference (Optional)'}).click();
         await page.getByLabel('Budget Reference',{exact:true}).selectOption('electricity');
-        await page.getByLabel('Reference State',{exact:true}).selectOption('Virginia');
+        await page.getByLabel('Reference State',{exact:true}).selectOption('VA');
         await page.getByRole('button',{name:'Apply to Current Amount',exact:true}).click();
         await page.waitForFunction(el=>Number(el.value)>100,await page.getByLabel('Current Amount').elementHandle());
         await page.getByRole('button',{name:'Undo Reference Amount',exact:true}).click();
