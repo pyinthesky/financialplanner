@@ -34,7 +34,8 @@ const server = http.createServer((req, res) => {
           const nav = page.getByRole('button', { name: label, exact: true });
           if (!await nav.isVisible()) await page.getByRole('button', { name: 'Toggle Sidebar' }).click();
           await page.getByRole('button', { name: label, exact: true }).click();
-          await page.getByRole('heading', { name: label, exact: true }).first().waitFor();
+          const heading = label === 'Household' ? 'Household & Assumptions' : label;
+          await page.getByRole('heading', { name: heading, exact: true }).first().waitFor();
         };
         const noOverflow = async label => {
           const size = await page.evaluate(() => ({ content: document.documentElement.scrollWidth, viewport: window.innerWidth }));
