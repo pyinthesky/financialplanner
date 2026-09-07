@@ -25,9 +25,11 @@ const server = http.createServer((req, res) => {
     try {
       for (const width of [320, 375, 390, 430, 768, 1280]) {
         const page = await browser.newPage({ viewport: { width, height: 900 } });
+        page.setDefaultTimeout(10000);
         const errors = [];
         page.on('pageerror', e => errors.push(e.message));
         await page.goto('http://127.0.0.1:4173/financialplanner/');
+        console.log(`Checking ${name} at ${width}px`);
         const navigate = async label => {
           const nav = page.getByRole('button', { name: label, exact: true });
           if (!await nav.isVisible()) await page.getByRole('button', { name: 'Toggle Sidebar' }).click();
