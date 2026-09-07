@@ -95,8 +95,10 @@ const server = http.createServer((req, res) => {
           await navigate('Household');
           await page.locator('summary').filter({ hasText: 'Use a Historical Inflation Reference' }).click();
           await page.getByRole('button', { name: /^Use .*Historical Reference$/ }).click();
+          await page.waitForFunction(el => Number(el.value) > 2.5, await page.getByLabel('General inflation', { exact: true }).elementHandle());
           assert.ok(+(await page.getByLabel('General inflation', { exact: true }).inputValue()) > 2.5);
           await page.getByRole('button', { name: 'Undo Reference', exact: true }).click();
+          await page.waitForFunction(el => el.value === '', await page.getByLabel('General inflation', { exact: true }).elementHandle());
           assert.equal(await page.getByLabel('General inflation', { exact: true }).inputValue(), '');
           await noOverflow('historical reference');
         }
