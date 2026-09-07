@@ -61,7 +61,9 @@ The work is organized into bounded batches so each batch can ship independently.
 
 ### Priority delivery sequence
 
-The highest-value path is to finish the broadly applicable federal-tax correctness work in Batch 2, then deliver the universal Social Security and pension decisions in Batch 3, followed by the most useful scenario tools in Batch 5. Essential healthcare and state inputs follow where they materially affect those decisions. Specialized military and government paths remain in Batch 3 but follow the universal benefit engine they depend on.
+The primary journey is **Current Budget → Retirement Budget → Scenarios → Plan Summary**, beginning with Data & Privacy and a shared household model. The detailed [Batch 5 plan](docs/batch-5-plan.md) is the canonical delivery contract: reconcile the existing engine first, build linked budgets, correct and expose debt-payment cascading, provide optional sourced assumptions, then ship meaningful scenario comparisons. Pull in specific Batch 3/4 benefit, health, and state-data dependencies when needed; do not imply they work merely because a scenario selector exists.
+
+Read [development state](docs/development-state.md) before resuming. Timed builds are disabled. Budget usability, source shortcuts, and mobile acceptance are core delivery requirements, not optional polish left at the end of the backlog.
 
 ### Batch 1 — Private planning foundation (complete)
 
@@ -90,7 +92,9 @@ The highest-value path is to finish the broadly applicable federal-tax correctne
 - [x] Remove redundant in-content navigation actions such as **Review Assumptions** when the primary menu already provides the destination
 - [x] Reshape rough Planning Signals cards into a calm, prioritized summary with a plain-language reason and next useful action for each signal; never label an untouched plan as funded
 
-### Batch 2 — Federal tax engine (complete)
+### Batch 2 — Federal tax worksheets delivered; integration repairs required
+
+The items below record delivered functionality. A September 7, 2026 review found tax-funding feedback, cash-withdrawal reporting, and conversion integration gaps. These are explicitly reopened prerequisites in [5A](docs/batch-5-plan.md#5a--reconcile-the-engine-before-comparing-plans); the earlier “complete” label did not establish that the full projection was validated for decision comparisons.
 
 - [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
 - [x] Social Security taxation worksheet using provisional income, filing-status thresholds, tax-exempt interest, and the married-filing-separately lived-apart distinction
@@ -130,14 +134,18 @@ The highest-value path is to finish the broadly applicable federal-tax correctne
 
 ### Batch 5 — Scenario laboratory
 
-- Side-by-side mortgage payoff versus investing
-- Mortgage principal-and-interest versus escrow reconciliation so taxes, homeowners insurance, HOA, mortgage insurance, and other impounds are not mistaken for debt service or double-counted; connect the result to a dedicated housing view
-- Move-state, retire-date, spending, and claiming-age comparisons
-- Guardrails, cash buckets, and sequence-of-returns stress tests
-- Recommended cash-buffer range on the plan overview, with an itemized explanation of which essential costs it covers, how many months it funds, and how the recommendation changes by income stability and retirement stage
-- Inheritance, one-time income, home sale/downsize, and legacy goals
-- A monthly plan-summary view connecting income sources, required and discretionary withdrawals, categorized expenses, tax set-asides, remaining margin, and annual/irregular obligations
-- Plan-summary income views that include pensions without incorrectly capitalizing them into portfolio assets, plus a user toggle between combined household cash flow and individually split sources
+See [the implementation plan and acceptance examples](docs/batch-5-plan.md). All original scenario requirements are retained there alongside the missing current/retirement-budget journey.
+
+- [ ] **5A — Reliable foundation:** cash and tax-funding reconciliation, monthly/annual ledger, conversion constraints, independent fixtures, and CI verification
+  - [x] **5A.1 annual funding repair:** cash withdrawals, retained surplus, iterative tax funding and unpaid-tax results; gross/taxable labels; full-horizon conversion tax comparison; tests and type checks in Pages CI. Verified with 84 tests and production build. Monthly timing and conversion access remain open.
+- [ ] **5B — Linked budgets:** current earnings and monthly bills, retirement changes by category and owner timeline, quick/detail entry, shared inputs, and a reconciled summary
+- [ ] **5C — Housing and debt:** P&I/escrow reconciliation, mill rate or annual tax, correct Snowball/Avalanche rollover and Custom extra, per-debt ledgers and a visible minimum-payment cascade
+- [ ] **5D — Optional reference choices:** sourced historical/national/cohort/state values where appropriate, local ZIP assistance when defensible, provenance, undo, and overrides; zero prefilled financial values
+- [ ] **5E — Scenario comparisons:** baseline-plus-overrides, retire-date/spending comparisons, equal-budget mortgage payoff versus investing, monthly cash flow, split pension/benefit sources, and matching PDF output; claiming-age/state automation depends on relevant Batch 3/4 engines
+- [ ] **5F — Resilience:** itemized cash-buffer coverage, cash buckets, configurable spending guardrails, and sequence/inflation/care/longevity stress with explicit assumptions
+- [ ] **5G — Life events and legacy:** one-time income, inheritance with supported tax treatment, home sale/downsize, and legacy goals; complex inherited-account and survivor cases retain explicit dependencies
+
+Mobile/browser acceptance, printable charts, blank onboarding, migrations, and local-only privacy apply to every slice. A phase is not complete until its user journey and calculation criteria pass.
 
 ### Batch 6 — Trust, accessibility, and optional AI
 

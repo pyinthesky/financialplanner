@@ -181,6 +181,14 @@ export interface ProjectionYear {
   currentLawAcaStatus: AcaPtcStatus | null;
   currentLawIrmaaAnnual: number | null;
   taxableOrdinaryIncome: number;
+  grossOrdinaryIncome: number;
+  cashWithdrawal: number;
+  cashSurplus: number;
+  taxesPaid: number;
+  unfundedTaxes: number;
+  unfundedSpending: number;
+  taxFundingIterations: number;
+  taxFundingConverged: boolean;
   taxableCostBasis: number;
   realizedTaxableGain: number;
   socialSecurityIncome: number;
@@ -484,7 +492,7 @@ export function projectPlan(
     syncTraditionalBalance();
     return amount;
   };
-  let traditionalWithdrawalsByOwner: Record<Owner, number> | null = null;
+  let traditionalWithdrawalsByOwner: Record<Owner, number> = { you: 0, partner: 0, joint: 0 };
 
   let youQcdContributionOffset = Math.max(
     0,
@@ -597,6 +605,7 @@ export function projectPlan(
 
     let spendingGap = Math.max(0, spending - income);
     let taxableWithdrawal = 0;
+    let cashWithdrawal = 0;
     let traditionalWithdrawal = 0;
     let requiredMinimumDistribution = 0;
     let youRmd = 0;
@@ -697,7 +706,10 @@ export function projectPlan(
     traditionalWithdrawal = youCashRmd + partnerCashRmd;
     const rmdUsedForSpending = Math.min(spendingGap, traditionalWithdrawal);
     spendingGap -= rmdUsedForSpending;
-    balances.cash += traditionalWithdrawal - rmdUsedForSpending;
+    // Hold surplus outside the accounts until tax settlement, so it cannot be
+    // reported a second time as a withdrawal when used to pay tax.
+    let settlementCash = Math.max(0, income - spending) +
+      traditionalWithdrawal - rmdUsedForSpending;
 
     if (fullyRetired) {
       const nonSocialSecurityIncome = income - socialSecurityIncome;
@@ -755,7 +767,7 @@ export function projectPlan(
       balances.taxable -= taxableWithdrawal;
       spendingGap -= taxableWithdrawal;
 
-      const cashWithdrawal = Math.min(balances.cash, spendingGap);
+      cashWithdrawal = Math.min(balances.cash, spendingGap);
       balances.cash -= cashWithdrawal;
       spendingGap -= cashWithdrawal;
 
@@ -799,6 +811,7 @@ export function projectPlan(
       : 0;
     const rothConversion = youRothConversion + partnerRothConversion;
 
+    const assessTaxes = () => {
     const youEarlyDistribution = calculateEarlyDistributionTax({
       ageOnDistributionDate: age,
       taxableDistribution: traditionalWithdrawalsByOwner.you,
@@ -912,16 +925,54 @@ export function projectPlan(
       stateTaxes +
       capitalGainsTaxes +
       earlyDistributionPenaltyTax;
-    const taxDraw = Math.min(balances.taxable, taxes);
-    if (taxDraw > 0 && balances.taxable > 0) {
-      taxableCostBasis = Math.max(
-        0,
-        taxableCostBasis - taxDraw * (taxableCostBasis / balances.taxable),
-      );
+    return { taxes, federalTax, stateTaxes, capitalGainsTaxes, capitalGainsTax,
+      taxableOrdinary, federalTaxResult, modifiedAdjustedGrossIncome,
+      acaModifiedAdjustedGrossIncome, currentLawAca, currentLawIrmaa, socialSecurityTax };
+    };
+
+    let assessment = assessTaxes();
+    let taxesPaid = 0;
+    let taxFundingIterations = 0;
+    // Draw only the newly uncovered tax, then reassess all tax interactions.
+    // The bounded loop exposes an unpaid residual even when funds run out.
+    for (; taxFundingIterations < 128; taxFundingIterations += 1) {
+      let due = Math.max(0, assessment.taxes - taxesPaid);
+      if (due <= 0.0001) break;
+      const fromSurplus = Math.min(settlementCash, due);
+      settlementCash -= fromSurplus;
+      due -= fromSurplus;
+      const fromCash = Math.min(balances.cash, due);
+      balances.cash -= fromCash;
+      cashWithdrawal += fromCash;
+      due -= fromCash;
+      const sale = Math.min(balances.taxable, due);
+      if (sale > 0) {
+        const allocatedBasis = sale * taxableCostBasis / balances.taxable;
+        taxableCostBasis = Math.max(0, taxableCostBasis - allocatedBasis);
+        realizedTaxableGain += Math.max(0, sale - allocatedBasis);
+        balances.taxable -= sale;
+        taxableWithdrawal += sale;
+        due -= sale;
+      }
+      const fromTraditional = withdrawTraditional(due);
+      traditionalWithdrawal += fromTraditional;
+      due -= fromTraditional;
+      // Never immediately spend a conversion to fund its own tax. Roth access
+      // eligibility remains an explicit limitation until the lot contract ships.
+      const fromRoth = Math.min(Math.max(0, balances.roth - rothConversion), due);
+      balances.roth -= fromRoth;
+      rothWithdrawal += fromRoth;
+      const funded = fromSurplus + fromCash + sale + fromTraditional + fromRoth;
+      taxesPaid += funded;
+      assessment = assessTaxes();
+      if (funded <= 0) break;
     }
-    balances.taxable -= taxDraw;
-    const remainingTax = taxes - taxDraw;
-    if (remainingTax > 0) withdrawTraditional(remainingTax);
+    const { taxes, federalTax, stateTaxes, capitalGainsTaxes, capitalGainsTax,
+      taxableOrdinary, federalTaxResult, modifiedAdjustedGrossIncome,
+      acaModifiedAdjustedGrossIncome, currentLawAca, currentLawIrmaa, socialSecurityTax } = assessment;
+    const unfundedTaxes = Math.max(0, taxes - taxesPaid);
+    const cashSurplus = settlementCash;
+    balances.cash += cashSurplus;
 
     home *= 1 + inflation;
     const portfolio = kinds.reduce((sum, kind) => sum + balances[kind], 0);
@@ -929,7 +980,7 @@ export function projectPlan(
       taxableWithdrawal +
       traditionalWithdrawal +
       rothWithdrawal +
-      hsaWithdrawal;
+      hsaWithdrawal + cashWithdrawal;
     rows.push({
       age,
       year: calendarYear,
@@ -954,7 +1005,15 @@ export function projectPlan(
         currentLawAca?.potentialPremiumTaxCredit ?? null,
       currentLawAcaStatus: currentLawAca?.status ?? null,
       currentLawIrmaaAnnual: currentLawIrmaa?.annualHouseholdIrmaa ?? null,
-      taxableOrdinaryIncome: taxableOrdinary,
+      taxableOrdinaryIncome: federalTaxResult.taxableIncome,
+      grossOrdinaryIncome: taxableOrdinary,
+      cashWithdrawal,
+      cashSurplus,
+      taxesPaid,
+      unfundedTaxes,
+      unfundedSpending: spendingGap,
+      taxFundingIterations,
+      taxFundingConverged: unfundedTaxes <= 0.0001,
       taxableCostBasis,
       realizedTaxableGain,
       socialSecurityIncome,
@@ -980,7 +1039,9 @@ export function projectPlan(
       rothWithdrawal,
       hsaWithdrawal,
       fundedRatio:
-        spending > 0 ? Math.min(1, (income + withdrawals) / spending) : 1,
+        spending + taxes > 0
+          ? Math.max(0, 1 - (spendingGap + unfundedTaxes) / (spending + taxes))
+          : 1,
     });
   }
   return rows;

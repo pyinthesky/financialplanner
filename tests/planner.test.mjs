@@ -410,8 +410,10 @@ test("taxable withdrawals realize only the gain above allocated cost basis", () 
   plan.income = [{ id: "pension", name: "Pension", owner: "you", kind: "pension", startAge: 67, annualAmount: 20_000, cola: 0, survivorPercent: 0 }];
   plan.accounts = [{ id: "brokerage", name: "Brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 80_000 }];
   const row = projectPlan(plan)[0];
-  assert.ok(Math.abs(row.realizedTaxableGain - 10_000) < 0.01);
-  assert.ok(Math.abs(row.capitalGainsTaxes - 2_000) < 0.01);
+  // Sale = 50,000 spending gap + 390 ordinary tax + 4% of sale.
+  const sale = 50_390 / 0.96;
+  assert.ok(Math.abs(row.realizedTaxableGain - sale * 0.2) < 0.01);
+  assert.ok(Math.abs(row.capitalGainsTaxes - sale * 0.04) < 0.01);
 });
 
 test("projection uses statutory LTCG bands when no override is entered", () => {
@@ -423,11 +425,14 @@ test("projection uses statutory LTCG bands when no override is entered", () => {
   plan.income = [{ id: "pension", name: "Pension", owner: "you", kind: "pension", startAge: 67, annualAmount: 60_000, cola: 0, survivorPercent: 0 }];
   plan.accounts = [{ id: "brokerage", name: "Brokerage", kind: "taxable", owner: "you", balance: 100_000, annualContribution: 0, costBasis: 80_000 }];
   const row = projectPlan(plan)[0];
-  assert.ok(Math.abs(row.realizedTaxableGain - 10_000) < 0.01);
-  assert.ok(Math.abs(row.taxableLongTermCapitalGain - 10_000) < 0.01);
-  assert.ok(Math.abs(row.regularCapitalGainsTaxes - 667.5) < 0.01);
+  // Ordinary tax 5,020; 5,550 of gains fit 0%; remaining gains at 15%.
+  const sale = (50_000 + 5_020 - 832.5) / 0.97;
+  const gainsTax = (sale * 0.2 - 5_550) * 0.15;
+  assert.ok(Math.abs(row.realizedTaxableGain - sale * 0.2) < 0.01);
+  assert.ok(Math.abs(row.taxableLongTermCapitalGain - sale * 0.2) < 0.01);
+  assert.ok(Math.abs(row.regularCapitalGainsTaxes - gainsTax) < 0.01);
   assert.equal(row.netInvestmentIncomeTax, 0);
-  assert.ok(Math.abs(row.capitalGainsTaxes - 667.5) < 0.01);
+  assert.ok(Math.abs(row.capitalGainsTaxes - gainsTax) < 0.01);
 });
 
 test("taxable contributions increase adjusted basis", () => {
@@ -497,7 +502,8 @@ test("projection calculates RMDs separately for each account owner", () => {
   assert.ok(Math.abs(row.youRmd - 10_000) < 0.01);
   assert.ok(Math.abs(row.partnerRmd - 10_000) < 0.01);
   assert.ok(Math.abs(row.requiredMinimumDistribution - 20_000) < 0.01);
-  assert.ok(Math.abs(row.cash - 20_000) < 0.01);
+  // This fixture deliberately retains single filing: 390 tax uses RMD cash.
+  assert.ok(Math.abs(row.cash - 19_610) < 0.01);
 });
 
 test("joint tax-deferred balances are not silently assigned to an RMD owner", () => {
@@ -652,11 +658,11 @@ test("projection adds the early-distribution tax without treating an exception a
   }];
   plan.earlyWithdrawalPlanning.annualConfirmedExceptionYou = 6_000;
   const row = projectPlan(plan)[0];
-  assert.equal(row.traditionalWithdrawal, 10_000);
+  assert.ok(Math.abs(row.traditionalWithdrawal - (10_000 - 600) / 0.9) < 0.001);
   assert.equal(row.earlyDistributionExceptionAmount, 6_000);
-  assert.equal(row.earlyDistributionPenaltyBase, 4_000);
-  assert.equal(row.earlyDistributionPenaltyTax, 400);
-  assert.equal(row.taxes, 400);
+  assert.ok(Math.abs(row.earlyDistributionPenaltyBase - 4_000 / 0.9) < 0.001);
+  assert.ok(Math.abs(row.earlyDistributionPenaltyTax - 400 / 0.9) < 0.001);
+  assert.ok(Math.abs(row.taxes - 400 / 0.9) < 0.001);
 });
 
 test("unassigned early tax-deferred withdrawals are flagged rather than penalized against a guessed owner", () => {
@@ -693,7 +699,8 @@ test("owner-specific Roth ladder moves balances and includes conversions in inco
   const rows = projectPlan(plan);
   assert.equal(rows[0].youRothConversion, 20_000);
   assert.equal(rows[0].rothConversion, 20_000);
-  assert.equal(rows[0].taxableOrdinaryIncome, 20_000);
+  assert.equal(rows[0].grossOrdinaryIncome, 20_000);
+  assert.equal(rows[0].taxableOrdinaryIncome, 3_900);
   assert.equal(rows[0].traditional, 80_000);
   assert.equal(rows[0].roth, 20_000);
   assert.equal(rows[1].traditional, 60_000);
@@ -765,7 +772,7 @@ test("conversion ladder exposes Social Security, ACA, and IRMAA sensitivities", 
   plan.accounts = [{ id: "ira", name: "IRA", kind: "traditional", owner: "you", balance: 50_000, annualContribution: 0 }];
   const row = projectPlan(plan)[0];
   assert.ok(row.taxableSocialSecurity > 0);
-  assert.ok(row.taxableOrdinaryIncome > row.rothConversion);
+  assert.ok(row.grossOrdinaryIncome > row.rothConversion);
   assert.equal(row.currentLawAcaStatus, "standard-income-range");
   assert.ok(row.currentLawAcaPremiumTaxCredit !== null);
   assert.ok(row.currentLawIrmaaAnnual !== null);
