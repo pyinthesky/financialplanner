@@ -43,7 +43,7 @@ const server = http.createServer((req, res) => {
           assert.ok(size.content <= size.viewport + 1, `${name} ${width} ${label}: ${JSON.stringify(size)}`);
         };
         await navigate('Current Budget');
-        assert.equal(await page.locator('main input[type=number]').count(), 0, 'No prefilled financial entries');
+        assert.ok((await page.locator('main input[type=number]').evaluateAll(inputs=>inputs.map(i=>i.value))).every(v=>v===''), 'No prefilled financial entries');
         await page.getByRole('button', { name: 'Add Take-Home Pay', exact: true }).click();
         await page.getByLabel('Take-Home per Payment').fill('100');
         await page.getByLabel('Frequency', { exact: true }).selectOption('biweekly');
@@ -73,6 +73,8 @@ const server = http.createServer((req, res) => {
           const downloaded = await downloadPromise;
           const fixture = JSON.parse(fs.readFileSync(await downloaded.path(), 'utf8'));
           Object.assign(fixture.household, { currentAge: 60, retirementAge: 60, planToAge: 80 });
+          fixture.budget.timeline={startYear:2026,retirementMonthYou:'2026-01',retirementMonthPartner:''};
+          fixture.budget.reviewed=true;
           fixture.accounts = [{ id: 'synthetic-cash', name: 'Synthetic Cash', owner: 'you', kind: 'cash', balance: 10000, annualContribution: 0 }];
           fixture.debts = [['A',100,50],['B',400,100],['C',1000,100]].map(([id,balance,minimumPayment]) => ({ id, name: id, kind: id === 'C' ? 'mortgage' : 'other', balance, minimumPayment, interestRate: 0 }));
           fixture.debtStrategy = { method: 'snowball', extraMonthlyPayment: 50 };
@@ -103,10 +105,29 @@ const server = http.createServer((req, res) => {
           await page.waitForFunction(el => el.value === '', await page.getByLabel('General inflation', { exact: true }).elementHandle());
           assert.equal(await page.getByLabel('General inflation', { exact: true }).inputValue(), '');
           await noOverflow('historical reference');
+          await navigate('Scenario Laboratory');
+          await page.getByRole('checkbox',{name:'Use Monthly Results in Plan Summary and PDF',exact:true}).check();
+          await page.getByRole('button',{name:'Create Scenario',exact:true}).click();
+          await page.getByLabel('Scenario Name',{exact:true}).fill('Synthetic Scenario');
+          await page.getByLabel('Everyday Spending Change / %',{exact:true}).fill('50');
+          await page.getByRole('heading',{name:'Selected Scenario Results',exact:true}).waitFor();
+          await noOverflow('scenario laboratory');
+          await page.screenshot({path:path.join(out,`${name}-${width}-scenarios.png`),fullPage:true});
+          const save=page.waitForEvent('download');
+          await page.getByRole('button',{name:'Export plan data',exact:true}).click();
+          const exported=JSON.parse(fs.readFileSync(await (await save).path(),'utf8'));
+          assert.equal(exported.laboratory.scenarios[0].overrides.spendingChangePercent,50);
+          assert.equal(exported.laboratory.settings.enabled,true);
+          await navigate('Data & Privacy');
+          await page.locator('input[type=file]').setInputFiles({name:'synthetic-scenarios.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))});
+          await page.getByRole('button',{name:/Open data and privacy — Imported/}).waitFor();
+          await navigate('Plan Summary');
+          await page.getByRole('heading',{name:'Monthly Planning Summary',exact:true}).waitFor();
+          await noOverflow('monthly summary');
         }
         if (name === 'chromium' && width === 1280) {
           await page.emulateMedia({ media: 'print' });
-          assert.ok(await page.locator('.report-portfolio-chart').isVisible(), 'Print chart renders');
+          assert.ok(await page.locator('.monthly-print svg').isVisible(), 'Monthly print chart renders');
           await page.pdf({ path: path.join(out, 'synthetic-budget-report.pdf'), format: 'Letter', printBackground: true });
         }
         assert.deepEqual(errors, [], `${name} ${width} has no uncaught errors`);

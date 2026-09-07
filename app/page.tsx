@@ -5,6 +5,8 @@ import { Activity, BriefcaseBusiness, Building2, Calculator, ChevronRight, Circl
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
+import { ScenarioLaboratory, MonthlyResults, MonthlyPrintReport } from '@/components/scenario-laboratory';
+import { projectMonthly } from '@/lib/monthly-projection';
 import { BudgetEditor } from "@/components/budget-editor";
 import { DebtCascade } from "@/components/debt-cascade";
 import { MortgageStatementEditor } from "@/components/mortgage-statement";
@@ -31,7 +33,7 @@ import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
-type SectionId = "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
+type SectionId = "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
 type VaultStatus = "off" | "locked" | "unlocked";
 type SaveStatus = "unsaved" | "locked" | "saving" | "saved" | "failed";
 
@@ -47,6 +49,7 @@ const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "debt", label: "Debt Payoff", icon: WalletCards },
   { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
   { id: "taxes", label: "Taxes & Withdrawals", icon: Calculator },
+  { id: "scenarios", label: "Scenario Laboratory", icon: Activity },
   { id: "overview", label: "Plan Summary", icon: Activity },
 ];
 
@@ -186,6 +189,7 @@ function PlannerNavigation({ activeSection, onSelect }: { activeSection: Section
 }
 
 function PrintReport({ data, projection, successRate, debtMonths }: { data: PlannerData; projection: ReturnType<typeof projectPlan>; successRate: number; debtMonths: number }) {
+  if (data.laboratory?.settings.enabled) return <article className="print-report"><header className="report-header"><h1>Retirement Plan Summary</h1><p>Monthly Engine</p></header><MonthlyPrintReport plan={data} result={projectMonthly(data)}/><footer>Local-only educational planning estimate. See Scenario Laboratory for tax, benefit and account-access limitations.</footer></article>;
   const retirement = projection.find((row) => row.age === data.household.retirementAge) ?? projection[0];
   const last = projection.at(-1)!;
   const printChart = buildPrintPortfolioChart(projection);
@@ -2262,8 +2266,8 @@ export default function HomePage() {
   );
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
-    ? <BudgetEditor budget={plan.budget} onChange={budget => setPlan(current => ({ ...current, budget }))} retirement={activeSection === "retirementBudget"} married={plan.household.maritalStatus === "married"} legacyAnnual={plan.assumptions.annualSpending} linkedAnnual={{ housing: propertyTaxAnnual(plan) + homeInsuranceAnnual(plan) + mortgageAncillaryAnnual(plan), debt: debtPayoffSchedule(plan).slice(1, 13).reduce((sum, m) => sum + m.principalPaid + m.interestPaid, 0), health: plan.household.currentAge < 65 ? plan.healthcare.preMedicareAnnual : plan.healthcare.medicareAnnual }} />
-    : activeSection === "overview" ? renderOverview() : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    ? <BudgetEditor accounts={plan.accounts} household={plan.household} budget={plan.budget} onChange={budget => setPlan(current => ({ ...current, budget }))} retirement={activeSection === "retirementBudget"} married={plan.household.maritalStatus === "married"} legacyAnnual={plan.assumptions.annualSpending} linkedAnnual={{ housing: propertyTaxAnnual(plan) + homeInsuranceAnnual(plan) + mortgageAncillaryAnnual(plan), debt: debtPayoffSchedule(plan).slice(1, 13).reduce((sum, m) => sum + m.principalPaid + m.interestPaid, 0), health: plan.household.currentAge < 65 ? plan.healthcare.preMedicareAnnual : plan.healthcare.medicareAnnual }} />
+    : activeSection === "scenarios" ? <ScenarioLaboratory plan={plan} onChange={setPlan}/> : activeSection === "overview" ? (plan.laboratory?.settings.enabled ? <div className="budget-flow"><div className="section-heading"><h1>Plan Summary</h1><p>Monthly budget and funding model selected in Scenario Laboratory.</p></div><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>

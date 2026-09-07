@@ -134,7 +134,11 @@ The items below record delivered functionality. A September 7, 2026 review found
 
 ### Batch 5 — Scenario laboratory
 
+September 7 buildout (browser release verification pending): enhanced grouped Current/Retirement Budgets, dated owner transitions, reconciled payroll and funded savings; a separate selectable monthly engine with shared annual tax modules; immutable scenario baselines and explicit rebase; hypothetical return/inflation/longevity changes; cash coverage and discretionary guardrails; confirmed cash events and legacy targets. See [development state](docs/development-state.md) for the exact supported scope. This does not mark the entire batch complete.
+
 See [the implementation plan and acceptance examples](docs/batch-5-plan.md). All original scenario requirements are retained there alongside the missing current/retirement-budget journey.
+
+The [experience contract](docs/batch-5-experience.md) adds compact grouped entry, simple/category budgets, Today/Retirement comparisons, scoped monthly edits, explicit actual-versus-projected semantics, reconciled cash-flow charts, and mobile acceptance. These refine the existing phases; they are planned requirements, not claims of shipped functionality.
 
 - [ ] **5A — Reliable foundation:** cash and tax-funding reconciliation, monthly/annual ledger, conversion constraints, independent fixtures, and CI verification
   - [x] **5A.1 annual funding repair:** cash withdrawals, retained surplus, iterative tax funding and unpaid-tax results; gross/taxable labels; full-horizon conversion tax comparison; tests and type checks in Pages CI. Verified with 84 tests and production build. Monthly timing and conversion access remain open.

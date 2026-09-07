@@ -3,6 +3,7 @@ import { budgetTotals, EMPTY_BUDGET, normalizeBudget, type BudgetData } from "./
 import { buildDebtLedger, type DebtLedgerMonth } from "./debt-ledger.ts";
 import { reconcileMortgage, type MortgageStatement } from "./housing.ts";
 import type { InflationReceipt } from "./references.ts";
+import { normalizeLaboratory, type Laboratory } from './monthly-model.ts';
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
 import { calculateQcdElection } from "./qcd.ts";
@@ -30,6 +31,8 @@ export interface Account {
   annualContribution: number;
   costBasis?: number;
   qcdEligibleIra?: boolean;
+  conversionEligiblePretax?: boolean;
+  rothQualifiedFromYear?: number;
 }
 
 export interface IncomeStream {
@@ -65,6 +68,7 @@ export interface RecurringCost {
 export interface PlannerData {
   schemaVersion: 1 | 2;
   budget: BudgetData;
+  laboratory?: Laboratory;
   inflationReference?: InflationReceipt;
   household: {
     maritalStatus: "single" | "married";
@@ -1165,6 +1169,7 @@ export function normalizePlan(input: unknown): PlannerData {
     ...candidate,
     schemaVersion: 2,
     budget: normalizeBudget(candidate.budget),
+    laboratory: normalizeLaboratory(candidate.laboratory),
     accounts: candidate.accounts.map((account) => ({
       ...account,
       qcdEligibleIra:

@@ -4,6 +4,8 @@ Status: 5A.1, the 5B entry foundation, 5C, and the initial 5D inflation referenc
 
 ## Product outcome
 
+The [Batch 5 experience contract](batch-5-experience.md) refines layout, simple/category budgeting, dated edits, cash-flow explanations, and acceptance. It contains generic design requirements only. Apply it to the existing phases below; it does not authorize private reference assets or personal data in the repository.
+
 A person should be able to answer: **What does my life cost today? What changes in retirement? Which decisions improve the plan, by how much, and why?**
 
 The main journey is Data & Privacy → Household → Current Budget → Retirement Budget → Accounts & Benefits → Scenarios → Plan Summary. Housing and debt are connected detail editors. Taxes, advanced assumptions, and calculation worksheets are progressively disclosed supporting views. The menu remains the single navigation system; avoid redundant navigation buttons inside analysis cards.

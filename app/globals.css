@@ -559,6 +559,39 @@ button, input, select { font: inherit; }
 }
 
 .budget-flow { display: grid; gap: 1.25rem; min-width: 0; }
+.budget-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; min-width: 0; }
+.budget-toolbar > * { min-width: 0; flex: 1 1 220px; }
+.budget-group { border-block-start: 1px solid #dbe4ee; min-width: 0; }
+.budget-group > summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; font-weight: 650; }
+.budget-group .budget-card { border: 0; border-radius: 0; border-top: 1px solid #edf0f5; padding: 12px 0; }
+.budget-comparison { display: grid; grid-template-columns: minmax(0,1.5fr) repeat(2,minmax(0,1fr)); gap: .75rem; align-items: start; }
+.budget-comparison span { color: #63718a; font-size: .82rem; }
+.budget-comparison b { display: block; color: #17243b; font-variant-numeric: tabular-nums; }
+.budget-calendar-row small { display: block; margin-top: .3rem; }
+.budget-calendar-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem 1rem; }
+.monthly-table-wrap { min-width: 0; }
+.monthly-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.monthly-table th,.monthly-table td { padding: .6rem .4rem; text-align: right; border-bottom: 1px solid #dbe4ee; font-variant-numeric: tabular-nums; }
+.monthly-table th:first-child { text-align: left; }
+.monthly-table caption { text-align: left; font-weight: 650; padding: .5rem 0; }
+.monthly-print svg { width: 100%; height: auto; }
+.monthly-print table { width: 100%; border-collapse: collapse; font-size: 10px; }
+.monthly-print td,.monthly-print th { text-align: right; padding: 5px; border-bottom: 1px solid #dbe4ee; }
+.monthly-print tr { break-inside: avoid; }
+@media (max-width: 1000px) {
+  .monthly-table thead { display: none; }
+  .monthly-table tbody,.monthly-table tr { display: grid; gap: .5rem; }
+  .monthly-table tr { grid-template-columns: repeat(2,minmax(0,1fr)); padding: .75rem 0; border-bottom: 1px solid #dbe4ee; }
+  .monthly-table th { grid-column: 1 / -1; }
+  .monthly-table td { text-align: left; border: none; }
+  .monthly-table td::before { content: attr(data-label); display: block; color: #63718a; font-size: .72rem; }
+}
+@media (max-width: 600px) {
+  .budget-comparison { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .budget-comparison > strong { grid-column: 1/-1; }
+  .budget-calendar-grid { grid-template-columns: minmax(0,1fr); }
+  .budget-toolbar > * { flex-basis: 100%; }
+}
 .budget-flow .section-heading { display: block; }
 .budget-flow .panel { border: 1px solid #dbe4ee; border-radius: 18px; background: #fff; padding: 24px; min-width: 0; }
 .budget-flow h2 { font-size: 1.2rem; font-weight: 650; color: #17243b; }

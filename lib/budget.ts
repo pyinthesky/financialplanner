@@ -17,6 +17,7 @@ export interface BudgetLine {
   amount: number | null;
   frequency: Frequency;
   essential: boolean;
+  flexibility?: 'fixed' | 'flexible';
   owner: BudgetOwner;
   /** ISO date anchors actual cash dates. Without one, only averages are known. */
   nextDueDate: string;
@@ -30,7 +31,19 @@ export interface BudgetPay {
   amount: number | null;
   frequency: Frequency;
   nextPayDate: string;
+  /** All values are per paycheck; withholding is income tax only. */
+  payroll?: {
+    gross: number | null;
+    taxableWages: number | null;
+    incomeTaxWithheld: number | null;
+    otherDeductions: number | null;
+    employeeSavings: number | null;
+    employerSavings: number | null;
+    accountId: string;
+  };
 }
+export interface BudgetSaving { id: string; name: string; accountId: string; amount: number | null; frequency: Frequency; owner: BudgetOwner }
+export interface BudgetOverride { id: string; lineId: string; fromMonth: string; throughMonth: string; amount: number | null }
 export interface BudgetData {
   version: 1;
   lines: BudgetLine[];
@@ -38,6 +51,10 @@ export interface BudgetData {
   /** Migration never silently mixes category detail with an old aggregate. */
   retirementSpendingSource: 'legacy' | 'worksheet';
   reviewed: boolean;
+  presentation?: 'simple' | 'category';
+  savings?: BudgetSaving[];
+  overrides?: BudgetOverride[];
+  timeline?: { startYear: number | null; retirementMonthYou: string; retirementMonthPartner: string };
 }
 export const EMPTY_BUDGET: BudgetData = {
   version: 1, lines: [], pay: [], retirementSpendingSource: 'legacy', reviewed: false,
@@ -70,7 +87,7 @@ export function budgetTotals(budget: BudgetData, retired = false) {
     missing: missing + (retired ? 0 : budget.pay.filter(pay => pay.amount === null).length) };
 }
 
-function validDate(value: string) {
+export function validDate(value: string) {
   const date = new Date(value + 'T12:00:00Z');
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(+date) && date.toISOString().slice(0, 10) === value;
 }
@@ -124,11 +141,24 @@ export function normalizeBudget(input: unknown): BudgetData {
   for (const p of b.pay) {
     identity(p);
     if (!money(p.amount) || !['you', 'partner'].includes(p.owner) || !date(p.nextPayDate)) throw new Error('Invalid pay entry.');
+    if (p.payroll && (!['gross', 'taxableWages', 'incomeTaxWithheld', 'otherDeductions', 'employeeSavings', 'employerSavings'].every(key => money(p.payroll![key as keyof typeof p.payroll])) || typeof p.payroll.accountId !== 'string')) throw new Error('Invalid payroll breakdown.');
   }
   for (const l of b.lines) {
     identity(l);
+    if (l.flexibility !== undefined && !['fixed', 'flexible'].includes(l.flexibility)) throw new Error('Invalid budget flexibility.');
     if (!money(l.amount) || !l.retirement || !['continue', 'stop', 'replace', 'percent', 'retirementOnly'].includes(l.retirement.rule) || !money(l.retirement.amount, l.retirement.rule === 'percent') || typeof l.retirement.reason !== 'string' || typeof l.category !== 'string' || typeof l.essential !== 'boolean' || !['you', 'partner', 'household'].includes(l.owner) || !date(l.nextDueDate) || !date(l.endDate)) throw new Error('Invalid budget cost.');
   }
   if (!['legacy', 'worksheet'].includes(b.retirementSpendingSource) || typeof b.reviewed !== 'boolean') throw new Error('Invalid budget preferences.');
+  if (b.presentation !== undefined && !['simple', 'category'].includes(b.presentation)) throw new Error('Invalid budget presentation.');
+  if (b.savings !== undefined && !Array.isArray(b.savings)) throw new Error('Invalid savings entries.');
+  for (const s of b.savings ?? []) { identity(s); if (!money(s.amount) || typeof s.accountId !== 'string' || !['you', 'partner', 'household'].includes(s.owner)) throw new Error('Invalid savings entry.'); }
+  const month = (s: unknown) => typeof s === 'string' && validDate(s + '-01');
+  if (b.timeline && (!(b.timeline.startYear === null || Number.isInteger(b.timeline.startYear) && b.timeline.startYear >= 2026 && b.timeline.startYear <= 2100) || ![b.timeline.retirementMonthYou, b.timeline.retirementMonthPartner].every(s => s === '' || month(s)))) throw new Error('Invalid budget timeline.');
+  if (b.overrides !== undefined && !Array.isArray(b.overrides)) throw new Error('Invalid budget overrides.');
+  const overrideIds = new Set<string>();
+  for (const o of b.overrides ?? []) {
+    if (!o.id || overrideIds.has(o.id) || !b.lines.some(l => l.id === o.lineId) || !(o.fromMonth === '' || month(o.fromMonth)) || (o.throughMonth !== '' && (!month(o.throughMonth) || o.throughMonth < o.fromMonth)) || !money(o.amount)) throw new Error('Invalid dated budget edit.');
+    overrideIds.add(o.id);
+  }
   return structuredClone(b);
 }
