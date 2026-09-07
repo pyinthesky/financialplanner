@@ -39,7 +39,7 @@ export function buildDebtLedger(input: DebtInput[], method: 'snowball' | 'avalan
       });
     } else {
       const targets = debts.map((d, i) => ({ d, i })).filter(({ d }) => d.balance > 0)
-        .sort((a, b) => (method === 'snowball' ? a.d.balance - b.d.balance : b.d.interestRate - a.d.interestRate) || a.d.id.localeCompare(b.d.id));
+        .sort((a, b) => (method === 'snowball' ? a.d.balance - b.d.balance : b.d.interestRate - a.d.interestRate) || (a.d.id < b.d.id ? -1 : a.d.id > b.d.id ? 1 : 0));
       const apply = (budget: number, field: 'rolledPayment' | 'extraPayment') => {
         for (const { d, i } of targets) {
           const paid = Math.min(d.balance, budget);

@@ -85,6 +85,8 @@ const server = http.createServer((req, res) => {
           await page.getByText('A ($50.00/month) is paid off.', { exact: false }).waitFor();
           await page.screenshot({ path: path.join(out, `${name}-${width}-debt.png`), fullPage: true });
           await navigate('Spending & Housing');
+          const emptyLabel = await page.locator('.costs-table td[colspan]').evaluate(el => getComputedStyle(el, '::before').content);
+          assert.ok(['none', 'normal', '""'].includes(emptyLabel), 'Empty cost cards have no overlapping column label');
           await page.getByLabel('Mortgage Account', { exact: true }).selectOption('C');
           for (const [label, value] of [['Total Statement Payment','130'],['Principal & Interest','100'],['Property Tax Escrow','20'],['Home Insurance Escrow','10'],['Mortgage Insurance','0'],['Other Escrow','0']]) await page.getByLabel(label, { exact: true }).fill(value);
           await page.getByRole('checkbox', { name: 'Use This Statement in the Plan', exact: true }).check();

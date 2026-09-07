@@ -16,6 +16,8 @@ Visual inspection of the budget release: mobile WebKit screenshot fits the viewp
 
 ## Current release work
 
+Implementation commit: `7313579fe456ff8e7cbdc43cc63922714e5cfa31`; browser selector correction: `10ef9625aefaf3a62d4f9ecc52562da53abe203f`. Visual follow-up corrects short debt-chart month labels and an empty-card CSS specificity issue. The browser gate now checks computed empty-card label content. Debt tie-breaking uses locale-independent ID ordering.
+
 - Primary-home mortgage statement reconciliation: `lib/housing.ts`, `components/mortgage-statement.tsx`, `tests/housing.test.mjs`. P&I drives amortization; escrow tax/home insurance replace manual housing values when enabled. Mortgage insurance/other loan-related escrow are separate cash costs while the loan remains in the schedule. Ongoing non-loan costs belong elsewhere. Incomplete active statements block readiness. Annual-dollar property tax bypasses mills.
 - Separate cash interest (`assumptions.cashReturn`, blank/zero default), ordinary-income inclusion, isolation from market paths, and PDF readiness/zero-series repair. Covered in `tests/funding.test.mjs`.
 - Optional historical inflation: `lib/references.ts`, `tests/references.test.mjs`, Household control. BLS CPI-U annual-average endpoints 188.9 (2004) and 313.689 (2024), compound change over 20 years. Source: BLS December 2024 historical table, verified September 7, 2026. October 2025 is missing; label the 2004–2024 window explicitly, never as the latest rolling window. Apply/Undo/manual override and exported receipt are supported; no runtime data query.

@@ -1220,7 +1220,7 @@ export default function HomePage() {
         <ChartContainer config={{ totalBalance: { label: "Debt Balance", color: "#2f7df4" } }} className="h-[280px] w-full aspect-auto">
           <LineChart data={debtSchedule.filter((_, index) => index % 3 === 0 || index === debtSchedule.length - 1)}>
             <CartesianGrid vertical={false} />
-            <XAxis dataKey="month" tickFormatter={(value) => `${Math.floor(value / 12)}y`} tickLine={false} axisLine={false} />
+            <XAxis dataKey="month" tickFormatter={(value) => payoffMonths < 24 ? `${value}m` : `${Math.floor(value / 12)}y${value % 12 ? ` ${value % 12}m` : ''}`} tickLine={false} axisLine={false} />
             <YAxis tickFormatter={(value) => compactCurrency.format(value)} tickLine={false} axisLine={false} width={70} />
             <ChartTooltip content={<ChartTooltipContent formatter={(value) => currency.format(Number(value))} />} />
             <Line name="Debt Balance" type="monotone" dataKey="totalBalance" stroke="var(--color-totalBalance)" strokeWidth={3} dot={false} />

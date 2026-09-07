@@ -501,7 +501,7 @@ button, input, select { font: inherit; }
   .mobile-card-table td:last-child::before { content: none; }
   .mobile-card-table tr:has(td[colspan]) { padding: 0; }
   .mobile-card-table td[colspan] { display: block; border: 0; padding: 1.25rem; }
-  .mobile-card-table td[colspan]::before { content: none; }
+  .mobile-card-table tbody td[colspan]::before { content: none; }
   .mobile-card-table input, .mobile-card-table select { width: 100%; min-width: 0; }
   .mobile-card-table [data-slot="native-select-wrapper"] { width: 100%; min-width: 0; max-width: 100%; }
   .mobile-card-table .input-affix { width: 100%; min-width: 0; }
