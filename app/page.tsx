@@ -6,6 +6,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, L
 
 import { Button } from "@/components/ui/button";
 import { BudgetEditor } from "@/components/budget-editor";
+import { DebtCascade } from "@/components/debt-cascade";
 import { annualize, budgetTotals, retirementAmount } from "@/lib/budget";
 import { NumericInput } from "@/components/numeric-input";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
@@ -1133,7 +1134,7 @@ export default function HomePage() {
     <>
       <SectionHeading
         title="Debt Payoff"
-        description="Compare the motivational snowball with the interest-saving avalanche. Minimum payments roll into the next debt automatically."
+        description="Snowball targets small balances; Avalanche targets high interest. Both roll paid-off minimums forward. Custom keeps extra payments assigned to individual debts."
         action={
           <Button
             onClick={() =>
@@ -1179,11 +1180,12 @@ export default function HomePage() {
             }))
           }
           options={[
-            { value: "avalanche", label: "Avalanche — highest APR first" },
             { value: "snowball", label: "Snowball — smallest balance first" },
+            { value: "avalanche", label: "Avalanche — highest APR first" },
+            { value: "custom", label: "Custom — assigned extra, no rollover" },
           ]}
         />
-        <Field
+        {plan.debtStrategy.method !== 'custom' && <Field
           label="Extra monthly payment"
           value={plan.debtStrategy.extraMonthlyPayment}
           onChange={(value) =>
@@ -1198,7 +1200,7 @@ export default function HomePage() {
           prefix="$"
           suffix="/ month"
           step={50}
-        />
+        />}
       </div>
       <Panel title="Payoff Path" eyebrow={plan.debtStrategy.method.toUpperCase()} className="chart-panel">
         <ChartContainer config={{ totalBalance: { label: "Debt Balance", color: "#2f7df4" } }} className="h-[280px] w-full aspect-auto">
@@ -1211,6 +1213,7 @@ export default function HomePage() {
           </LineChart>
         </ChartContainer>
       </Panel>
+      <DebtCascade months={debtSchedule} method={plan.debtStrategy.method} debts={plan.debts} updateDebt={updateDebt} />
       <Panel>
         <div className="table-wrap mobile-card-table debts-table">
           <Table>

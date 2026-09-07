@@ -1,5 +1,6 @@
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
 import { budgetTotals, EMPTY_BUDGET, normalizeBudget, type BudgetData } from "./budget.ts";
+import { buildDebtLedger, type DebtLedgerMonth } from "./debt-ledger.ts";
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
 import { calculateQcdElection } from "./qcd.ts";
@@ -47,6 +48,7 @@ export interface Debt {
   balance: number;
   interestRate: number;
   minimumPayment: number;
+  customExtraPayment?: number;
 }
 
 export interface RecurringCost {
@@ -146,7 +148,7 @@ export interface PlannerData {
     longTermCareYears: number;
   };
   debtStrategy: {
-    method: "snowball" | "avalanche";
+    method: "snowball" | "avalanche" | "custom";
     extraMonthlyPayment: number;
   };
   accounts: Account[];
@@ -218,12 +220,7 @@ export interface ProjectionYear {
   fundedRatio: number;
 }
 
-export interface DebtMonth {
-  month: number;
-  totalBalance: number;
-  interestPaid: number;
-  principalPaid: number;
-}
+export type DebtMonth = DebtLedgerMonth;
 
 export const DEFAULT_PLAN: PlannerData = {
   schemaVersion: 2,
@@ -308,7 +305,7 @@ export const DEFAULT_PLAN: PlannerData = {
     longTermCareStartAge: 0,
     longTermCareYears: 0,
   },
-  debtStrategy: { method: "avalanche", extraMonthlyPayment: 0 },
+  debtStrategy: { method: "snowball", extraMonthlyPayment: 0 },
   accounts: [],
   income: [],
   debts: [],
@@ -1053,64 +1050,7 @@ export function projectPlan(
 }
 
 export function debtPayoffSchedule(data: PlannerData): DebtMonth[] {
-  const debts = data.debts.map((debt) => ({
-    ...debt,
-    balance: Math.max(0, debt.balance),
-  }));
-  const rows: DebtMonth[] = [
-    {
-      month: 0,
-      totalBalance: debts.reduce((sum, debt) => sum + debt.balance, 0),
-      interestPaid: 0,
-      principalPaid: 0,
-    },
-  ];
-  let rollover = Math.max(0, data.debtStrategy.extraMonthlyPayment);
-
-  for (
-    let month = 1;
-    month <= 600 && debts.some((debt) => debt.balance > 0.01);
-    month += 1
-  ) {
-    let monthInterest = 0;
-    let monthPrincipal = 0;
-    let freedMinimums = 0;
-    for (const debt of debts) {
-      if (debt.balance <= 0) continue;
-      const interest = debt.balance * (pct(debt.interestRate) / 12);
-      const payment = Math.min(
-        debt.balance + interest,
-        Math.max(0, debt.minimumPayment),
-      );
-      const principal = Math.max(0, payment - interest);
-      debt.balance = Math.max(0, debt.balance - principal);
-      monthInterest += interest;
-      monthPrincipal += principal;
-      if (debt.balance <= 0.01) freedMinimums += debt.minimumPayment;
-    }
-
-    const candidates = debts
-      .filter((debt) => debt.balance > 0.01)
-      .sort((a, b) =>
-        data.debtStrategy.method === "snowball"
-          ? a.balance - b.balance
-          : b.interestRate - a.interestRate,
-      );
-    if (candidates.length > 0 && rollover > 0) {
-      const target = candidates[0];
-      const extra = Math.min(target.balance, rollover);
-      target.balance -= extra;
-      monthPrincipal += extra;
-    }
-    rollover += freedMinimums;
-    rows.push({
-      month,
-      totalBalance: debts.reduce((sum, debt) => sum + debt.balance, 0),
-      interestPaid: monthInterest,
-      principalPaid: monthPrincipal,
-    });
-  }
-  return rows;
+  return buildDebtLedger(data.debts, data.debtStrategy.method, data.debtStrategy.extraMonthlyPayment);
 }
 
 function remainingLoanBalance(debt: Debt, months: number) {

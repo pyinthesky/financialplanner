@@ -65,17 +65,26 @@ const server = http.createServer((req, res) => {
         await page.getByLabel('Retirement Amount').fill('');
         assert.equal(await page.getByLabel('Retirement Amount').inputValue(), '');
         await page.getByLabel('Retirement Amount').fill('20');
-        if (name === 'chromium' && width === 1280) {
+        {
           const downloadPromise = page.waitForEvent('download');
           await page.getByRole('button', { name: 'Export plan data', exact: true }).click();
           const downloaded = await downloadPromise;
           const fixture = JSON.parse(fs.readFileSync(await downloaded.path(), 'utf8'));
           Object.assign(fixture.household, { currentAge: 60, retirementAge: 60, planToAge: 80 });
           fixture.accounts = [{ id: 'synthetic-cash', name: 'Synthetic Cash', owner: 'you', kind: 'cash', balance: 10000, annualContribution: 0 }];
+          fixture.debts = [['A',100,50],['B',400,100],['C',1000,100]].map(([id,balance,minimumPayment]) => ({ id, name: id, kind: 'other', balance, minimumPayment, interestRate: 0 }));
+          fixture.debtStrategy = { method: 'snowball', extraMonthlyPayment: 50 };
           await navigate('Data & Privacy');
           await page.locator('input[type=file]').setInputFiles({ name: 'synthetic-plan.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fixture)) });
           await navigate('Retirement Budget');
           assert.equal(await page.getByLabel('Retirement Amount').inputValue(), '20', 'Export/import preserves the overlay');
+          await navigate('Debt Payoff');
+          await page.getByLabel('Payment Month', { exact: true }).selectOption('2');
+          await noOverflow('debt cascade');
+          await page.getByText('A ($50.00/month) is paid off.', { exact: false }).waitFor();
+          await page.screenshot({ path: path.join(out, `${name}-${width}-debt.png`), fullPage: true });
+        }
+        if (name === 'chromium' && width === 1280) {
           await page.emulateMedia({ media: 'print' });
           assert.ok(await page.locator('.report-portfolio-chart').isVisible(), 'Print chart renders');
           await page.pdf({ path: path.join(out, 'synthetic-budget-report.pdf'), format: 'Letter', printBackground: true });

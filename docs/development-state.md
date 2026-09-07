@@ -4,6 +4,9 @@ Updated: September 7, 2026. This is the starting point for the next implementati
 
 ## Latest implementation
 
+- Debt cascade implemented in `lib/debt-ledger.ts` and `components/debt-cascade.tsx`; the projection and current linked debt totals consume this same ledger. Six independent tests include the exact A/B/C schedule, same-month multiple payoff, APR/tie priority, Custom, unpaid interest, and no-extra/already-paid boundaries. All 98 tests and TypeScript pass locally. Mortgage escrow is still an explicit prerequisite for precise mortgage comparisons.
+- Budget browser gate initially failed on accessible selector naming. Controls now have explicit names (`76a2d71`). Do not bypass the browser gate; inspect its exact result. The debt release extends the journey to imported synthetic debts and the month-2 cascade at all viewport widths.
+
 - Funding release `ea22a0dab4a19f6c9b05f9cb6d35f722969be52c`: deployed successfully, Pages `34079855430`.
 - Budget entry foundation implemented: `lib/budget.ts`, `components/budget-editor.tsx`, `tests/budget.test.mjs`. Plan schema 2 migrates schema 1 to a legacy spending selection; blank and explicit zero are distinct in new fields.
 - 92 calculation/regression tests, TypeScript, build, and whitespace checks pass locally. Browser binaries could not download in this workspace (network timeout); `scripts/browser-check.cjs` is added to Pages CI with Chromium/WebKit at six widths and a synthetic PDF/export/import journey. Record the actual CI outcome before claiming rendered verification.
