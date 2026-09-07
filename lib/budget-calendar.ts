@@ -2,6 +2,7 @@ import { annualize, retirementAmount, scheduledPayments, type BudgetData, type B
 
 export interface BudgetHousehold { currentAge: number; partnerAge: number; retirementAge: number; partnerRetirementAge: number; maritalStatus: 'single' | 'married' }
 export interface BudgetMonth {
+  payByOwner:{owner:'you'|'partner';amount:number}[];
   month: string; youRetired: boolean; partnerRetired: boolean;
   takeHome: number; grossPay: number; taxableWages: number; withholding: number; payrollDeductions: number;
   essential: number; discretionary: number; spending: number;
@@ -51,11 +52,12 @@ export function buildBudgetYear(budget: BudgetData, household: BudgetHousehold, 
     const month = `${year}-${String(m + 1).padStart(2, '0')}`;
     const youRetired = month >= dates.you, partnerRetired = month >= dates.partner;
     const retired = (owner: BudgetOwner) => owner === 'you' ? youRetired : owner === 'partner' ? partnerRetired : youRetired && partnerRetired;
-    const row: BudgetMonth = { month, youRetired, partnerRetired, takeHome: 0, grossPay: 0, taxableWages: 0, withholding: 0, payrollDeductions: 0, essential: 0, discretionary: 0, spending: 0, requestedSavings: 0, employeeSavings: 0, employerSavings: 0, payrollComplete: true, missingAmounts: 0, averageSchedules: 0, transfers: [], lines: [] };
+    const row: BudgetMonth = { payByOwner:[],month, youRetired, partnerRetired, takeHome: 0, grossPay: 0, taxableWages: 0, withholding: 0, payrollDeductions: 0, essential: 0, discretionary: 0, spending: 0, requestedSavings: 0, employeeSavings: 0, employerSavings: 0, payrollComplete: true, missingAmounts: 0, averageSchedules: 0, transfers: [], lines: [] };
     for (const pay of budget.pay) {
       if (retired(pay.owner) || pay.owner === 'partner' && household.maritalStatus === 'single') continue;
       const net = monthAmount(pay.amount, pay.frequency, pay.nextPayDate, year, m);
       row.takeHome += net.amount ?? 0;
+      row.payByOwner.push({owner:pay.owner,amount:net.amount??0});
       if (net.amount === null) row.missingAmounts++;
       if (net.timing === 'average') row.averageSchedules++;
       const reconciled = payrollReconciliation(pay, accountIds);

@@ -1,4 +1,5 @@
 /** Canonical budget facts. Amounts are never inferred from blank fields. */
+import type { BudgetReferenceReceipt } from './budget-references.ts';
 export const FREQUENCIES = {
   weekly: { label: 'Weekly', payments: 52 },
   biweekly: { label: 'Every Two Weeks', payments: 26 },
@@ -11,6 +12,9 @@ export type Frequency = keyof typeof FREQUENCIES;
 export type BudgetOwner = 'you' | 'partner' | 'household';
 export type RetirementRule = 'continue' | 'stop' | 'replace' | 'percent' | 'retirementOnly';
 export interface BudgetLine {
+  /** Optional explanation of the envelope; never additional spending rows. */
+  allocations?: { id: string; name: string; amount: number | null; retirement: { rule: 'continue' | 'stop' | 'replace'; amount: number | null } }[];
+  reference?: BudgetReferenceReceipt;
   id: string;
   name: string;
   category: string;
@@ -87,6 +91,16 @@ export function budgetTotals(budget: BudgetData, retired = false) {
     missing: missing + (retired ? 0 : budget.pay.filter(pay => pay.amount === null).length) };
 }
 
+export function budgetAllocation(line: BudgetLine, retired = false) {
+  const total=retired?retirementAmount(line):line.retirement.rule==='retirementOnly'?0:line.amount;
+  let allocated=0,missing=0;
+  for(const a of line.allocations??[]){
+    const value=retired&&line.retirement.rule==='stop'||!retired&&line.retirement.rule==='retirementOnly'?0:retired?(a.retirement.rule==='stop'?0:a.retirement.rule==='replace'?a.retirement.amount:a.amount):a.amount;
+    if(value===null)missing++;else allocated+=value;
+  }
+  return {total,allocated,missing,remaining:total===null?null:total-allocated,overallocated:total!==null&&allocated>total+0.005};
+}
+
 export function validDate(value: string) {
   const date = new Date(value + 'T12:00:00Z');
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(+date) && date.toISOString().slice(0, 10) === value;
@@ -145,8 +159,17 @@ export function normalizeBudget(input: unknown): BudgetData {
   }
   for (const l of b.lines) {
     identity(l);
+    if(l.allocations!==undefined&&!Array.isArray(l.allocations))throw new Error('Invalid budget breakdown.');
+    for(const a of l.allocations??[]){
+      if(!a.id||ids.has(a.id)||typeof a.name!=='string'||!money(a.amount)||!a.retirement||!['continue','stop','replace'].includes(a.retirement.rule)||!money(a.retirement.amount))throw new Error('Invalid budget allocation.');
+      ids.add(a.id);
+    }
     if (l.flexibility !== undefined && !['fixed', 'flexible'].includes(l.flexibility)) throw new Error('Invalid budget flexibility.');
     if (!money(l.amount) || !l.retirement || !['continue', 'stop', 'replace', 'percent', 'retirementOnly'].includes(l.retirement.rule) || !money(l.retirement.amount, l.retirement.rule === 'percent') || typeof l.retirement.reason !== 'string' || typeof l.category !== 'string' || typeof l.essential !== 'boolean' || !['you', 'partner', 'household'].includes(l.owner) || !date(l.nextDueDate) || !date(l.endDate)) throw new Error('Invalid budget cost.');
+    if(l.reference){
+      const r=l.reference,v=r.reference;
+      if(!v||!['https://www.bls.gov/news.release/pdf/cesan.pdf','https://www.eia.gov/electricity/sales_revenue_price/pdf/table_5A.pdf'].includes(v.source)||!['id','label','category','geography','period','published','population','method'].every(k=>typeof v[k as keyof typeof v]==='string')||!money(v.monthly)||v.monthly===null||!['current','retirement'].includes(r.target)||!money(r.applied)||r.applied===null||!Object.hasOwn(FREQUENCIES,r.frequency)||!money(r.previousAmount)||!r.previousRetirement||!['continue','stop','replace','percent','retirementOnly'].includes(r.previousRetirement.rule)||!money(r.previousRetirement.amount,r.previousRetirement.rule==='percent')||typeof r.previousRetirement.reason!=='string')throw new Error('Invalid public-reference receipt.');
+    }
   }
   if (!['legacy', 'worksheet'].includes(b.retirementSpendingSource) || typeof b.reviewed !== 'boolean') throw new Error('Invalid budget preferences.');
   if (b.presentation !== undefined && !['simple', 'category'].includes(b.presentation)) throw new Error('Invalid budget presentation.');

@@ -1,5 +1,5 @@
 import { buildBudgetYear, type BudgetMonth } from './budget-calendar.ts';
-import { normalizeBudget } from './budget.ts';
+import { normalizeBudget, budgetAllocation } from './budget.ts';
 import { calculateFederalIncomeTax } from './federal-tax.ts';
 import { calculateCapitalGainsTax } from './capital-gains-tax.ts';
 import { calculateTaxableSocialSecurity } from './social-security-tax.ts';
@@ -8,6 +8,7 @@ import { calculateRmd } from './rmd.ts';
 import { calculateQcdElection } from './qcd.ts';
 import { EMPTY_LAB, type ScenarioOverrides } from './monthly-model.ts';
 import { mortgagePayoffSchedule, mortgagePaymentReleased } from './mortgage-scenario.ts';
+import { calculateHomeMove } from './home-move.ts';
 import { activeMortgageStatement, debtPayoffSchedule, homeInsuranceAnnual, propertyTaxAnnual, type Account, type PlannerData } from './planner.ts';
 
 export interface MonthlyRow {
@@ -22,12 +23,17 @@ export interface MonthlyRow {
   eventIncome: number; eventExpense: number; cashTarget: number; bufferGap: number; liabilities: number;
   conservationResidual: number; accounts: Record<string, number>;
   mortgagePayoff: number; releasedPaymentInvested: number;
+  homeProceeds: number; homeValue: number; totalNetWorth: number;
+  coverageMonths: number;
+  openingCash: number; cashPayrollSavings: number; savingsToInvestments: number;
+  incomeByOwner: Record<'you'|'partner',{pay:number;pension:number;socialSecurity:number}>;
 }
 export interface MonthlyYear {
   year: number; portfolio: number; cash: number; income: number; spending: number; taxes: number; taxPaid: number; taxRefund: number;
   withholding: number; unfunded: number; savings: number; converted: number; conversionRequested: number;
   federalTax: number; stateTax: number; capitalGainsTax: number; earlyTax: number;
   financialNetWorth: number;
+  totalNetWorth: number;
 }
 export interface MonthlyResult { months: MonthlyRow[]; years: MonthlyYear[]; issues: string[]; supported: boolean; firstShortfall: string | null; legacyTarget: number | null; legacyGap: number | null }
 const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0);
@@ -47,6 +53,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   try { budget = normalizeBudget(data.budget); } catch { return { months:[], years:[], issues:['Correct invalid or negative budget inputs before projecting.'], supported:false, firstShortfall:null, legacyTarget:null, legacyGap:null }; }
   if (overrides.retirementMonthYou || overrides.retirementMonthPartner) budget.timeline = { startYear: budget.timeline?.startYear ?? null, retirementMonthYou: overrides.retirementMonthYou ?? budget.timeline?.retirementMonthYou ?? '', retirementMonthPartner: overrides.retirementMonthPartner ?? budget.timeline?.retirementMonthPartner ?? '' };
   const issues = new Set<string>();
+  if(budget.lines.some(l=>budgetAllocation(l).overallocated||budgetAllocation(l,true).overallocated))issues.add('A bill breakdown exceeds its current or retirement envelope. Reconcile its total before comparing scenarios.');
   const empty = (): MonthlyResult => ({ months: [], years: [], issues: [...issues], supported: false, firstShortfall: null, legacyTarget: null, legacyGap: null });
   const start = budget.timeline?.startYear;
   const horizon = overrides.planToAge ?? data.household.planToAge;
@@ -63,7 +70,11 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   if (data.housing.payoffMortgageAtRetirement) issues.add('The legacy mortgage-payoff flag is unsupported in the monthly engine. Turn it off; a funded payoff event needs a separate comparison.');
   if (data.household.filingStatus === 'marriedSeparate') issues.add('Separate-return allocation is not supported by the household monthly tax settlement; use the sourced separate-filing worksheets without ranking this projection.');
   const accountIds = data.accounts.map(a => a.id);
+  if(data.income.some(s=>s.withholdingPercent!==undefined&&s.withholdingPercent!==null&&(!Number.isFinite(s.withholdingPercent)||s.withholdingPercent<0||s.withholdingPercent>100)))issues.add('Benefit withholding must be between zero and 100 percent.');
   const payoff=overrides.mortgagePayoff;
+  const homeMove=overrides.homeMove;
+  if(homeMove && (!calculateHomeMove(homeMove,data.household.filingStatus,0).supported || data.housing.homeValue<=0 || data.debts.filter(d=>d.kind==='mortgage').length>1 || data.debts.some(d=>d.kind==='mortgage'&&d.id!==homeMove.mortgageId))) issues.add('Home moves require the opening home value, complete standard-case inputs, and the one linked mortgage (or no mortgage). Multiple liens and new financing require separate rules.');
+  if(homeMove&&payoff)issues.add('Compare a home move and a separate mortgage payoff in different scenarios; combined transaction sequencing is not supported.');
   if(payoff && (!data.debts.some(d=>d.id===payoff.debtId&&d.kind==='mortgage') || !/^\d{4}-(0[1-9]|1[0-2])$/.test(payoff.month) || payoff.destination==='invest' && !data.accounts.some(a=>a.id===payoff.accountId&&a.kind==='taxable'))) issues.add('Complete the mortgage payoff month, loan and optional taxable investing destination.');
   if (new Set(accountIds).size !== accountIds.length || accountIds.length === 0) issues.add('Add uniquely identified opening account balances.');
   for (const a of data.accounts) {
@@ -81,6 +92,9 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
     for (const t of m.transfers) if (t.amount > 0 && !accountIds.includes(t.accountId)) issues.add('Assign every savings transfer to an existing account.');
   }
   const events = overrides.events ?? lab.events;
+  const finalMonth=`${startYear+yearsCount-1}-12`;
+  for(const event of [payoff,homeMove,...events])if(event&&(event.month<`${startYear}-01`||event.month>finalMonth))issues.add('A dated event falls outside this projection horizon; change its date or extend the horizon before comparing.');
+  for(const event of events)if(event.throughMonth&&(event.kind!=='expense'||event.throughMonth<event.month||!/^\d{4}-(0[1-9]|1[0-2])$/.test(event.throughMonth)))issues.add('Complete a valid ending month for the repeating expense.');
   for (const e of events) if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(e.month) || e.amount === null || !Number.isFinite(e.amount) || e.amount<0 || e.kind === 'cashReceipt' && (e.taxableAmount === null || e.taxableAmount<0 || e.taxableAmount>e.amount || !e.confirmedCashTreatment)) issues.add('Complete dated life events and confirm cash-receipt tax treatment; inherited retirement accounts and property sales cannot be entered as generic cash.');
   if (issues.size) return empty();
   const accounts = data.accounts.filter(a => a.kind !== 'cash').map(a => ({ ...a, balance: nonnegative(a.balance), costBasis: a.costBasis ?? a.balance * (1 - Math.min(1, nonnegative(data.assumptions.taxableGainFraction) / 100)), lockedConversions: [] as { amount: number; year: number }[] }));
@@ -92,11 +106,14 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   const scale = (i: number) => Math.pow(1 + Math.max(-0.99, infl), i);
   const originalDebt = debtPayoffSchedule(data);
   let debt = originalDebt;
+  let movedYear: number | null=null;
+  let homeValue=nonnegative(data.housing.homeValue);
   const statement = activeMortgageStatement(data);
   const months: MonthlyRow[] = [], years: MonthlyYear[] = [];
   const qcdOffsets = { you: data.qcdPlanning.unusedDeductibleContributionOffsetYou, partner: data.qcdPlanning.unusedDeductibleContributionOffsetPartner };
   for (let y = 0; y < yearsCount; y++) {
     const year = startYear + y;
+    homeValue=movedYear===null?nonnegative(data.housing.homeValue)*scale(y):nonnegative(homeMove?.replacementPrice)*Math.pow(1+Math.max(-0.99,infl),year-movedYear);
     const prior = { you: sum(accounts.filter(a => a.kind === 'traditional' && a.owner === 'you').map(a => a.balance)), partner: sum(accounts.filter(a => a.kind === 'traditional' && a.owner === 'partner').map(a => a.balance)) };
     const distributions = { you: 0, partner: 0 };
     let wages = 0, pensions = 0, ss = 0, interest = 0, gains = 0, conversions = 0, eventTaxable = 0, qcdTaxable = 0, withholding = 0;
@@ -147,22 +164,40 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
     for (let m = 0; m < 12; m++) {
       const b: BudgetMonth = calendar[y][m];
       const opening = portfolio();
+      const openingCash=cash;
+      const incomeByOwner={you:{pay:0,pension:0,socialSecurity:0},partner:{pay:0,pension:0,socialSecurity:0}};
+      for(const p of b.payByOwner)incomeByOwner[p.owner].pay+=p.amount;
       const age = data.household.currentAge + y;
       const monthIndex = y * 12 + m;
       wages += b.taxableWages; withholding += b.withholding;
       cash += b.takeHome;
-      let mortgagePayoff=0, payoffDraws=0, releasedPaymentInvested=0;
+      let mortgagePayoff=0, payoffDraws=0, releasedPaymentInvested=0,homeProceeds=0;
       let pension = 0, social = 0;
+      let pensionWithholding=0,socialWithholding=0;
       for (const s of data.income) {
         if (!married && s.owner === 'partner') continue;
         const ownerAge = getAge(s.owner, y);
         if (ownerAge >= s.startAge) {
           const amount = s.annualAmount * Math.pow(1 + s.cola / 100, ownerAge - s.startAge) / 12;
           if (s.kind === 'socialSecurity') social += amount; else pension += amount;
+          const held=amount*(s.withholdingPercent??0)/100;
+          if(s.kind==='socialSecurity')socialWithholding+=held;else pensionWithholding+=held;
+          incomeByOwner[s.owner==='partner'?'partner':'you'][s.kind==='socialSecurity'?'socialSecurity':'pension']+=amount-held;
         }
       }
-      pensions += pension; ss += social; cash += pension + social;
+      pensions += pension; ss += social;
+      const benefitWithholding=pensionWithholding+socialWithholding;
+      withholding+=benefitWithholding;pension-=pensionWithholding;social-=socialWithholding;cash += pension + social;
       for (const t of b.transfers.filter(t => t.source !== 'takeHome')) deposit(t.accountId, t.amount);
+      const cashPayrollSavings=sum(b.transfers.filter(t=>t.source!=='takeHome'&&data.accounts.find(a=>a.id===t.accountId)?.kind==='cash').map(t=>t.amount));
+      if(homeMove?.month===b.month){
+        const changed=mortgagePayoffSchedule(data,debt,monthIndex,homeMove.mortgageId);
+        const sale=calculateHomeMove(homeMove,data.household.filingStatus,changed.payoff);
+        const savedAccounts=structuredClone(accounts),savedCash=cash,savedGains=gains,savedDistributions={...distributions};
+        const need=Math.max(0,-sale.netCash);payoffDraws=raiseCash(need);
+        if(sale.supported&&cash+0.0001>=need){cash+=sale.netCash;homeProceeds=sale.netCash;gains+=sale.taxableGain;debt=changed.schedule;homeValue=homeMove.replacementPrice!;movedYear=year;}
+        else{accounts.splice(0,accounts.length,...savedAccounts);cash=savedCash;gains=savedGains;Object.assign(distributions,savedDistributions);payoffDraws=0;issues.add('Replacement housing or underwater sale could not be funded; the existing home and mortgage remain.');}
+      }
       if(payoff?.month===b.month){
         const changed=mortgagePayoffSchedule(data,debt,monthIndex,payoff.debtId);
         if(changed.payoff>0){
@@ -179,11 +214,11 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
       const reduction = cutActive ? requestedDiscretionary * Math.min(1, nonnegative(settings.discretionaryCutPercent) / 100) : 0;
       const discretionary = requestedDiscretionary - reduction;
       const debtRow = debt[monthIndex + 1];
-      const housing = (propertyTaxAnnual(data) + homeInsuranceAnnual(data)) * scale(y) / 12 + (statement && debtRow?.payments.some(p => p.id === statement.debtId && p.openingBalance > 0) ? nonnegative(statement.mortgageInsurance) + nonnegative(statement.otherEscrow) : 0);
+      const housing = movedYear!==null&&homeMove ? (homeMove.newMonthlyHousing!+(homeMove.newAnnualPropertyTax!+homeMove.newAnnualInsurance!)/12)*Math.pow(1+Math.max(-0.99,infl),year-movedYear) : (propertyTaxAnnual(data) + homeInsuranceAnnual(data)) * scale(y) / 12 + (statement && debtRow?.payments.some(p => p.id === statement.debtId && p.openingBalance > 0) ? nonnegative(statement.mortgageInsurance) + nonnegative(statement.otherEscrow) : 0);
       const healthScale = Math.pow(1 + data.healthcare.healthInflation / 100, y);
       const healthcare = ((age < 65 ? data.healthcare.preMedicareAnnual : data.healthcare.medicareAnnual) + (age >= data.healthcare.longTermCareStartAge && age < data.healthcare.longTermCareStartAge + data.healthcare.longTermCareYears ? data.healthcare.longTermCareAnnual : 0)) * healthScale / 12;
       const timed = sum(data.recurringCosts.filter(c => age >= c.startAge && age <= c.endAge).map(c => c.annualAmount * (c.inflationLinked ? scale(y) : 1) / 12));
-      const matchingEvents = events.filter(e => e.month === b.month);
+      const matchingEvents = events.filter(e => e.month === b.month || e.kind==='expense'&&e.throughMonth&&b.month>e.month&&b.month<=e.throughMonth);
       const eventIncome = sum(matchingEvents.filter(e => e.kind === 'cashReceipt').map(e => e.amount!));
       const eventExpense = sum(matchingEvents.filter(e => e.kind === 'expense').map(e => e.amount!));
       eventTaxable += sum(matchingEvents.filter(e => e.kind === 'cashReceipt').map(e => e.taxableAmount!));
@@ -194,8 +229,10 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
       const regularPaid=Math.min(cash,regularSpending);cash-=regularPaid;
       const spendingPaid=regularPaid+mortgagePayoff;
       let savingsFunded = 0;
+      let savingsToInvestments=0;
       for (const t of b.transfers.filter(t => t.source === 'takeHome')) {
         const available = Math.min(cash, t.amount); cash -= available; deposit(t.accountId, available); savingsFunded += available;
+        if(data.accounts.find(a=>a.id===t.accountId)?.kind!=='cash')savingsToInvestments+=available;
       }
       if(payoff?.destination==='invest'&&debt!==originalDebt&&b.month>=payoff.month){
         releasedPaymentInvested=Math.min(cash,mortgagePaymentReleased(originalDebt,debt,monthIndex));
@@ -250,19 +287,35 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
         unfundedTax = Math.max(0, lastAssessment.total - withholding - taxSettlement);
         taxRefund = Math.max(0, withholding - lastAssessment.total); cash += taxRefund;
       }
-      const coverageGap = Math.max(0, essential + housing + healthcare + timed + (debtRow?.principalPaid ?? 0) + (debtRow?.interestPaid ?? 0) - nonnegative(settings.dependableIncomeMonthly));
-      const cashTarget = coverageGap * nonnegative(settings.cashCoverageMonths) + nonnegative(settings.reserveExtra);
+      // End-of-month cash covers the next selected months, including the actual
+      // due month of nonmonthly bills. A reserve allocation is never an expense.
+      const coverageMonths=Math.min(nonnegative(settings.cashCoverageMonths),Math.max(0,yearsCount*12-monthIndex-1));
+      let cashTarget=nonnegative(settings.reserveExtra);
+      for(let next=1;next<=Math.ceil(coverageMonths);next++){
+        const futureIndex=monthIndex+next,fy=Math.floor(futureIndex/12),fm=futureIndex%12;
+        const future=calendar[fy]?.[fm];if(!future)break;
+        const futureAge=data.household.currentAge+fy;
+        const everyday=future.essential*scale(fy)*(1+(overrides.spendingChangePercent??0)/100);
+        const futureHealth=((futureAge<65?data.healthcare.preMedicareAnnual:data.healthcare.medicareAnnual)+(futureAge>=data.healthcare.longTermCareStartAge&&futureAge<data.healthcare.longTermCareStartAge+data.healthcare.longTermCareYears?data.healthcare.longTermCareAnnual:0))*Math.pow(1+data.healthcare.healthInflation/100,fy)/12;
+        const futureTimed=sum(data.recurringCosts.filter(c=>futureAge>=c.startAge&&futureAge<=c.endAge).map(c=>c.annualAmount*(c.inflationLinked?scale(fy):1)/12));
+        const futureDebt=debt[futureIndex+1];
+        const futureHousing=movedYear!==null&&homeMove?(homeMove.newMonthlyHousing!+(homeMove.newAnnualPropertyTax!+homeMove.newAnnualInsurance!)/12)*Math.pow(1+Math.max(-0.99,infl),startYear+fy-movedYear):(propertyTaxAnnual(data)+homeInsuranceAnnual(data))*scale(fy)/12+(statement&&futureDebt?.payments.some(p=>p.id===statement.debtId&&p.openingBalance>0)?nonnegative(statement.mortgageInsurance)+nonnegative(statement.otherEscrow):0);
+        const dependable=settings.dependableIncomeSource==='benefits'?sum(data.income.filter(s=>(married||s.owner==='you')&&getAge(s.owner,fy)>=s.startAge).map(s=>s.annualAmount*Math.pow(1+s.cola/100,getAge(s.owner,fy)-s.startAge)/12)):nonnegative(settings.dependableIncomeMonthly);
+        const futureEvents=sum(events.filter(e=>e.kind==='expense'&&(e.month===future.month||e.throughMonth&&future.month>e.month&&future.month<=e.throughMonth)).map(e=>e.amount!));
+        const gap=Math.max(0,everyday+futureHousing+futureHealth+futureTimed+futureEvents+(futureDebt?.principalPaid??0)+(futureDebt?.interestPaid??0)-dependable);
+        cashTarget+=gap*Math.min(1,coverageMonths-next+1);
+      }
       // Refill through ordinary funded withdrawals. Taxes created after the
       // December settlement must not escape that settlement, so skip December.
       if (settings.refillCash && m !== 11) withdrawals += raiseCash(cashTarget);
       const closing = portfolio();
       if (spending-spendingPaid>0.005 && (debtRow?.principalPaid??0)+(debtRow?.interestPaid??0)>0) issues.add('A shortfall occurs while debt payments are scheduled; projected debt balances assume those payments are made and require review.');
-      const externalChange = b.takeHome + pension + social + b.employeeSavings + b.employerSavings + eventIncome + investmentReturn + cashInterest - spendingPaid - taxSettlement + taxRefund - qcd;
-      const row: MonthlyRow = { month: b.month, age, openingPortfolio: opening, portfolio: closing, cash, investmentReturn, pay: b.takeHome, pension, socialSecurity: social, cashInterest, essential, discretionary, discretionaryReduction: reduction, housing, healthcare, timedCosts: timed, debtPrincipal: (debtRow?.principalPaid ?? 0)+mortgagePayoff, debtInterest: debtRow?.interestPaid ?? 0, spending, spendingPaid, unfundedSpending: spending - spendingPaid, taxSettlement, taxRefund, withholding: b.withholding, unfundedTax, requestedSavings: b.requestedSavings, savingsFunded, savingsUnfunded: b.requestedSavings - savingsFunded, payrollSavings: b.employeeSavings, employerSavings: b.employerSavings, withdrawals, rmd, conversionRequested, converted, charitableGift: qcd, eventIncome, eventExpense, cashTarget, bufferGap: Math.max(0, cashTarget - cash), liabilities: debtRow?.totalBalance ?? debt.at(-1)?.totalBalance ?? 0, conservationResidual: closing - opening - externalChange, accounts: Object.fromEntries(accounts.map(a => [a.id, a.balance])),mortgagePayoff,releasedPaymentInvested };
+      const externalChange = b.takeHome + pension + social + b.employeeSavings + b.employerSavings + eventIncome + investmentReturn + cashInterest + homeProceeds - spendingPaid - taxSettlement + taxRefund - qcd;
+      const row: MonthlyRow = {openingCash,cashPayrollSavings,savingsToInvestments,incomeByOwner, month: b.month, age, openingPortfolio: opening, portfolio: closing, cash, investmentReturn, pay: b.takeHome, pension, socialSecurity: social, cashInterest, essential, discretionary, discretionaryReduction: reduction, housing, healthcare, timedCosts: timed, debtPrincipal: (debtRow?.principalPaid ?? 0)+mortgagePayoff, debtInterest: debtRow?.interestPaid ?? 0, spending, spendingPaid, unfundedSpending: spending - spendingPaid, taxSettlement, taxRefund, withholding: b.withholding+benefitWithholding, unfundedTax, requestedSavings: b.requestedSavings, savingsFunded, savingsUnfunded: b.requestedSavings - savingsFunded, payrollSavings: b.employeeSavings, employerSavings: b.employerSavings, withdrawals, rmd, conversionRequested, converted, charitableGift: qcd, eventIncome, eventExpense, cashTarget, bufferGap: Math.max(0, cashTarget - cash), liabilities: debtRow?.totalBalance ?? debt.at(-1)?.totalBalance ?? 0, conservationResidual: closing - opening - externalChange, accounts: Object.fromEntries(accounts.map(a => [a.id, a.balance])),mortgagePayoff,releasedPaymentInvested,homeProceeds,homeValue,coverageMonths,totalNetWorth:closing+homeValue-(debtRow?.totalBalance??debt.at(-1)?.totalBalance??0) };
       months.push(row);
     }
     const rows = months.slice(-12);
-    years.push({ year, portfolio: portfolio(), cash, income: sum(rows.map(r => r.pay + r.pension + r.socialSecurity + r.eventIncome + r.cashInterest)), spending: sum(rows.map(r => r.spending)), taxes: lastAssessment.total, taxPaid: sum(rows.map(r => r.taxSettlement)) + withholding, taxRefund: sum(rows.map(r => r.taxRefund)), withholding, unfunded: sum(rows.map(r => r.unfundedSpending + r.unfundedTax)), savings: sum(rows.map(r => r.savingsFunded + r.payrollSavings + r.employerSavings)), converted: conversions, conversionRequested: sum(rows.map(r => r.conversionRequested)), federalTax: lastAssessment.federal, stateTax: lastAssessment.state, capitalGainsTax: lastAssessment.capital, earlyTax: lastAssessment.early, financialNetWorth:portfolio()-rows.at(-1)!.liabilities });
+    years.push({ year, portfolio: portfolio(), cash, income: sum(rows.map(r => r.pay + r.pension + r.socialSecurity + r.eventIncome + r.cashInterest)), spending: sum(rows.map(r => r.spending)), taxes: lastAssessment.total, taxPaid: sum(rows.map(r => r.taxSettlement)) + withholding, taxRefund: sum(rows.map(r => r.taxRefund)), withholding, unfunded: sum(rows.map(r => r.unfundedSpending + r.unfundedTax)), savings: sum(rows.map(r => r.savingsFunded + r.payrollSavings + r.employerSavings)), converted: conversions, conversionRequested: sum(rows.map(r => r.conversionRequested)), federalTax: lastAssessment.federal, stateTax: lastAssessment.state, capitalGainsTax: lastAssessment.capital, earlyTax: lastAssessment.early, financialNetWorth:portfolio()-rows.at(-1)!.liabilities,totalNetWorth:portfolio()+homeValue-rows.at(-1)!.liabilities });
   }
   if (calendar.some(ms => ms.some(m => m.averageSchedules > 0))) issues.add('Undated recurring amounts use monthly averages; dated bills and pay use their scheduled months.');
   const blockers = [...issues].filter(s => !s.startsWith('Undated'));

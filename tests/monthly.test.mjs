@@ -70,6 +70,11 @@ test('cash receives cash interest only and a guardrail changes discretionary spe
   const r=projectMonthly(p); close(r.months[0].discretionary,50);close(r.months[0].cashInterest,99.5);close(r.months[0].portfolio,10049.5);
   for(const m of r.months)close(m.conservationResidual,0);
 });
+test('cash coverage looks forward to irregular bills without charging the reserve as spending',()=>{
+  const p=plan();Object.assign(p.budget.lines[0],{amount:1200,frequency:'annual',nextDueDate:'2026-07-01'});
+  p.laboratory.settings.cashCoverageMonths=6;
+  const r=projectMonthly(p);close(r.months[0].spending,0);close(r.months[0].cashTarget,1200);close(r.months[0].portfolio,10000);close(r.months[6].spending,1200);close(r.months[6].cashTarget,0);
+});
 test('confirmed cash event occurs exactly once and missing tax treatment blocks it',()=>{
   const p=plan(); p.laboratory.events=[{id:'event',name:'Synthetic Receipt',month:'2026-06',kind:'cashReceipt',amount:100,taxableAmount:0,confirmedCashTreatment:true}];
   close(projectMonthly(p).years[0].portfolio,8900);
@@ -82,4 +87,29 @@ test('conversions require confirmed source, preserve assets before tax, and crea
   const r=projectMonthly(p);close(r.years[0].converted,100);close(r.years[0].portfolio,8900);
   p.accounts[1].conversionEligiblePretax=false;
   const blocked=projectMonthly(p);close(blocked.years[0].converted,0);assert.equal(blocked.supported,false);
+});
+
+test('scenario-only care costs repeat through the end month and reserve includes the upcoming shock once',()=>{
+  const p=plan();p.laboratory.settings.cashCoverageMonths=6;
+  const events=[{id:'care',name:'Synthetic Care',kind:'expense',month:'2026-04',throughMonth:'2026-06',amount:200,taxableAmount:null,confirmedCashTreatment:false}];
+  const r=projectMonthly(p,{events});
+  close(r.months[0].cashTarget,1200); // Six months of 100 ordinary bills + three care payments of 200.
+  assert.deepEqual(r.months.map(m=>m.eventExpense),[0,0,0,200,200,200,0,0,0,0,0,0]);
+  close(r.years[0].portfolio,8200);close(projectMonthly(p).years[0].portfolio,8800);
+  p.laboratory.events=events;assert.equal(normalizePlan(JSON.parse(JSON.stringify(p))).laboratory.events[0].throughMonth,'2026-06');
+});
+
+test('guardrail restores spending after recovery and protects essential costs',()=>{
+  const p=plan();p.budget.lines[0].essential=false;p.laboratory.settings.guardrailFloor=11000;p.laboratory.settings.discretionaryCutPercent=50;
+  p.laboratory.events=[{id:'gift',name:'Synthetic Cash',month:'2026-02',kind:'cashReceipt',amount:5000,taxableAmount:0,confirmedCashTreatment:true}];
+  const r=projectMonthly(p);close(r.months[0].discretionary,50);close(r.months[2].discretionary,100);
+  p.budget.lines[0].essential=true;close(projectMonthly(p).months[0].essential,100);close(projectMonthly(p).months[0].discretionaryReduction,0);
+});
+
+test('benefit withholding changes deposit timing but is credited once against annual tax',()=>{
+ const p=plan();p.income=[{id:'pension',name:'Synthetic Pension',owner:'you',kind:'pension',startAge:60,annualAmount:1200,cola:0,survivorPercent:0,withholdingPercent:10}];
+ const r=projectMonthly(p);close(r.months[0].pension,90);close(r.months[0].withholding,10);close(r.years[0].income,1080);close(r.years[0].withholding,120);close(r.years[0].taxRefund,120);close(r.years[0].portfolio,10000);
+ for(const m of r.months)close(m.conservationResidual,0);
+ assert.equal(normalizePlan(JSON.parse(JSON.stringify(p))).income[0].withholdingPercent,10);
+ p.income[0].withholdingPercent=101;assert.throws(()=>normalizePlan(p),/withholding/);assert.equal(projectMonthly(p).months.length,0);
 });

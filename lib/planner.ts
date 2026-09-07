@@ -36,6 +36,8 @@ export interface Account {
 }
 
 export interface IncomeStream {
+  /** Entered income-tax withholding only; blank preserves unknown deposit timing. */
+  withholdingPercent?: number | null;
   id: string;
   name: string;
   owner: Exclude<Owner, "joint">;
@@ -1162,6 +1164,7 @@ export function normalizePlan(input: unknown): PlannerData {
     throw new Error("The plan file is missing required sections.");
   }
   const maritalStatus = candidate.household.maritalStatus ?? "single";
+  for(const stream of candidate.income??[])if(stream.withholdingPercent!==undefined&&stream.withholdingPercent!==null&&(!Number.isFinite(stream.withholdingPercent)||stream.withholdingPercent<0||stream.withholdingPercent>100))throw new Error('Benefit withholding must be between zero and 100 percent.');
   const filingStatus =
     candidate.household.filingStatus ??
     (maritalStatus === "married" ? "marriedJoint" : "single");

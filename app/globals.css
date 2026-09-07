@@ -627,3 +627,12 @@ button, input, select { font: inherit; }
   .report-budget tr { break-inside: avoid; }
   .report-budget thead { display: table-header-group; }
 }
+
+.funding-columns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.25rem; }
+.funding-part { margin:.8rem 0; min-width:0; }
+.funding-part > div:first-child { display:flex; justify-content:space-between; gap:.65rem; font-size:.85rem; }
+.funding-part strong { white-space:nowrap; }
+.funding-track { height:7px; margin-top:.35rem; background:#e7edf3; border-radius:4px; overflow:hidden; }
+.funding-track > span { display:block; height:100%; }
+.funding-ribbons { width:100%; max-height:200px; }
+@media(max-width:640px) { .funding-columns { grid-template-columns:minmax(0,1fr); gap:.75rem; } .funding-ribbons { display:none; } }

@@ -49,6 +49,19 @@ const server = http.createServer((req, res) => {
         await page.getByLabel('Frequency', { exact: true }).selectOption('biweekly');
         await page.getByRole('button', { name: 'Food', exact: true }).click();
         await page.getByLabel('Current Amount').fill('10');
+        await page.locator('summary').filter({hasText:'Use a Public Reference (Optional)'}).click();
+        await page.getByLabel('Budget Reference',{exact:true}).selectOption('electricity');
+        await page.getByLabel('Reference State',{exact:true}).selectOption('Virginia');
+        await page.getByRole('button',{name:'Apply to Current Amount',exact:true}).click();
+        await page.waitForFunction(el=>Number(el.value)>100,await page.getByLabel('Current Amount').elementHandle());
+        await page.getByRole('button',{name:'Undo Reference Amount',exact:true}).click();
+        await page.waitForFunction(el=>el.value==='10',await page.getByLabel('Current Amount').elementHandle());
+        await page.locator('summary').filter({hasText:'Use a Public Reference (Optional)'}).click();
+        await page.locator('summary').filter({hasText:'Break Down This Amount'}).click();
+        await page.getByRole('button',{name:'Add Bill Allocation',exact:true}).click();
+        await page.getByLabel('Current Allocation',{exact:true}).fill('5');
+        await page.getByLabel('Allocation Label',{exact:true}).fill('Synthetic Detail');
+        await page.locator('summary').filter({hasText:'Break Down This Amount'}).click();
         await page.locator('summary').filter({hasText:'Edit Bill Details'}).click();
         await page.getByLabel('Description', { exact: true }).fill('Synthetic Bill');
         await noOverflow('current budget');
@@ -76,6 +89,7 @@ const server = http.createServer((req, res) => {
           Object.assign(fixture.household, { currentAge: 60, retirementAge: 60, planToAge: 80 });
           fixture.budget.timeline={startYear:2026,retirementMonthYou:'2026-01',retirementMonthPartner:''};
           fixture.budget.reviewed=true;
+          fixture.housing.homeValue=2000;
           fixture.accounts = [{ id: 'synthetic-cash', name: 'Synthetic Cash', owner: 'you', kind: 'cash', balance: 10000, annualContribution: 0 }];
           fixture.debts = [['A',100,50],['B',400,100],['C',1000,100]].map(([id,balance,minimumPayment]) => ({ id, name: id, kind: id === 'C' ? 'mortgage' : 'other', balance, minimumPayment, interestRate: 0 }));
           fixture.debtStrategy = { method: 'snowball', extraMonthlyPayment: 50 };
@@ -115,6 +129,21 @@ const server = http.createServer((req, res) => {
           await page.getByRole('checkbox',{name:'Include a Funded Mortgage Payoff',exact:true}).check();
           await page.getByLabel('Mortgage to Pay Off',{exact:true}).selectOption('C');
           await page.getByLabel('Payoff Month',{exact:true}).fill('2026-03');
+          await page.getByRole('button',{name:'Create Scenario',exact:true}).click();
+          await page.getByLabel('Scenario Name',{exact:true}).fill('Synthetic Home Move');
+          await page.locator('summary').filter({hasText:'Home Sale & Cash-Funded Downsize'}).click();
+          await page.getByRole('checkbox',{name:'Include a Home Move',exact:true}).check();
+          await page.getByLabel('Sale Month',{exact:true}).fill('2026-03');
+          await page.getByLabel('Mortgage Settled at Sale',{exact:true}).selectOption('C');
+          for(const [label,value] of [['Home Sale Price','2500'],['Selling Costs','100'],['Adjusted Home Tax Basis','1000'],['Replacement Home Cash Price','1000'],['Replacement Closing Costs','50'],['New Rent / HOA / Maintenance per Month','0'],['New Property Tax per Year','0'],['New Home / Renters Insurance per Year','0']])await page.getByLabel(label,{exact:true}).fill(value);
+          await page.getByRole('checkbox',{name:'I confirm a long-term, standard personal-home sale with none of the excluded special cases.',exact:true}).check();
+          await page.locator('summary').filter({hasText:'Scenario Cash Policy & Care / Life Events'}).click();
+          await page.getByRole('button',{name:'Customize Scenario Events',exact:true}).click();
+          const scenarioEvents=page.getByRole('heading',{name:'Scenario Events',exact:true}).locator('..');
+          await scenarioEvents.getByRole('button',{name:'Add Life Event',exact:true}).click();
+          await scenarioEvents.getByLabel('Event Month',{exact:true}).fill('2026-06');
+          await scenarioEvents.getByLabel('Repeat Expense through Month',{exact:true}).fill('2026-08');
+          await scenarioEvents.getByLabel('Event Amount',{exact:true}).fill('50');
           await page.getByRole('heading',{name:'Selected Scenario Results',exact:true}).waitFor();
           await noOverflow('scenario laboratory');
           await page.screenshot({path:path.join(out,`${name}-${width}-scenarios.png`),fullPage:true});
@@ -123,13 +152,17 @@ const server = http.createServer((req, res) => {
           const exported=JSON.parse(fs.readFileSync(await (await save).path(),'utf8'));
           assert.equal(exported.laboratory.scenarios[0].overrides.spendingChangePercent,50);
           assert.equal(exported.laboratory.settings.enabled,true);
+          assert.equal(exported.laboratory.scenarios[1].overrides.homeMove.salePrice,2500);
+          assert.equal(exported.laboratory.scenarios[1].overrides.events[0].throughMonth,'2026-08');
           assert.equal(exported.laboratory.scenarios[0].overrides.mortgagePayoff.month,'2026-03');
           await navigate('Data & Privacy');
           await page.locator('input[type=file]').setInputFiles({name:'synthetic-scenarios.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))});
           await page.getByRole('button',{name:/Open data and privacy — Imported/}).waitFor();
           await navigate('Plan Summary');
           await page.getByRole('heading',{name:'Monthly Planning Summary',exact:true}).waitFor();
+          await page.getByRole('heading',{name:'Where the Money Goes',exact:true}).waitFor();
           await noOverflow('monthly summary');
+          await page.screenshot({path:path.join(out,`${name}-${width}-monthly-summary.png`),fullPage:true});
         }
         if (name === 'chromium' && width === 1280) {
           await page.emulateMedia({ media: 'print' });

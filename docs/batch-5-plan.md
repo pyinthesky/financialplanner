@@ -1,6 +1,6 @@
 # Batch 5: Budgets, Decisions, and Development Continuity
 
-Status: 5A.1, the 5B entry foundation, 5C, and the initial 5D inflation reference are delivered. The monthly ledger and remaining phases are incomplete. Original review used main commit `6328a5fe12fb5a160c75d7be23e93fecc583462d`; see development-state.md for September 7, 2026 release evidence and current limitations. Scheduled development remains disabled. This document supersedes the old delivery sequence, not the user's privacy or blank-onboarding requirements.
+Status: the supported budget/monthly-ledger, debt, deterministic scenario/policy and standard life-event paths are implemented. Current/retirement budget enhancements, public references, funded home moves and cash-flow explanations are in the September 7 follow-up release. See development-state.md for verification and explicit Batch 3/4/data dependencies. No claim of unrestricted tax, benefit, state, stochastic or estate simulation is made. Scheduled development remains disabled.
 
 ## Product outcome
 
@@ -182,4 +182,4 @@ For each new implementation turn:
 
 ## Next implementation handoff
 
-Continue with **5A.2 and the remaining 5B bridge**: the entry schema, debt ledger, annual funding repair, and browser CI now exist. Specify and integrate payroll funding, actual monthly timing, staggered retirement, and annual tax settlement with independent cash/balance identities. Then complete 5A.3 conversion source/access constraints before scenario rankings. See development-state.md for the exact next implementation contract. Do not begin by adding another independent worksheet.
+Verify the current release evidence in development-state.md first. Do not rebuild the monthly ledger or repeat already delivered worksheet work. Preserve a single monthly transaction ledger and the existing sourced annual tax modules. Resolve the remaining source/rule dependencies before automatic claiming, survivor, state relocation, historical/stochastic replay or specialized inherited/property scenarios. Keep the simple budget entry usable without complete tax inputs. Future health/HSA and state integrations must consume the canonical budget and benefit facts, not introduce disconnected totals.
