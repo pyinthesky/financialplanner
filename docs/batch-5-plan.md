@@ -1,6 +1,6 @@
 # Batch 5: Budgets, Decisions, and Development Continuity
 
-Status: implementation started with the 5A.1 annual funding repair; later phases remain pending. Reviewed September 7, 2026 against main commit `6328a5fe12fb5a160c75d7be23e93fecc583462d`; see development-state.md for current evidence. Scheduled development remains disabled. This document supersedes the old delivery sequence, not the user's privacy or blank-onboarding requirements.
+Status: 5A.1, the 5B entry foundation, 5C, and the initial 5D inflation reference are delivered. The monthly ledger and remaining phases are incomplete. Original review used main commit `6328a5fe12fb5a160c75d7be23e93fecc583462d`; see development-state.md for September 7, 2026 release evidence and current limitations. Scheduled development remains disabled. This document supersedes the old delivery sequence, not the user's privacy or blank-onboarding requirements.
 
 ## Product outcome
 
@@ -180,4 +180,4 @@ For each new implementation turn:
 
 ## Next implementation handoff
 
-Start with **5A.1**: turn the two reproduced synthetic failures and tax-funding feedback cases into independent regression fixtures, fix them, and add tests/type checking to Pages CI. Then settle the monthly ledger and current/retirement budget schema before extending the scenario UI. Do not begin by adding another independent worksheet.
+Continue with **5A.2 and the remaining 5B bridge**: the entry schema, debt ledger, annual funding repair, and browser CI now exist. Specify and integrate payroll funding, actual monthly timing, staggered retirement, and annual tax settlement with independent cash/balance identities. Then complete 5A.3 conversion source/access constraints before scenario rankings. See development-state.md for the exact next implementation contract. Do not begin by adding another independent worksheet.

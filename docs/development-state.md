@@ -14,14 +14,14 @@ The first budget CI run failed because implicit select names included option tex
 
 Visual inspection of the budget release: mobile WebKit screenshot fits the viewport and the populated one-page PDF has a rendered portfolio graph/table without clipping. This is automated WebKit on Linux, not a physical iPhone keyboard test. Inspection exposed cash inheriting market volatility and zero-series outlines; both are repaired in the next release.
 
-## Current release work
+## Latest delivered release
 
-Implementation commit: `7313579fe456ff8e7cbdc43cc63922714e5cfa31`; browser selector correction: `10ef9625aefaf3a62d4f9ecc52562da53abe203f`. Visual follow-up corrects short debt-chart month labels and an empty-card CSS specificity issue. The browser gate now checks computed empty-card label content. Debt tie-breaking uses locale-independent ID ordering.
+Implementation starts at `7313579fe456ff8e7cbdc43cc63922714e5cfa31`; final verified release is `991f6072ab81695e19da2cf2fa94cbb0db156cef`. Build and deployment succeeded in [Pages run 34082716003](https://github.com/pyinthesky/financialplanner/actions/runs/34082716003). Visual follow-up corrects short debt-chart month labels and an empty-card CSS specificity issue. The browser gate checks computed empty-card label content. Debt tie-breaking uses locale-independent ID ordering. Browser fixes use explicit page headings and wait for rendered input updates, drawer closure, and import completion; normal clicks and animations remain enabled.
 
 - Primary-home mortgage statement reconciliation: `lib/housing.ts`, `components/mortgage-statement.tsx`, `tests/housing.test.mjs`. P&I drives amortization; escrow tax/home insurance replace manual housing values when enabled. Mortgage insurance/other loan-related escrow are separate cash costs while the loan remains in the schedule. Ongoing non-loan costs belong elsewhere. Incomplete active statements block readiness. Annual-dollar property tax bypasses mills.
 - Separate cash interest (`assumptions.cashReturn`, blank/zero default), ordinary-income inclusion, isolation from market paths, and PDF readiness/zero-series repair. Covered in `tests/funding.test.mjs`.
 - Optional historical inflation: `lib/references.ts`, `tests/references.test.mjs`, Household control. BLS CPI-U annual-average endpoints 188.9 (2004) and 313.689 (2024), compound change over 20 years. Source: BLS December 2024 historical table, verified September 7, 2026. October 2025 is missing; label the 2004–2024 window explicitly, never as the latest rolling window. Apply/Undo/manual override and exported receipt are supported; no runtime data query.
-- 106 tests, TypeScript, production build and whitespace checks pass locally, including cash-interest NIIT and conservation. Browser journey extended to statement entry and reference Apply/Undo. Verify exact deployment outcome and inspect latest artifacts before promoting this release to rendered-verified.
+- 106 tests, TypeScript, production build and whitespace checks pass, including cash-interest NIIT and conservation. Chromium and WebKit pass the full journey at 320/375/390/430/768/1280, including statement entry, debt cascade, reference Apply/Undo, and export/import. The populated PDF and 320px WebKit debt/housing screenshots from the exact release were rendered/visually inspected: the portfolio graph is present, the empty cost card is clean, and forms fit the viewport. Physical iPhone keyboard behavior and Firefox remain unverified.
 
 ## Important incomplete work — do not claim Batch 5 complete
 
