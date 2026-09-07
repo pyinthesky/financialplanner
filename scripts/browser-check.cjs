@@ -27,6 +27,7 @@ const server = http.createServer((req, res) => {
         const page = await browser.newPage({ viewport: { width, height: 900 } });
         page.setDefaultTimeout(30000);
         const errors = [];
+        page.on('crash',()=>console.error(`Renderer crashed: ${name} ${width}px`));
         page.on('pageerror', e => errors.push(e.message));
         await page.goto('http://127.0.0.1:4173/financialplanner/');
         console.log(`Checking ${name} at ${width}px`);

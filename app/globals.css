@@ -635,4 +635,19 @@ button, input, select { font: inherit; }
 .funding-track { height:7px; margin-top:.35rem; background:#e7edf3; border-radius:4px; overflow:hidden; }
 .funding-track > span { display:block; height:100%; }
 .funding-ribbons { width:100%; max-height:200px; }
+/* Explicit transform endpoints keep the mobile drawer stable after opening.
+   Avoid mixing the generic sheet transition with registered animation variables. */
+[data-mobile="true"][data-sidebar="sidebar"] {
+  width: min(18rem, calc(100vw - 3rem));
+  transition-property: background-color, box-shadow;
+}
+[data-mobile="true"][data-state="open"] { animation: planner-drawer-enter 220ms ease-out both; }
+[data-mobile="true"][data-state="closed"] { animation: planner-drawer-exit 180ms ease-in both; }
+@keyframes planner-drawer-enter { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes planner-drawer-exit { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+[data-mobile="true"][data-drawer-side="right"][data-state="open"] { animation-name: planner-drawer-enter-right; }
+[data-mobile="true"][data-drawer-side="right"][data-state="closed"] { animation-name: planner-drawer-exit-right; }
+@keyframes planner-drawer-enter-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes planner-drawer-exit-right { from { transform: translateX(0); } to { transform: translateX(100%); } }
+@media(prefers-reduced-motion:reduce) { [data-mobile="true"][data-state] { animation-duration:1ms; } }
 @media(max-width:640px) { .funding-columns { grid-template-columns:minmax(0,1fr); gap:.75rem; } .funding-ribbons { display:none; } }
