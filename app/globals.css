@@ -558,7 +558,8 @@ button, input, select { font: inherit; }
   .report-chart { break-inside: avoid; }
 }
 
-.budget-flow { display: grid; gap: 1.25rem; min-width: 0; }
+.budget-flow { display: grid; grid-template-columns: minmax(0,1fr); gap: 1.25rem; min-width: 0; }
+.budget-flow > * { min-width: 0; max-width: 100%; }
 .budget-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; min-width: 0; }
 .budget-toolbar > * { min-width: 0; flex: 1 1 220px; }
 .budget-group { border-block-start: 1px solid #dbe4ee; min-width: 0; }
@@ -581,6 +582,10 @@ button, input, select { font: inherit; }
 .monthly-print td,.monthly-print th { text-align: right; padding: 5px; border-bottom: 1px solid #dbe4ee; }
 .monthly-print tr { break-inside: avoid; }
 @media (max-width: 1000px) {
+  .monthly-table { display: block; min-width: 0; }
+  .monthly-table caption { display: block; }
+  .monthly-table tbody { width: 100%; min-width: 0; }
+  .monthly-table th,.monthly-table td { min-width: 0; overflow-wrap: anywhere; }
   .monthly-table thead { display: none; }
   .monthly-table tbody,.monthly-table tr { display: grid; gap: .5rem; }
   .monthly-table tr { grid-template-columns: repeat(2,minmax(0,1fr)); padding: .75rem 0; border-bottom: 1px solid #dbe4ee; }
@@ -602,9 +607,9 @@ button, input, select { font: inherit; }
 .budget-metrics > div { min-width: 0; background: #f0f5fb; padding: 18px; border-radius: 12px; }
 .budget-metrics span, .budget-metrics dt { color: #63718a; font-size: .8rem; display: block; }
 .budget-metrics strong, .budget-metrics dd { display: block; font-size: 1.55rem; font-weight: 650; margin-top: .5rem; overflow-wrap: anywhere; }
-.budget-card { border: 1px solid #dbe4ee; border-radius: 12px; padding: 18px; display: grid; gap: 1rem; min-width: 0; }
+.budget-card { border: 1px solid #dbe4ee; border-radius: 12px; padding: 18px; display: grid; grid-template-columns: minmax(0,1fr); gap: 1rem; min-width: 0; }
 .budget-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: end; }
-.budget-field { min-width: 0; display: grid; gap: .4rem; font-size: .86rem; }
+.budget-field { min-width: 0; display: grid; grid-template-columns: minmax(0,1fr); gap: .4rem; font-size: .86rem; }
 .budget-field input, .budget-field select { min-width: 0; width: 100%; max-width: 100%; font-size: 16px; }
 .budget-field select { min-height: 44px; padding: 8px; line-height: 1.5; border: 1px solid #b9c8da; border-radius: 8px; background: #f5f8fc; }
 .budget-field input[type="date"] { appearance: none; min-height: 44px; }
