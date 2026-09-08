@@ -15,7 +15,7 @@ import { createSaveGuard, isBlankPlan } from '@/lib/plan-lifecycle';
 import { RETURN_REFERENCES } from '@/lib/references';
 import { US_STATES } from '@/lib/states';
 import samplePlan from '@/public/sample-plan.json';
-import { DebtCascade } from "@/components/debt-cascade";
+import { DebtPayoffView } from "@/components/debt-payoff-view";
 import { MortgageStatementEditor } from "@/components/mortgage-statement";
 import { homeInsuranceAnnual, mortgageAncillaryAnnual } from "@/lib/planner";
 import { applyInflationReference, canUndoInflationReference, INFLATION_REFERENCE, inflationReferenceValue } from "@/lib/references";
@@ -40,7 +40,7 @@ import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
-type SectionId = "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "spending" | "debt" | "health" | "taxes" | "data";
+type SectionId = "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "debt" | "health" | "taxes" | "data";
 type VaultStatus = "off" | "locked" | "unlocked";
 type SaveStatus = "unsaved" | "locked" | "saving" | "saved" | "failed";
 
@@ -48,10 +48,9 @@ const VAULT_KEY = "open-retirement-planner-vault-v1";
 const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "data", label: "Data & Privacy", icon: ShieldCheck },
   { id: "household", label: "Household", icon: Home },
-  { id: "portfolio", label: "Accounts", icon: BriefcaseBusiness },
+  { id: "portfolio", label: "Cash & Investments", icon: BriefcaseBusiness },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
-  { id: "spending", label: "Spending & Housing", icon: ReceiptText },
-  { id: "debt", label: "Debt Payoff", icon: WalletCards },
+  { id: "debt", label: "Loans & Debts", icon: WalletCards },
   { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
   { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
   { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
@@ -723,7 +722,7 @@ export default function HomePage() {
   const renderPortfolio = () => (
     <>
       <SectionHeading
-        title="Investment Accounts"
+        title="Cash & Investments"
         description="Keep each tax treatment separate so the withdrawal plan can use the right dollars at the right time."
         action={
           <Button
@@ -1058,16 +1057,7 @@ export default function HomePage() {
     </>
   );
 
-  const renderSpending = () => (
-    <>
-      <SectionHeading title="Spending & Housing" description="Separate everyday spending from large costs and home carrying costs so each can change on its own timeline." />
-      <div className="two-column">
-        <Panel title="Baseline Spending" eyebrow="RETIREMENT">
-          <div className="form-grid single">
-            <p className="field-help">Everyday spending is managed in Retirement Budget.</p>
-            <p className="panel-copy">Enter normal living expenses here. Healthcare, property tax, home insurance, debts, and the large recurring costs below are added separately.</p>
-          </div>
-        </Panel>
+  const renderHousing = () => (<>
         <Panel title="Home Carrying Costs" eyebrow="HOUSING">
           {plan.housing.statement?.enabled && <p className="panel-copy">The active mortgage statement supplies property tax and home insurance. Manual amounts below are retained for use if you turn it off.</p>}
           <div className="form-grid">
@@ -1097,9 +1087,11 @@ export default function HomePage() {
             <Switch checked={plan.housing.payoffMortgageAtRetirement} onCheckedChange={(value) => setHousing("payoffMortgageAtRetirement", value)} />
           </label>
         </Panel>
-      </div>
       <MortgageStatementEditor statement={plan.housing.statement} debts={plan.debts} onChange={statement => setHousing('statement', statement)} />
-      <Panel title="Large Recurring Costs" eyebrow="TIMED EXPENSES">
+    </>);
+
+  const renderTimedCosts = () => (<>
+      <Panel title="Timed Costs" eyebrow="SHARED BY BOTH BUDGETS"><p className="panel-copy">Tuition, family support, travel and other costs with a start and end age. These are expenses, not debts: they do not have a loan balance or enter the payoff cascade. Enter each cost once; it is included automatically in both budget timelines. Use the category worksheet for ordinary recurring bills.</p>
         <div className="table-wrap mobile-card-table costs-table">
           <Table>
             <TableHeader>
@@ -1204,8 +1196,8 @@ export default function HomePage() {
   const renderDebt = () => (
     <>
       <SectionHeading
-        title="Debt Payoff"
-        description="Snowball targets small balances; Avalanche targets high interest. Both roll paid-off minimums forward. Custom keeps extra payments assigned to individual debts."
+        title="Loans & Debts"
+        description="Enter balances and monthly loan payments here, including 0% financing. Home carrying costs and escrow stay separate from principal and interest. View the payoff path in Plan Summary or experiment in Scenario Laboratory."
         action={
           <Button
             onClick={() =>
@@ -1273,18 +1265,7 @@ export default function HomePage() {
           step={50}
         />}
       </div>
-      <Panel title="Payoff Path" eyebrow={plan.debtStrategy.method.toUpperCase()} className="chart-panel">
-        <ChartContainer config={{ totalBalance: { label: "Debt Balance", color: "#2f7df4" } }} className="h-[280px] w-full aspect-auto">
-          <LineChart data={debtSchedule.filter((_, index) => index % 3 === 0 || index === debtSchedule.length - 1)}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="month" tickFormatter={(value) => payoffMonths < 24 ? `${value}m` : `${Math.floor(value / 12)}y${value % 12 ? ` ${value % 12}m` : ''}`} tickLine={false} axisLine={false} />
-            <YAxis tickFormatter={(value) => compactCurrency.format(value)} tickLine={false} axisLine={false} width={70} />
-            <ChartTooltip content={<ChartTooltipContent formatter={(value) => currency.format(Number(value))} />} />
-            <Line name="Debt Balance" type="monotone" dataKey="totalBalance" stroke="var(--color-totalBalance)" strokeWidth={3} dot={false} />
-          </LineChart>
-        </ChartContainer>
-      </Panel>
-      <DebtCascade months={debtSchedule} method={plan.debtStrategy.method} debts={plan.debts} updateDebt={updateDebt} />
+      {plan.debtStrategy.method === 'custom' && <Panel title="Assigned Extra Payments"><div className="form-grid">{plan.debts.map(debt => <Field key={debt.id} label={`Extra for ${debt.name || 'Debt'}`} value={debt.customExtraPayment ?? 0} onChange={value => updateDebt(debt.id, {customExtraPayment:value})} prefix="$" suffix="/ month" />)}</div></Panel>}
       <Panel>
         <div className="table-wrap mobile-card-table debts-table">
           <Table>
@@ -1376,6 +1357,7 @@ export default function HomePage() {
           </Table>
         </div>
       </Panel>
+      {renderHousing()}
     </>
   );
 
@@ -2111,7 +2093,7 @@ export default function HomePage() {
             <Calculator /> A QCD must be paid directly by the IRA trustee to an eligible charity, and the owner must be at least age 70½ on the distribution date. The 2026 exclusion limit is {currency.format(111_000)} per eligible owner and a QCD can count toward that owner's RMD. Age 70 requires the exact birth and distribution dates, which this planner does not collect, so the projection begins no earlier than the first unambiguous eligible year.
           </p>
           <p className="model-note">
-            <Calculator /> Mark eligible IRA sources on the Accounts page. The intended gift reduces that IRA balance and may satisfy RMDs, but it is never counted as spendable cash. The entered contribution offset is consumed before any QCD is excluded from income. The known 2026 ceiling is held flat in later years rather than guessing future IRS indexing. Continuing post-70½ deductible contributions, charity eligibility and acknowledgement, split-interest gifts, inherited IRAs, and exact transaction timing remain review items.
+            <Calculator /> Mark eligible IRA sources on the Cash & Investments page. The intended gift reduces that IRA balance and may satisfy RMDs, but it is never counted as spendable cash. The entered contribution offset is consumed before any QCD is excluded from income. The known 2026 ceiling is held flat in later years rather than guessing future IRS indexing. Continuing post-70½ deductible contributions, charity eligibility and acknowledgement, split-interest gifts, inherited IRAs, and exact transaction timing remain review items.
           </p>
         </Panel>
         <Panel title="Early Distribution Check" eyebrow="IRC SECTION 72(T)">
@@ -2320,8 +2302,8 @@ export default function HomePage() {
   );
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
-    ? <CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>
-    : activeSection === "scenarios" ? <ScenarioLaboratory plan={plan} onChange={setPlan}/> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><SummaryCashFlow key={planEpoch} plan={plan}/>{plan.laboratory?.settings.enabled ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
+    : activeSection === "scenarios" ? <ScenarioLaboratory plan={plan} onChange={setPlan}/> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{plan.laboratory?.settings.enabled ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>

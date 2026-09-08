@@ -22,6 +22,7 @@ export interface PlanEvent {
   confirmedCashTreatment: boolean;
 }
 export interface ScenarioOverrides {
+  debtStrategy?: { method?: 'snowball' | 'avalanche' | 'custom'; extraMonthlyPayment?: number; customExtraPayments?: Record<string, number> };
   homeMove?: HomeMove;
   mortgagePayoff?: { debtId: string; month: string; destination: 'cash' | 'invest'; accountId: string };
   retirementMonthYou?: string;
@@ -78,6 +79,10 @@ export function normalizeLaboratory(input: unknown): Laboratory {
     if (!scenario.id || ids.has(scenario.id) || typeof scenario.name !== 'string' || typeof scenario.baseline !== 'string' || scenario.baseline.length > 2_000_000 || !scenario.overrides) throw new Error('Invalid scenario.');
     ids.add(scenario.id);
     const o = scenario.overrides;
+    if(o.debtStrategy!==undefined){
+      const d=o.debtStrategy;
+      if(!d||typeof d!=='object'||Array.isArray(d)||(d.method!==undefined&&!['snowball','avalanche','custom'].includes(d.method))||(d.extraMonthlyPayment!==undefined&&(!Number.isFinite(d.extraMonthlyPayment)||d.extraMonthlyPayment<0))||(d.customExtraPayments!==undefined&&(!d.customExtraPayments||typeof d.customExtraPayments!=='object'||Array.isArray(d.customExtraPayments)||Object.values(d.customExtraPayments).some(v=>!Number.isFinite(v)||v<0))))throw new Error('Invalid scenario debt strategy.');
+    }
     if(o.homeMove){const h=o.homeMove;if(!(h.month===''||month(h.month))||typeof h.mortgageId!=='string'||!['none','standard'].includes(h.exclusion)||typeof h.eligibilityConfirmed!=='boolean'||typeof h.standardCaseConfirmed!=='boolean'||!['salePrice','sellingCosts','adjustedBasis','replacementPrice','replacementClosingCosts','newMonthlyHousing','newAnnualPropertyTax','newAnnualInsurance'].every(k=>amount(h[k as keyof HomeMove])))throw new Error('Invalid home-move scenario.');}
     if (o.mortgagePayoff && (typeof o.mortgagePayoff.debtId !== 'string' || !(o.mortgagePayoff.month === '' || month(o.mortgagePayoff.month)) || !['cash','invest'].includes(o.mortgagePayoff.destination) || typeof o.mortgagePayoff.accountId !== 'string')) throw new Error('Invalid mortgage-payoff scenario.');
     if (o.retirementMonthYou !== undefined && !month(o.retirementMonthYou) || o.retirementMonthPartner !== undefined && !month(o.retirementMonthPartner)) throw new Error('Invalid scenario timeline.');

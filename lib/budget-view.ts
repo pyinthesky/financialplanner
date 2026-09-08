@@ -24,12 +24,12 @@ export function budgetView(plan:PlannerData,month:string) {
     if(s.owner==='partner'&&plan.household.maritalStatus==='single'||ownerAge<s.startAge||s.startAge<=0)continue;
     income.push({id:s.id,name:s.name||s.kind,amount:s.withholdingPercent==null?null:s.annualAmount*Math.pow(1+s.cola/100,ownerAge-s.startAge)*(1-s.withholdingPercent/100)/12,source:'Pensions & Social Security'});
   }
-  const linked:BudgetViewRow[]=(debt?.payments??[]).filter(p=>p.payment>0).map(p=>({id:p.id,name:p.name||'Loan Payment',amount:p.payment,source:'Debt Payoff · includes cascade and extra'}));
+  const linked:BudgetViewRow[]=(debt?.payments??[]).filter(p=>p.payment>0).map(p=>({id:p.id,name:p.name||'Loan Payment',amount:p.payment,source:'Loans & Debts · includes cascade and extra'}));
   const add=(id:string,name:string,amount:number,source:string)=>{if(amount>0)linked.push({id,name,amount,source});};
-  add('property-tax','Property Tax',propertyTaxAnnual(plan)*inflation/12,'Spending & Housing');
-  add('home-insurance','Home Insurance',homeInsuranceAnnual(plan)*inflation/12,'Spending & Housing');
+  add('property-tax','Property Tax',propertyTaxAnnual(plan)*inflation/12,'Loans & Debts');
+  add('home-insurance','Home Insurance',homeInsuranceAnnual(plan)*inflation/12,'Loans & Debts');
   const statement=activeMortgageStatement(plan);
-  if(statement&&debt?.payments.some(p=>p.id===statement.debtId&&p.openingBalance>0))add('escrow-other','Mortgage Insurance & Other Escrow',(statement.mortgageInsurance??0)+(statement.otherEscrow??0),'Spending & Housing');
+  if(statement&&debt?.payments.some(p=>p.id===statement.debtId&&p.openingBalance>0))add('escrow-other','Mortgage Insurance & Other Escrow',(statement.mortgageInsurance??0)+(statement.otherEscrow??0),'Loans & Debts');
   const healthScale=Math.pow(1+plan.healthcare.healthInflation/100,y);
   add('health','Healthcare',(age<65?plan.healthcare.preMedicareAnnual:plan.healthcare.medicareAnnual)*healthScale/12,'Health & Long-Term Care');
   if(age>=plan.healthcare.longTermCareStartAge&&age<plan.healthcare.longTermCareStartAge+plan.healthcare.longTermCareYears)add('care','Long-Term Care',plan.healthcare.longTermCareAnnual*healthScale/12,'Health & Long-Term Care');

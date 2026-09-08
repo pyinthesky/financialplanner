@@ -40,3 +40,39 @@ test('draft dated edits and stress controls survive local export without fabrica
   assert.equal(imported.budget.overrides[0].amount,null);
   assert.equal(comparison(imported,imported.laboratory.scenarios).scenarios[0].result.months.length,0);
 });
+
+test('debt strategy experiments cascade real payments without mutating their saved baseline', async()=>{
+  const {debtScenarioPlan}=await import('../lib/debt-scenario.ts');
+  const {debtPayoffSchedule}=await import('../lib/planner.ts');
+  const p=plan();
+  p.debts=[{id:'zero',name:'Zero APR',kind:'other',balance:100,interestRate:0,minimumPayment:25},{id:'interest',name:'Interest Loan',kind:'other',balance:300,interestRate:12,minimumPayment:25}];
+  p.debtStrategy={method:'snowball',extraMonthlyPayment:50};
+  const before=JSON.stringify(p),baseline=baselineSnapshot(p);
+  const scenarios=['snowball','avalanche','custom'].map(method=>({id:method,name:'',baseline,overrides:{debtStrategy:{method,extraMonthlyPayment:50,customExtraPayments:{zero:0,interest:50}}}}));
+  const schedules=scenarios.map(s=>debtPayoffSchedule(debtScenarioPlan(p,s.overrides)));
+  assert.equal(schedules[0][1].payments[0].payment,75);
+  assert.equal(schedules[1][1].payments[1].payment,75);
+  assert.equal(schedules[2][1].payments[1].payment,75);
+  const result=comparison(p,scenarios).scenarios;
+  for(let i=0;i<result.length;i++){
+    assert.equal(result[i].comparable,true);
+    assert.equal(result[i].result.months[0].debtPrincipal,schedules[i][1].principalPaid);
+    assert.equal(result[i].result.months[1].debtInterest,schedules[i][2].interestPaid);
+    for(const month of result[i].result.months)assert.ok(Math.abs(month.conservationResidual)<.005);
+  }
+  assert.equal(result[0].deltaPortfolio,0);
+  assert.ok(result[1].deltaPortfolio>0,'Earlier payments to the interest-bearing loan save interest');
+  assert.equal(JSON.stringify(p),before);
+  p.laboratory.scenarios=scenarios;
+  const restored=normalizePlan(JSON.parse(JSON.stringify(p)));
+  assert.deepEqual(restored.laboratory.scenarios.map(s=>s.overrides),scenarios.map(s=>s.overrides));
+});
+
+test('scenario debt overrides reject negative and malformed payments while retaining explicit zero',()=>{
+  for(const debtStrategy of [{method:'invalid'},{extraMonthlyPayment:-1},{extraMonthlyPayment:'10'},{customExtraPayments:{x:-1}},{customExtraPayments:[]},null]){
+    const p=plan();p.laboratory.scenarios=[{id:'s',name:'',baseline:baselineSnapshot(p),overrides:{debtStrategy}}];
+    assert.throws(()=>normalizePlan(p),/scenario debt strategy/);
+  }
+  const p=plan();p.laboratory.scenarios=[{id:'s',name:'',baseline:baselineSnapshot(p),overrides:{debtStrategy:{extraMonthlyPayment:0}}}];
+  assert.equal(normalizePlan(p).laboratory.scenarios[0].overrides.debtStrategy.extraMonthlyPayment,0);
+});

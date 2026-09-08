@@ -20,7 +20,7 @@ export function buildPlanningSignals(
   context: { shortfallAge?: number; payoffMonths: number },
 ): PlanningSignalSummary {
   const missing: PlanningSignal[] = [];
-  if (data.housing.statement?.enabled && !activeMortgageStatement(data)) missing.push({ title: 'Reconcile the mortgage statement', reason: 'The selected mortgage or its payment components are incomplete.', nextAction: 'Correct the statement under Spending & Housing.', tone: 'attention' });
+  if (data.housing.statement?.enabled && !activeMortgageStatement(data)) missing.push({ title: 'Reconcile the mortgage statement', reason: 'The selected mortgage or its payment components are incomplete.', nextAction: 'Correct the statement under Loans & Debts.', tone: 'attention' });
   const timelineReady =
     data.household.currentAge > 0 &&
     data.household.retirementAge >= data.household.currentAge &&
@@ -50,7 +50,7 @@ export function buildPlanningSignals(
     missing.push({
       title: "Add the accounts funding the plan",
       reason: "No investment, retirement, cash, or HSA accounts are included in the projection yet.",
-      nextAction: "Add current balances and contributions under Accounts.",
+      nextAction: "Add current balances and contributions under Cash & Investments.",
       tone: "attention",
     });
   }

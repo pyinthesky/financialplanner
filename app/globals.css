@@ -450,7 +450,7 @@ button, input, select { font: inherit; }
 .report-detail-section h3 { font-size:12px; font-weight:650; margin:16px 0 6px; }
 .report-detail-section p { font-size:11px; line-height:1.5; margin:8px 0; }
 .report-detail-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; }
-.report-detail-table th, .report-detail-table td { text-align:left; padding:7px 6px; border-bottom:1px solid #dce4ee; overflow-wrap:anywhere; vertical-align:top; }
+.report-detail-table th, .report-detail-table td { text-align:left; padding:6px; border-bottom:1px solid #dce4ee; overflow-wrap:anywhere; vertical-align:top; }
 .report-detail-table th { background:#eef3f9; font-weight:650; }
 .report-detail-section .report-caption { font-size:9px; color:#5f6d82; }
 .report-flow-svg { display:block; width:100%; height:auto; }

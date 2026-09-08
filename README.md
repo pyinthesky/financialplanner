@@ -64,7 +64,7 @@ The work is organized into bounded batches so each batch can ship independently.
 
 ### Priority delivery sequence
 
-The entry journey is **Data & Privacy → Household → Accounts → Benefits → Housing → Debts → Health → Current Budget → Retirement Budget → Taxes → Scenarios → Plan Summary**. Shared inputs flow into both budgets. The detailed [Batch 5 plan](docs/batch-5-plan.md) and [compact-budget revision](docs/compact-budget-round.md) describe the delivery contracts. Pull in specific Batch 3/4 benefit, health, and state-data dependencies when needed; do not imply they work merely because a scenario selector exists.
+The entry journey is **Data & Privacy → Household → Cash & Investments → Benefits → Loans & Debts → Health → Current Budget → Retirement Budget → Taxes → Scenarios → Plan Summary**. Shared inputs flow into both budgets. The detailed [Batch 5 plan](docs/batch-5-plan.md) and [compact-budget revision](docs/compact-budget-round.md) describe the delivery contracts. Pull in specific Batch 3/4 benefit, health, and state-data dependencies when needed; do not imply they work merely because a scenario selector exists.
 
 ### Compact budgets and Summary revision — September 8, 2026
 
@@ -220,3 +220,13 @@ Issues and pull requests are welcome. Financial-law changes must cite an authori
 ## License
 
 MIT
+
+
+### September 8 Navigation and Debt Review
+
+- [x] Rename Accounts to **Cash & Investments**, including linked input guidance and the PDF.
+- [x] Consolidate the existing home carrying costs, escrow reconciliation and debt-entry forms under **Loans & Debts**. Remove the empty Baseline Spending panel. Home value remains an asset; property tax and insurance never become loan principal or available rollover payments.
+- [x] Move **Timed Costs** to both budget pages as one shared editor. Ordinary recurring bills belong in the category worksheet. Age-bounded tuition, support and other costs retain their existing timed-expense records and feed both budgets once; they are not converted into loans. Zero-interest financing remains a real loan with a balance and payoff schedule.
+- [x] Extract the payoff chart and month-by-month minimum-payment cascade into a view-only **Plan Summary** section. Baseline method and extra-payment inputs stay with loan entry.
+- [x] Add isolated **Debt Payoff Experiment** overrides to saved scenarios: Snowball, Avalanche or Custom, shared extra or per-loan Custom extras, blank-to-inherit and reset. The full monthly scenario projection uses the changed strategy, including cash funding and mortgage reconciliation; it does not mutate the current plan. Saved-plan import validates and preserves overrides.
+- [ ] **Income-property comparison / Real Estate:** Build a separate bounded Scenario Laboratory comparison before adding a dedicated tab. Inputs: purchase/down payment/closing costs, loan terms, gross rent, vacancy, management, maintenance, capital-replacement reserve, property tax and insurance. Show operating cash flow separately from principal reduction, initial cash invested, equity and sale proceeds. Compare the same starting assets against keeping those funds invested. Require explicit sourced tax treatment or label an initial comparison pre-tax and exclude it from tax-complete rankings; do not guess depreciation, passive-loss limits or sale recapture. No tenant names, addresses, listings, accounts or external plan transmission are needed. Promote to a Real Estate tab only when multiple existing properties justify it; do not imply rental support by relabeling the current owner-occupied home form.

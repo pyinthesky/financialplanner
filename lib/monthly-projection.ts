@@ -1,3 +1,4 @@
+import { debtScenarioPlan } from './debt-scenario.ts';
 import { buildBudgetYear, type BudgetMonth } from './budget-calendar.ts';
 import { normalizeBudget, budgetAllocation } from './budget.ts';
 import { calculateFederalIncomeTax } from './federal-tax.ts';
@@ -47,6 +48,7 @@ const nonnegative = (v: number | undefined | null) => Math.max(0, v ?? 0);
  * estimated-payment compliance calculation. Missing payroll is a hard gate.
  */
 export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides = {}): MonthlyResult {
+  data = debtScenarioPlan(data, overrides);
   const lab = data.laboratory ?? EMPTY_LAB;
   const settings = { ...lab.settings, ...Object.fromEntries(['cashCoverageMonths', 'guardrailFloor', 'discretionaryCutPercent'].filter(k => overrides[k as keyof ScenarioOverrides] !== undefined).map(k => [k, overrides[k as keyof ScenarioOverrides]])) } as typeof lab.settings;
   let budget;

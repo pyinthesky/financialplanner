@@ -126,12 +126,16 @@ const server = http.createServer((req, res) => {
           await navigate('Retirement Budget');
           await expandFood();
           assert.equal(await retirementAmount().inputValue(), '20', 'Export/import preserves the overlay');
-          await navigate('Debt Payoff');
+          const emptyLabel = await page.locator('.costs-table td[colspan]').evaluate(el => getComputedStyle(el, '::before').content);
+          assert.ok(['none', 'normal', '""'].includes(emptyLabel), 'Empty cost cards have no overlapping column label');
+
+          await navigate('Plan Summary');
+          assert.equal(await page.getByLabel('Payoff method',{exact:true}).count(),0,'Summary does not edit the baseline');
           await page.getByLabel('Payment Month', { exact: true }).selectOption('2');
           await noOverflow('debt cascade');
           await page.getByText('A ($50.00/month) is paid off.', { exact: false }).waitFor();
           await page.screenshot({ path: path.join(out, `${name}-${width}-debt.png`), fullPage: true });
-          await navigate('Spending & Housing');
+          await navigate('Loans & Debts');
           await page.getByLabel('Property tax entry method',{exact:true}).selectOption('annual');
           await page.getByLabel('Annual property tax',{exact:true}).fill('240');
           assert.equal(await page.getByLabel('Mill rate',{exact:true}).count(),0);
@@ -142,8 +146,6 @@ const server = http.createServer((req, res) => {
           await page.getByLabel('Mill rate',{exact:true}).fill('3');
           await page.getByLabel('Property tax entry method',{exact:true}).selectOption('annual');
           assert.equal(await page.getByLabel('Annual property tax',{exact:true}).inputValue(),'240');
-          const emptyLabel = await page.locator('.costs-table td[colspan]').evaluate(el => getComputedStyle(el, '::before').content);
-          assert.ok(['none', 'normal', '""'].includes(emptyLabel), 'Empty cost cards have no overlapping column label');
           await page.getByLabel('Mortgage Account', { exact: true }).selectOption('C');
           for (const [label, value] of [['Total Statement Payment','130'],['Principal & Interest','100'],['Property Tax Escrow','20'],['Home Insurance Escrow','10'],['Mortgage Insurance','0'],['Other Escrow','0']]) await page.getByLabel(label, { exact: true }).fill(value);
           await page.getByRole('checkbox', { name: 'Use This Statement in the Plan', exact: true }).check();
@@ -161,6 +163,17 @@ const server = http.createServer((req, res) => {
           await page.getByRole('checkbox',{name:'Use Monthly Results in Plan Summary and PDF',exact:true}).check();
           await page.getByRole('button',{name:'Create Scenario',exact:true}).click();
           await page.getByLabel('Scenario Name',{exact:true}).fill('Synthetic Scenario');
+          await page.locator('summary').filter({hasText:'Debt Payoff Experiment'}).click();
+          assert.equal(await page.getByLabel('Scenario Payoff Method',{exact:true}).inputValue(),'');
+          await page.getByLabel('Scenario Payoff Method',{exact:true}).selectOption('avalanche');
+          await page.getByLabel('Scenario Extra Payment / Month',{exact:true}).fill('0');
+          await page.getByRole('button',{name:'Restore Baseline Debt Strategy',exact:true}).click();
+          assert.equal(await page.getByLabel('Scenario Payoff Method',{exact:true}).inputValue(),'');
+          assert.equal(await page.getByLabel('Scenario Extra Payment / Month',{exact:true}).inputValue(),'');
+          await page.getByLabel('Scenario Payoff Method',{exact:true}).selectOption('avalanche');
+          await page.getByLabel('Scenario Extra Payment / Month',{exact:true}).fill('25');
+          await noOverflow('scenario debt controls');
+          await page.locator('summary').filter({hasText:'Debt Payoff Experiment'}).click();
           await page.getByLabel('Everyday Spending Change / %',{exact:true}).fill('50');
           await page.locator('summary').filter({hasText:'Mortgage Payoff versus Keeping the Loan'}).click();
           await page.getByRole('checkbox',{name:'Include a Funded Mortgage Payoff',exact:true}).check();
@@ -192,6 +205,10 @@ const server = http.createServer((req, res) => {
           await page.getByRole('button',{name:'Export plan data',exact:true}).click();
           const exported=JSON.parse(fs.readFileSync(await (await save).path(),'utf8'));
           assert.equal(exported.laboratory.scenarios[0].overrides.spendingChangePercent,50);
+          assert.equal(exported.laboratory.scenarios[0].overrides.debtStrategy.method,'avalanche');
+          assert.equal(exported.laboratory.scenarios[0].overrides.debtStrategy.extraMonthlyPayment,25);
+          assert.equal(exported.debtStrategy.method,'snowball','Scenario edits preserve the baseline');
+          assert.equal(exported.debtStrategy.extraMonthlyPayment,50);
           assert.equal(exported.laboratory.settings.enabled,true);
           assert.equal(exported.laboratory.simulation.samples,3);
           assert.equal(exported.laboratory.scenarios[1].overrides.homeMove.salePrice,2500);
@@ -243,7 +260,7 @@ const server = http.createServer((req, res) => {
         if(width===1280){
           await page.emulateMedia({media:'print'});
           const report=page.locator('.print-report');
-          for(const title of ['Household & Economic Assumptions','Current Budget & Cash Flow','Retirement Budget & Cash Flow','Investment Accounts','Pensions & Social Security','Housing & Debt Payoff','Healthcare & Long-Term Care','Timed Expenses','Tax, Withdrawal & Reserve Policy'])assert.ok(await report.getByRole('heading',{name:title,exact:true}).isVisible(),`Printed report includes ${title}`);
+          for(const title of ['Household & Economic Assumptions','Current Budget & Cash Flow','Retirement Budget & Cash Flow','Cash & Investments','Pensions & Social Security','Housing & Debt Payoff','Healthcare & Long-Term Care','Timed Expenses','Tax, Withdrawal & Reserve Policy'])assert.ok(await report.getByRole('heading',{name:title,exact:true}).isVisible(),`Printed report includes ${title}`);
           for(const stage of ['Current','Retirement'])assert.ok(await report.getByRole('img',{name:`${stage} Cash Flow Sankey`,exact:true}).isVisible());
           assert.ok(await report.locator('.report-flow-svg path').evaluateAll(paths=>paths.some(p=>p.getBBox().width>0&&p.getBBox().height>0)),'Printable cash flows have populated geometry');
           if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-complete-report.pdf'),format:'Letter',printBackground:true});

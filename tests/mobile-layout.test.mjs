@@ -45,8 +45,8 @@ test("the privacy start explains all local persistence choices", () => {
 
 test("navigation, page, and panel titles use consistent title case", () => {
   for (const title of [
-    "Spending & Housing",
-    "Debt Payoff",
+    "Loans & Debts",
+    "Cash & Investments",
     "Health & Long-Term Care",
     "Taxes & Withdrawals",
     "Household & Assumptions",
