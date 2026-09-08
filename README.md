@@ -68,6 +68,7 @@ The entry journey is **Data & Privacy → Household → Accounts → Benefits �
 
 ### Compact budgets and Summary revision — September 8, 2026
 
+- [x] Follow-up corrections: annual-dollar property-tax mode hides unused assessment/mill inputs while retaining them for mode switching; popup descriptions and buttons wrap within their dialog; monthly PDF export retains both budgets, printable current/retirement Sankeys, assumptions, accounts, benefits, housing/debt, care costs and policy details alongside projection/scenario charts. Browser gates verify dialog bounds, tax-input visibility and full report section/graphic coverage.
 - [x] Safe Load Sample Plan / Create New Plan; no sample values appear until requested. Dirty plans require confirmation and offer an export. Replacement erases the current plan and local vault and invalidates queued/in-flight saves.
 - [x] Collapse bill categories, edit subcategory names and amounts inline, and open timing/settings from icons. Suggestions are view-only until edited. Imported breakdowns remain in exports but their editor is disabled; only parent totals count.
 - [x] Move pay into Household and source entry before budgets. Selected-month budgets link the actual debt cascade, surviving mortgage costs, benefits, healthcare and dated costs. Paid-off loans are omitted. Portfolio draws and tax settlement appear in the funding ledger rather than being treated as earnings.

@@ -57,6 +57,15 @@ const server = http.createServer((req, res) => {
           const wrappedAmounts=await page.locator('main .budget-metrics strong').evaluateAll(elements=>elements.filter(el=>{if(!el.textContent.trim().startsWith('$'))return false;const range=document.createRange();range.selectNodeContents(el);const rects=[...range.getClientRects()];return rects.length>1||el.scrollWidth>el.clientWidth+1;}).map(el=>el.textContent));
           assert.deepEqual(wrappedAmounts,[],`${name} ${width} ${label}: summary amounts stay fully readable on one line`);
         };
+        const checkDialog = async () => {
+          const dialog=page.getByRole('dialog');
+          await dialog.evaluate(async el=>{await Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{})));});
+          const violations=await dialog.evaluate(el=>{
+            const bounds=el.getBoundingClientRect();
+            return [...el.querySelectorAll('[data-slot="dialog-title"], [data-slot="dialog-description"], [data-slot="dialog-footer"] button')].filter(child=>{const r=child.getBoundingClientRect();return r.left<bounds.left||r.right>bounds.right||child.scrollWidth>child.clientWidth+1;}).map(child=>child.textContent);
+          });
+          assert.deepEqual(violations,[],`${name} ${width}: dialog text and buttons fit the popup`);
+        };
         await navigate('Current Budget');
         assert.ok((await page.locator('main input[type=number]').evaluateAll(inputs=>inputs.map(i=>i.value))).every(v=>v===''), 'No prefilled financial entries');
         await navigate('Household');
@@ -123,6 +132,16 @@ const server = http.createServer((req, res) => {
           await page.getByText('A ($50.00/month) is paid off.', { exact: false }).waitFor();
           await page.screenshot({ path: path.join(out, `${name}-${width}-debt.png`), fullPage: true });
           await navigate('Spending & Housing');
+          await page.getByLabel('Property tax entry method',{exact:true}).selectOption('annual');
+          await page.getByLabel('Annual property tax',{exact:true}).fill('240');
+          assert.equal(await page.getByLabel('Mill rate',{exact:true}).count(),0);
+          assert.equal(await page.getByLabel('Assessed percent',{exact:true}).count(),0);
+          assert.ok(await page.getByLabel('Home market value',{exact:true}).isVisible());
+          await page.getByLabel('Property tax entry method',{exact:true}).selectOption('mills');
+          await page.getByLabel('Assessed percent',{exact:true}).fill('50');
+          await page.getByLabel('Mill rate',{exact:true}).fill('3');
+          await page.getByLabel('Property tax entry method',{exact:true}).selectOption('annual');
+          assert.equal(await page.getByLabel('Annual property tax',{exact:true}).inputValue(),'240');
           const emptyLabel = await page.locator('.costs-table td[colspan]').evaluate(el => getComputedStyle(el, '::before').content);
           assert.ok(['none', 'normal', '""'].includes(emptyLabel), 'Empty cost cards have no overlapping column label');
           await page.getByLabel('Mortgage Account', { exact: true }).selectOption('C');
@@ -208,6 +227,8 @@ const server = http.createServer((req, res) => {
         await navigate('Data & Privacy');
         await page.getByRole('button',{name:'Load Sample Plan',exact:true}).click();
         await page.getByRole('dialog').waitFor();
+        await checkDialog();
+        await page.screenshot({path:path.join(out,`${name}-${width}-replace-dialog.png`)});
         await page.getByRole('button',{name:'Cancel',exact:true}).click();
         await page.getByRole('button',{name:'Load Sample Plan',exact:true}).click();
         await page.getByRole('button',{name:'Erase and Load Sample',exact:true}).click();
@@ -219,6 +240,15 @@ const server = http.createServer((req, res) => {
         await page.getByRole('img',{name:/^Retirement Cash Flow Sankey/}).waitFor();
         await noOverflow('retirement Sankey');
         await page.screenshot({path:path.join(out,`${name}-${width}-retirement-sankey.png`),fullPage:true});
+        if(width===1280){
+          await page.emulateMedia({media:'print'});
+          const report=page.locator('.print-report');
+          for(const title of ['Household & Economic Assumptions','Current Budget & Cash Flow','Retirement Budget & Cash Flow','Investment Accounts','Pensions & Social Security','Housing & Debt Payoff','Healthcare & Long-Term Care','Timed Expenses','Tax, Withdrawal & Reserve Policy'])assert.ok(await report.getByRole('heading',{name:title,exact:true}).isVisible(),`Printed report includes ${title}`);
+          for(const stage of ['Current','Retirement'])assert.ok(await report.getByRole('img',{name:`${stage} Cash Flow Sankey`,exact:true}).isVisible());
+          assert.ok(await report.locator('.report-flow-svg path').evaluateAll(paths=>paths.some(p=>p.getBBox().width>0&&p.getBBox().height>0)),'Printable cash flows have populated geometry');
+          if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-complete-report.pdf'),format:'Letter',printBackground:true});
+          await page.emulateMedia({media:'screen'});
+        }
         await navigate('Current Budget');
         await expandFood();
         await noOverflow('sample compact budget');

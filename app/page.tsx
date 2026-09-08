@@ -10,6 +10,7 @@ import { projectMonthly } from '@/lib/monthly-projection';
 import { CompactBudgetEditor } from "@/components/compact-budget-editor";
 import { PayrollEditor } from '@/components/payroll-editor';
 import { SummaryCashFlow } from '@/components/summary-cash-flow';
+import { PrintPlanDetails } from '@/components/print-plan-details';
 import { createSaveGuard, isBlankPlan } from '@/lib/plan-lifecycle';
 import { RETURN_REFERENCES } from '@/lib/references';
 import { US_STATES } from '@/lib/states';
@@ -195,14 +196,14 @@ function PlannerNavigation({ activeSection, onSelect }: { activeSection: Section
 }
 
 function PrintReport({ data, projection, successRate, debtMonths }: { data: PlannerData; projection: ReturnType<typeof projectPlan>; successRate: number; debtMonths: number }) {
-  if (data.laboratory?.settings.enabled) return <article className="print-report"><header className="report-header"><h1>Retirement Plan Summary</h1><p>Monthly Engine</p></header><MonthlyPrintReport plan={data} result={projectMonthly(data)}/><footer>Local-only educational planning estimate. See Scenario Laboratory for tax, benefit and account-access limitations.</footer></article>;
+  if (data.laboratory?.settings.enabled) return <article className="print-report"><header className="report-header"><h1>Retirement Plan Summary</h1><p>Monthly Engine</p></header><MonthlyPrintReport plan={data} result={projectMonthly(data)}/><PrintPlanDetails plan={data}/><footer>Local-only educational planning estimate. Values are nominal and depend on entered assumptions. Not tax, investment, legal or medical advice.</footer></article>;
   const retirement = projection.find((row) => row.age === data.household.retirementAge) ?? projection[0];
   const last = projection.at(-1)!;
   const printChart = buildPrintPortfolioChart(projection);
   const retirementIndex = Math.max(0, projection.findIndex((row) => row.age >= data.household.retirementAge));
   const retirementX = printChart.xPositions[retirementIndex] ?? printChart.plot.left;
   return (
-    <article className="print-report" aria-hidden="true">
+    <article className="print-report">
       <header className="report-header">
         <div>
           <span>OPEN RETIREMENT PLANNER</span>
@@ -297,6 +298,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
           </ul>
         </section>
       </div>
+      <PrintPlanDetails plan={data}/>
       <footer>This is an educational estimate, not tax, investment, legal, or medical advice. Values are nominal and depend on the assumptions entered.</footer>
     </article>
   );
@@ -1072,8 +1074,8 @@ export default function HomePage() {
             <SelectField label="Property tax entry method" value={plan.housing.propertyTaxMode ?? 'mills'} onChange={value => setHousing('propertyTaxMode', value as 'mills' | 'annual')} options={[{ value: 'annual', label: 'Annual Dollar Amount' }, { value: 'mills', label: 'Assessment and Mill Rate' }]} />
             {plan.housing.propertyTaxMode === 'annual' && <Field label="Annual property tax" value={plan.housing.annualPropertyTax ?? 0} onChange={value => setHousing('annualPropertyTax', value)} prefix="$" suffix="/ year" />}
             <Field label="Home market value" value={plan.housing.homeValue} onChange={(value) => setHousing("homeValue", value)} prefix="$" step={5000} />
-            <Field label="Assessed percent" value={plan.housing.assessedPercent} onChange={(value) => setHousing("assessedPercent", value)} suffix="%" step={1} max={200} />
-            <Field label="Mill rate" value={plan.housing.millRate} onChange={(value) => setHousing("millRate", value)} suffix="mills" step={0.1} help="One mill is $1 per $1,000 of assessed value." />
+            {plan.housing.propertyTaxMode !== 'annual' && <><Field label="Assessed percent" value={plan.housing.assessedPercent} onChange={(value) => setHousing("assessedPercent", value)} suffix="%" step={1} max={200} />
+            <Field label="Mill rate" value={plan.housing.millRate} onChange={(value) => setHousing("millRate", value)} suffix="mills" step={0.1} help="One mill is $1 per $1,000 of assessed value." /></>}
             <Field label="Annual home insurance" value={plan.housing.annualInsurance} onChange={(value) => setHousing("annualInsurance", value)} prefix="$" suffix="/ year" step={100} />
           </div>
           <div className="calculated-line">
