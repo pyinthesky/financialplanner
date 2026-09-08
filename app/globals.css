@@ -680,10 +680,12 @@ button, input, select { font: inherit; }
 .assumption-shortcut small { color:#64748b; font-size:.75rem; }
 .summary-sankey { margin-bottom:1.5rem; }
 .summary-sankey-svg { width:100%; height:auto; display:block; overflow:visible; }
-@media(max-width:360px) {
-  .monthly-results .budget-metrics { display:flex; flex-direction:column; gap:.5rem; }
-  .monthly-results .budget-metrics > div { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.75rem; }
-  .monthly-results .budget-metrics strong { font-size:1.05rem; white-space:nowrap; }
+.budget-metrics { grid-template-columns:repeat(auto-fit,minmax(min(100%,12rem),1fr)); }
+.budget-metrics strong { overflow-wrap:normal; word-break:normal; }
+@media(max-width:600px) {
+  .budget-metrics { display:flex; flex-direction:column; gap:.5rem; }
+  .budget-metrics > div { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.75rem; }
+  .budget-metrics strong { font-size:1.05rem; white-space:nowrap; }
 }
 @media(max-width:600px) {
   .compact-section { padding:.7rem; }

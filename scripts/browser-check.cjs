@@ -54,6 +54,8 @@ const server = http.createServer((req, res) => {
           assert.ok(size.content <= size.viewport + 1, `${name} ${width} ${label}: ${JSON.stringify(size)}`);
           const clipped=await page.locator('main input, main select, main button, main [data-slot="chart"], main .panel, main .budget-card, main .monthly-table td').evaluateAll(elements=>elements.filter(el=>{const r=el.getBoundingClientRect();return el.getClientRects().length&&r.width>0&&r.height>0&&getComputedStyle(el).visibility!=='hidden'&&(r.left < -1||r.right > window.innerWidth+1);}).map(el=>({tag:el.tagName,className:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).slice(0,5));
           assert.deepEqual(clipped,[],`${name} ${width} ${label}: visible content must fit even when an ancestor clips overflow`);
+          const wrappedAmounts=await page.locator('main .budget-metrics strong').evaluateAll(elements=>elements.filter(el=>{if(!el.textContent.trim().startsWith('$'))return false;const range=document.createRange();range.selectNodeContents(el);const rects=[...range.getClientRects()];return rects.length>1||el.scrollWidth>el.clientWidth+1;}).map(el=>el.textContent));
+          assert.deepEqual(wrappedAmounts,[],`${name} ${width} ${label}: summary amounts stay fully readable on one line`);
         };
         await navigate('Current Budget');
         assert.ok((await page.locator('main input[type=number]').evaluateAll(inputs=>inputs.map(i=>i.value))).every(v=>v===''), 'No prefilled financial entries');
