@@ -274,9 +274,8 @@ const server = http.createServer((req, res) => {
         }
         await navigate('Loans & Debts');
         const refinance=page.locator('section').filter({has:page.getByRole('heading',{name:'Refinance Comparison',exact:true})}).last();
-        const primaryRefinance=refinance.locator('details').first();
-        await primaryRefinance.locator('summary').click();
-        for(const [label,value] of [['New Term / Years — Mortgage','15'],['Offered Rate / % — Mortgage','2'],['Closing Costs and Points — Mortgage','500'],['Holding Period / Months — Mortgage','60']])await primaryRefinance.getByLabel(label,{exact:true}).fill(value);
+        await refinance.locator('summary').filter({hasText:/^Mortgage(?:\s|$)/}).first().click();
+        for(const [label,value] of [['New Term / Years — Mortgage','15'],['Offered Rate / % — Mortgage','2'],['Closing Costs and Points — Mortgage','500'],['Holding Period / Months — Mortgage','60']])await page.getByLabel(label,{exact:true}).fill(value);
         await noOverflow('refinance comparison');
         await navigate('Real Estate');
         await page.getByRole('button',{name:'Add Rental Property',exact:true}).click();
