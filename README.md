@@ -14,11 +14,12 @@ Start with blank inputs or explicitly load the fictional sample plan. Build a cu
 | Household | Individual/partner timelines, payroll details, optional local ZIP and state selection, explicit Apply/Undo for dated public references |
 | Cash & Investments | Account balances, tax treatment, ownership, aggregate taxable basis and supported account-access assumptions |
 | Pensions & Social Security | Entered benefit amounts, ages, COLAs and withholding; automatic benefit optimization remains planned |
-| Loans & Debts | Loan entry, home carrying costs, annual-dollar property tax or assessment/mills, and mortgage principal-and-interest/escrow reconciliation |
+| Loans & Debts | Loan entry, cascade strategy and local fee/term-aware refinance comparisons with dated public mortgage indicators |
+| Real Estate | Primary-home carrying costs and escrow reconciliation; existing rental records linked to loans, budgets and monthly cash flow; isolated pre-tax property comparisons |
 | Current and Retirement Budgets | Compact expandable categories, editable bill names, timing controls, retirement changes and shared timed costs; linked pay, benefits, healthcare, housing and scheduled loan payments |
 | Taxes & Withdrawals | Dated federal worksheets, owner-specific RMD/QCD and distribution checks, conversion comparisons, LTCG/NIIT and an entered state-tax estimate, subject to the boundaries below |
 | Scenario Laboratory | Saved baseline snapshots, explicit overrides, compare/duplicate/reset/rebase, isolated debt-strategy experiments, funded mortgage payoff, supported home-sale/downsize comparisons, cash coverage and hypothetical stresses |
-| Plan Summary | Current/retirement Sankeys and funding details, existing planning signals, read-only debt payoff/cascade view and annual or monthly projection results |
+| Plan Summary | Current/retirement Sankeys and funding details, input-aware Outlook, compact month picker, total/per-loan debt charts with principal/interest and cascade details and annual or monthly projection results |
 | PDF Report | Printable projection/scenario charts, budgets, both Sankeys, assumptions, accounts, benefits, housing, care costs and policy details |
 
 Snowball and Avalanche retain paid-off minimums and roll available payments into the next debt. Custom uses assigned extra payments without rollover. Property tax and insurance continue after a mortgage is paid; escrow cannot become extra principal. A timed expense is not converted into a loan just because it recurs.
@@ -41,7 +42,7 @@ These are educational estimates, not a complete tax return or a guarantee of ret
 - Benefits are entered from statements. Automatic claiming, spousal/survivor, death-year and specialized pension transitions remain open.
 - ACA/IRMAA worksheets and conversion sensitivities use dated rules; they are not automatic forecasts of future premiums or eligibility.
 - Monthly account access is conservative. Inherited accounts, detailed IRA basis, tax lots, special home-sale cases and automatic qualified HSA reimbursements remain unsupported dependencies.
-- The supported home-move comparison covers specified personal-home sales and cash-funded replacement housing. Income-property operation, rental taxes and new property financing are planned under Real Estate.
+- The supported home-move comparison covers specified personal-home sales and cash-funded replacement housing. Existing passive rentals require user-confirmed nonnegative taxable profit; operating cash is calculated separately. Rental losses, depreciation and sale tax are not calculated. Property experiments are explicitly pre-tax and excluded from household scenario rankings.
 - Hypothetical investment paths are not calibrated probabilities or historical replay. Unsupported rules, missing inputs and unfunded obligations must remain visible; no recommendation should hide them.
 
 [Calculation sources and reference methodology](docs/calculation-sources.md) preserve effective dates, exclusions and the methods behind the inflation, portfolio and cash shortcuts. A historical arithmetic portfolio return is not a compound-growth forecast; the existing two-bank cash reference is not a national HYSA average.
@@ -50,17 +51,29 @@ These are educational estimates, not a complete tax return or a guarantee of ret
 
 This section is the authoritative priority list. Historical checkboxes are retained in [delivery history](docs/delivery-history.md), not used as the current work queue. Status terms are **Planned**, **In Progress**, **Supported with Limits**, and **Complete**. Complete applies only to the stated scope and its acceptance evidence.
 
-The shared entry journey is **Data & Privacy → Household → Cash & Investments → Pensions & Social Security → Loans & Debts → Health → Current Budget → Retirement Budget → Taxes → Scenario Laboratory → Plan Summary**. Enter a fact once; budgets, scenarios, charts and reports should reuse it without double counting.
+The shared entry journey is **Data & Privacy → Household → Cash & Investments → Pensions & Social Security → Loans & Debts → Real Estate → Health → Current Budget → Retirement Budget → Taxes → Scenario Laboratory → Plan Summary**. Enter a fact once; budgets, scenarios, charts and reports should reuse it without double counting.
 
 ### Next Priorities
 
 | Order | Work | Status | Completion criteria |
 | --- | --- | --- | --- |
 | 1 | Documentation consolidation | Complete | One visible roadmap; history and calculation methodology linked separately; Real Estate and remaining dependencies retained |
-| 2 | Outlook assessment and compact month navigation | Planned | Summary opens with explainable, input-aware assessment and tested next actions; accessible month/year picker replaces the long dropdown |
-| 3 | Explainable debt visualization | Planned | Total/per-loan balances, principal/interest payment bars, payoff markers and visible minimum-payment transfers use the actual monthly ledger |
-| 4 | Real Estate | Planned | Existing property records and isolated income-property comparisons connect to budgets, loans, cash flow and net worth with explicit tax boundaries |
-| 5 | Refinancing opportunity indicators | Planned | Dated comparable benchmarks, local opportunity badges and a fee/term-aware comparison; no personalized quote claims or transmitted plan data |
+| 2 | Outlook assessment and compact month navigation | Supported with Limits | Summary opens with explainable, input-aware assessment and tested next actions; accessible month/year picker replaces the long dropdown |
+| 3 | Explainable debt visualization | Complete | Total/per-loan balances, principal/interest payment bars, payoff markers and visible minimum-payment transfers use the actual monthly ledger |
+| 4 | Refinancing opportunity indicators | Supported with Limits | Fresh, user-confirmed comparable mortgage references; local badges/snooze and fee/term comparison; no rate qualification claims |
+| 5 | Real Estate | Supported with Limits | Existing rentals in the monthly engine; linked mortgages; isolated pre-tax buy/invest and keep/sell comparisons; unsupported rental tax and transaction timing remain excluded |
+
+### Current Priority Delivery
+
+Implemented September 8, 2026, in the requested order (refinancing before Real Estate). Calculation/type/build checks pass locally; the required Chromium/WebKit and PDF release checks run in the Pages workflow.
+
+- **Outlook:** readiness and funding-gap reasons, full-retirement timing, first shortfall, cash-target gaps and legacy gaps. Two explicit comparisons show the effect of 5% lower everyday spending and one percentage point higher inflation on the same baseline and horizon. Reserve review is a third action when relevant. These are conditional illustrations, not personalized investment advice or probabilities. The PDF includes the same assessment.
+- **Month navigation and debt:** calendar month input, bounded previous/next and retirement/payoff jumps; every debt month retained, per-loan view, principal/interest bars and payoff markers. Existing payment-transfer details remain available. Linear zero-interest payoff is deliberately preserved.
+- **Refinancing:** fixed-rate P&I comparison, upfront/financed fees, remaining balances, common holding period, interest, break-even and term-extension warnings. The optional benchmark requires explicit product/cohort confirmation and a 15/30-year comparison term; it is not a refinance offer. Indicators expire after 21 days and can be snoozed. The manual `node --experimental-strip-types scripts/refresh-mortgage-rates.mjs` command validates Freddie Mac data before replacing the local snapshot; publish updates through normal review and Pages gates. Automatic approval review blocked unattended scheduled commits to main, so no rate-update schedule is enabled. Timed feature builds remain disabled. Failed or changed source parsing preserves the last good file; stale files suppress badges.
+- **Real Estate:** the primary home's existing fields now live here. Existing rental records use distinct canonical mortgages from Loans & Debts; no second mortgage balance is created. Collected rent, operating costs, confirmed taxable profit and property value feed both budgets and the monthly engine, Sankeys, reserves, net worth and PDF. Reserve targets add to the cash target without becoming a second expense or asset; entered repair allowances are actual modeled spending. Enter explicit zeros and confirm taxable profit to unblock projections. Rental records select monthly Summary/PDF output because the legacy annual engine does not model rentals.
+- **Property experiments:** buy versus same-cash investing and keep versus immediate sale/investing; opening purchase or sale, monthly constant nominal rent/costs, fixed-rate amortization and liquidation at the entered horizon. Both alternatives receive identical additional outside funding; positive rent is reinvested. Selling fees and outstanding debt reduce terminal proceeds. Inputs remain separate from the household baseline and all tax-complete rankings. Underwater sale-now cases are blocked. This is not a rental acquisition recommendation.
+
+Remaining boundaries: dated mid-plan rental purchases/sales, multiple liens, variable-rate financing, tax losses/depreciation/recapture, return-risk equivalence, exact credit-score pricing and automated personal refinancing recommendations are not supported. Existing-property value and costs remain nominal; changes require explicit edits. Keep-mode payment is estimated from the entered balance/rate/remaining term. Do not duplicate primary-home tax/insurance or rental repairs in another entry section. Rental cash cannot automatically fund a hypothetical purchase; experiments show required cash separately.
 
 ### Outlook Assessment
 
@@ -103,7 +116,7 @@ Make Real Estate a first-class planning area with **existing property records** 
 Use a restrained notification count on Loans & Debts and a marker on each relevant loan, labeled “Worth Comparing.” Provide a reason, source date and dismiss/snooze behavior; do not imply qualification or a lender offer.
 
 - Start with loan types for which a suitable benchmark exists. Match term/product and disclose population differences. A mortgage benchmark must not be reused for auto, student or credit-card debt.
-- Prefer regularly refreshed public snapshots served with the app; compare against the user's debt entirely locally. A future data-only update workflow is separate from timed feature development and is not enabled by this roadmap.
+- Prefer regularly refreshed public snapshots served with the app; compare against the user's debt entirely locally. A scheduled public-data-only updater remains pending explicit approval; the manual refresh script is available.
 - Validate source schema, values, observation date and usage rights. Preserve the last valid snapshot on failure, show stale data, and suppress fresh-opportunity claims when the benchmark is stale or unsuitable.
 - [Freddie Mac PMMS](https://www.freddiemac.com/pmms) is a candidate weekly mortgage reference, not a personalized refinance quote. Check its methodology and supported borrower/product population before implementation.
 - Credit bands are optional and remain local. Use them only where a source supports meaningful comparisons; never manufacture an exact credit-score rate adjustment.

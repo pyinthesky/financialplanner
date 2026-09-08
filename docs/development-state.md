@@ -1,3 +1,11 @@
+# Current Priority Handoff — September 8, 2026
+
+README Delivery Roadmap is authoritative. The user authorized Priorities 1–5, with refinance before Real Estate. Implemented Outlook/month navigation, explanatory debt charts, local refinance comparisons and public snapshot refresh, and bounded existing-rental/pre-tax-property tools. Seven focused tests cover funding status, common-horizon refinancing, freshness/cohort gates, rental cash/debt/tax conservation and sale/investment comparisons. Required Pages browser/PDF gates verify the release. No private screenshots or personal amounts are used. Timed feature builds remain disabled; automatic approval review rejected scheduled main writes for public rate refresh. No rate schedule was added; the manual validated refresh script is available. No delegated agents are authorized.
+
+Real Estate uses optional validated plan records; missing optional sections remain absent on legacy imports. Rental mortgage IDs refer to existing debts; rental receipts/costs appear once. Taxable passive profit is separately confirmed, nonnegative and nominal. Primary-home costs moved to Real Estate. Unsupported losses/sales remain blocked or outside the household engine. Property trials/refinance worksheets are omitted from household scenario snapshot identity because they do not change its cash flows. Rental properties remain part of that identity.
+
+The following is historical context, not the active queue.
+
 # Development State
 
 Updated September 7, 2026. User authorized the enhanced current/retirement budget journey and the rest of supported Batch 5. Canonical contracts: [Batch 5 plan](batch-5-plan.md) and [experience](batch-5-experience.md). Timed builds remain disabled. No delegated agents are authorized. Private reference screenshots and personal financial content must never enter repository assets, fixtures, logs or uploaded artifacts.

@@ -10,8 +10,8 @@ import { buildBudgetYear, payrollReconciliation, type BudgetHousehold } from '@/
 import type { Account, IncomeStream } from '@/lib/planner';
 
 const money = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
-export function Amount({ label, value, onChange, percent = false }: { label: string; value: number | null; onChange: (n: number | null) => void; percent?: boolean }) {
-  return <label className="budget-field"><span>{label}</span><div className="input-affix"><span>{percent ? '%' : '$'}</span><Input aria-label={label} type="number" min={percent ? -100 : 0} step="any" value={value ?? ''} onFocus={e => e.currentTarget.select()} onChange={e => onChange(e.target.value === '' ? null : e.target.valueAsNumber)} /></div></label>;
+export function Amount({ label, value, onChange, percent = false, unit }: { unit?: string; label: string; value: number | null; onChange: (n: number | null) => void; percent?: boolean }) {
+  return <label className="budget-field"><span>{label}</span><div className="input-affix"><span>{unit ?? (percent ? '%' : '$')}</span><Input aria-label={label} type="number" min={percent ? -100 : 0} step="any" value={value ?? ''} onFocus={e => e.currentTarget.select()} onChange={e => onChange(e.target.value === '' ? null : e.target.valueAsNumber)} /></div></label>;
 }
 export function FrequencySelect({ value, onChange }: { value: Frequency; onChange: (v: Frequency) => void }) {
   return <label className="budget-field"><span>Frequency</span><select aria-label="Frequency" value={value} onChange={e => onChange(e.target.value as Frequency)}>{Object.entries(FREQUENCIES).map(([key, f]) => <option key={key} value={key}>{f.label}</option>)}</select></label>;

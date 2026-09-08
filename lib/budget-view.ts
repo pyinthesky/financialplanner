@@ -1,3 +1,4 @@
+import { rentalIssues, rentalTotals } from './real-estate.ts';
 import { buildBudgetYear, retirementMonths } from './budget-calendar.ts';
 import { activeMortgageStatement, debtPayoffSchedule, homeInsuranceAnnual, propertyTaxAnnual, type PlannerData } from './planner.ts';
 export interface BudgetViewRow { id:string; name:string; amount:number|null; source:string }
@@ -14,7 +15,7 @@ export function budgetView(plan:PlannerData,month:string) {
   const calendar=buildBudgetYear(plan.budget,plan.household,year,start,plan.accounts.map(a=>a.id))[m];
   const inflation=Math.pow(1+plan.assumptions.inflation/100,y),age=plan.household.currentAge+y;
   const ledger=debtPayoffSchedule(plan),index=y*12+m+1,debt=ledger[index];
-  const issues:string[]=[];
+  const issues:string[]=rentalIssues(plan);
   if(!plan.budget.timeline?.startYear)issues.push('Set the opening-balance year in Household for dated comparisons.');
   if(index>=ledger.length&&(ledger.at(-1)?.totalBalance??0)>0.005)issues.push('Debt remains beyond the available payoff schedule; its future payment is unknown.');
   if(plan.housing.statement?.enabled&&!activeMortgageStatement(plan))issues.push('Reconcile the mortgage statement before using linked housing totals.');
@@ -26,6 +27,9 @@ export function budgetView(plan:PlannerData,month:string) {
   }
   const linked:BudgetViewRow[]=(debt?.payments??[]).filter(p=>p.payment>0).map(p=>({id:p.id,name:p.name||'Loan Payment',amount:p.payment,source:'Loans & Debts · includes cascade and extra'}));
   const add=(id:string,name:string,amount:number,source:string)=>{if(amount>0)linked.push({id,name,amount,source});};
+  const rentals=rentalTotals(plan);
+  if(rentals.rent>0)income.push({id:'rental-income',name:'Collected Rent',amount:rentals.rent,source:'Real Estate · before income tax'});
+  add('rental-costs','Rental Operating Costs',rentals.costs,'Real Estate · loan payments above');
   add('property-tax','Property Tax',propertyTaxAnnual(plan)*inflation/12,'Loans & Debts');
   add('home-insurance','Home Insurance',homeInsuranceAnnual(plan)*inflation/12,'Loans & Debts');
   const statement=activeMortgageStatement(plan);

@@ -1,3 +1,5 @@
+import { normalizeRealEstate, type RealEstate } from './real-estate.ts';
+import { normalizeRefinancing, type RefinanceCase } from './refinance.ts';
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
 import { budgetTotals, EMPTY_BUDGET, normalizeBudget, type BudgetData } from "./budget.ts";
 import { buildDebtLedger, type DebtLedgerMonth } from "./debt-ledger.ts";
@@ -68,6 +70,8 @@ export interface RecurringCost {
 }
 
 export interface PlannerData {
+  realEstate?: RealEstate;
+  refinancing?: RefinanceCase[];
   returnReferences?: Partial<Record<'preRetirementReturn'|'retirementReturn'|'cashReturn', import('./references.ts').ReturnReceipt>>;
   schemaVersion: 1 | 2;
   budget: BudgetData;
@@ -1173,6 +1177,8 @@ export function normalizePlan(input: unknown): PlannerData {
   return {
     ...candidate,
     schemaVersion: 2,
+    realEstate: normalizeRealEstate(candidate.realEstate),
+    refinancing: normalizeRefinancing(candidate.refinancing),
     budget: normalizeBudget(candidate.budget),
     laboratory: normalizeLaboratory(candidate.laboratory),
     accounts: candidate.accounts.map((account) => ({

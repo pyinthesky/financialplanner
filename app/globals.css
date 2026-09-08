@@ -733,3 +733,6 @@ button, input, select { font: inherit; }
 @keyframes planner-drawer-exit-right { from { transform: translateX(0); } to { transform: translateX(100%); } }
 @media(prefers-reduced-motion:reduce) { [data-mobile="true"][data-state] { animation-duration:1ms; } }
 @media(max-width:640px) { .funding-columns { grid-template-columns:minmax(0,1fr); gap:.75rem; } .funding-ribbons { display:none; } }
+
+.opportunity-badge { display:inline-flex; max-width:100%; padding: .15rem .4rem; border-radius:.6rem; background:#d8eee8; color:#15594c; font-size:.72rem; white-space:normal; }
+.month-navigation {display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; min-width:0;}

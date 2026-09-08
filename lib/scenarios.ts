@@ -11,13 +11,15 @@ export function baselineSnapshot(plan: PlannerData): string {
   const copy = structuredClone(plan);
   copy.laboratory = { ...(copy.laboratory ?? structuredClone(EMPTY_LAB)), scenarios: [] };
   delete copy.laboratory.simulation;
+  delete copy.refinancing;
+  if(copy.realEstate){delete copy.realEstate.trial;if(!copy.realEstate.properties.length)delete copy.realEstate;}
   return JSON.stringify(sorted(normalizePlan(copy)));
 }
 export function scenarioIsStale(plan: PlannerData, scenario: SavedScenario) { return baselineSnapshot(plan) !== scenario.baseline; }
 export function scenarioChanges(plan: PlannerData, scenario: SavedScenario): string[] {
   const previous = JSON.parse(scenario.baseline), current = JSON.parse(baselineSnapshot(plan));
   const keys = new Set([...Object.keys(previous), ...Object.keys(current)]);
-  return [...keys].filter(k=>JSON.stringify(previous[k])!==JSON.stringify(current[k])).map(k=>({ household:'Household & Timeline', budget:'Budgets & Payroll', accounts:'Account Balances & Access', assumptions:'Economic & Tax Assumptions', laboratory:'Events & Reserve Policy', debts:'Debts', income:'Benefits', housing:'Housing', healthcare:'Healthcare', recurringCosts:'Timed Costs', rothConversionPlanning:'Conversion Plan' }[k]??k));
+  return [...keys].filter(k=>JSON.stringify(previous[k])!==JSON.stringify(current[k])).map(k=>({ realEstate:'Rental Properties', household:'Household & Timeline', budget:'Budgets & Payroll', accounts:'Account Balances & Access', assumptions:'Economic & Tax Assumptions', laboratory:'Events & Reserve Policy', debts:'Debts', income:'Benefits', housing:'Housing', healthcare:'Healthcare', recurringCosts:'Timed Costs', rothConversionPlanning:'Conversion Plan' }[k]??k));
 }
 export function evaluateScenario(scenario: SavedScenario) { return projectMonthly(normalizePlan(JSON.parse(scenario.baseline)), scenario.overrides); }
 export function comparison(plan: PlannerData, scenarios: SavedScenario[]) {

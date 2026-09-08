@@ -3,6 +3,7 @@ export interface FundingPart {name:string;amount:number}
 /** Cash-account identity, excluding transfers that never touch spendable cash. */
 export function monthlyFunding(row:MonthlyRow){
  const sources:FundingPart[]=[
+  {name:'Collected Rent',amount:row.rentalIncome??0},
   {name:'Take-Home Pay',amount:row.pay},{name:'Pensions',amount:row.pension},
   {name:'Social Security',amount:row.socialSecurity},{name:'Cash Events',amount:row.eventIncome},
   {name:'Cash Interest',amount:row.cashInterest},{name:'Tax Refund',amount:row.taxRefund},

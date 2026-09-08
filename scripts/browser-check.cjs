@@ -135,7 +135,7 @@ const server = http.createServer((req, res) => {
           await noOverflow('debt cascade');
           await page.getByText('A ($50.00/month) is paid off.', { exact: false }).waitFor();
           await page.screenshot({ path: path.join(out, `${name}-${width}-debt.png`), fullPage: true });
-          await navigate('Loans & Debts');
+          await navigate('Real Estate');
           await page.getByLabel('Property tax entry method',{exact:true}).selectOption('annual');
           await page.getByLabel('Annual property tax',{exact:true}).fill('240');
           assert.equal(await page.getByLabel('Mill rate',{exact:true}).count(),0);
@@ -251,6 +251,9 @@ const server = http.createServer((req, res) => {
         await page.getByRole('button',{name:'Erase and Load Sample',exact:true}).click();
         await navigate('Plan Summary');
         await page.getByRole('img',{name:/^Current Cash Flow Sankey/}).waitFor();
+        await page.getByRole('button',{name:'Choose Cash-Flow Month',exact:true}).click();
+        await page.getByLabel('Sankey Month',{exact:true}).fill('2026-02');
+        await page.getByRole('img',{name:/Sankey for 2026-02/}).waitFor();
         await noOverflow('current Sankey');
         await page.screenshot({path:path.join(out,`${name}-${width}-current-sankey.png`),fullPage:true});
         await page.getByRole('button',{name:'In Retirement',exact:true}).click();
@@ -264,6 +267,29 @@ const server = http.createServer((req, res) => {
           for(const stage of ['Current','Retirement'])assert.ok(await report.getByRole('img',{name:`${stage} Cash Flow Sankey`,exact:true}).isVisible());
           assert.ok(await report.locator('.report-flow-svg path').evaluateAll(paths=>paths.some(p=>p.getBBox().width>0&&p.getBBox().height>0)),'Printable cash flows have populated geometry');
           if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-complete-report.pdf'),format:'Letter',printBackground:true});
+          await page.emulateMedia({media:'screen'});
+        }
+        await navigate('Loans & Debts');
+        const refinance=page.locator('section').filter({has:page.getByRole('heading',{name:'Refinance Comparison',exact:true})}).last();
+        await refinance.locator('details').last().locator('summary').click();
+        for(const [label,value] of [['New Term / Years — Mortgage','15'],['Offered Rate / % — Mortgage','2'],['Closing Costs and Points — Mortgage','500'],['Holding Period / Months — Mortgage','60']])await page.getByLabel(label,{exact:true}).fill(value);
+        await noOverflow('refinance comparison');
+        await navigate('Real Estate');
+        await page.getByRole('button',{name:'Add Rental Property',exact:true}).click();
+        await page.getByLabel('Property Label',{exact:true}).fill('Synthetic Rental');
+        for(const [label,value] of [['Current Market Value','10000'],['Scheduled Rent / Month','100'],['Vacancy Allowance','10'],['Management / Collected Rent','0'],['Property Tax / Year','120'],['Insurance / Year','120'],['Routine Maintenance / Year','120'],['Actual Repair Spending Allowance / Year','120'],['Desired Property Cash Reserve','200'],['Confirmed Passive Taxable Profit / Year','500']])await page.getByLabel(label,{exact:true}).fill(value);
+        await page.getByRole('checkbox',{name:/I confirmed the nonnegative taxable profit/}).check();
+        await noOverflow('rental property entry');
+        await navigate('Scenario Laboratory');
+        const propertyLab=page.locator('section').filter({has:page.getByRole('heading',{name:'Income Property Laboratory',exact:true})}).last();
+        for(const [label,value] of [['Property Value / Purchase Price','12000'],['Equity / Down Payment','6000'],['Purchase Closing Costs','120'],['Mortgage Rate','0'],['Remaining / New Loan Term','10'],['Comparison Horizon','1'],['Scheduled Rent / Month','100'],['Vacancy Allowance','0'],['Operating Costs / Month','20'],['Actual Repairs / Year','0'],['Property Growth / Year','0'],['Alternative Investment Return / Year','0'],['Selling Costs / Property Value','5']])await propertyLab.getByLabel(label,{exact:true}).fill(value);
+        await propertyLab.getByText('Annual Comparison Ledger',{exact:true}).click();
+        await noOverflow('income property comparison');
+        await page.screenshot({path:path.join(out,`${name}-${width}-property.png`),fullPage:true});
+        if(width===1280&&name==='chromium'){
+          await page.emulateMedia({media:'print'});
+          await page.locator('.print-report').getByRole('heading',{name:'Real Estate — Scope and Assumptions',exact:true}).waitFor();
+          await page.pdf({path:path.join(out,'synthetic-property-report.pdf'),format:'Letter',printBackground:true});
           await page.emulateMedia({media:'screen'});
         }
         await navigate('Current Budget');

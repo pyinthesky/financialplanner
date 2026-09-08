@@ -1,3 +1,4 @@
+import { rentalIssues, rentalTotals } from './real-estate.ts';
 import { debtScenarioPlan } from './debt-scenario.ts';
 import { buildBudgetYear, type BudgetMonth } from './budget-calendar.ts';
 import { normalizeBudget, budgetAllocation } from './budget.ts';
@@ -16,6 +17,7 @@ export interface MonthlyRow {
   month: string; age: number; openingPortfolio: number; portfolio: number; cash: number;
   investmentReturn: number; pay: number; pension: number; socialSecurity: number; cashInterest: number;
   essential: number; discretionary: number; discretionaryReduction: number;
+  rentalIncome:number; rentalCosts:number; rentalValue:number;
   housing: number; healthcare: number; timedCosts: number; debtPrincipal: number; debtInterest: number;
   spending: number; spendingPaid: number; unfundedSpending: number;
   taxSettlement: number; taxRefund: number; withholding: number; unfundedTax: number;
@@ -54,7 +56,8 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   let budget;
   try { budget = normalizeBudget(data.budget); } catch { return { months:[], years:[], issues:['Correct invalid or negative budget inputs before projecting.'], supported:false, firstShortfall:null, legacyTarget:null, legacyGap:null }; }
   if (overrides.retirementMonthYou || overrides.retirementMonthPartner) budget.timeline = { startYear: budget.timeline?.startYear ?? null, retirementMonthYou: overrides.retirementMonthYou ?? budget.timeline?.retirementMonthYou ?? '', retirementMonthPartner: overrides.retirementMonthPartner ?? budget.timeline?.retirementMonthPartner ?? '' };
-  const issues = new Set<string>();
+  const issues = new Set<string>(rentalIssues(data));
+  const rental=rentalTotals(data);
   if(budget.lines.some(l=>budgetAllocation(l).overallocated||budgetAllocation(l,true).overallocated))issues.add('A bill breakdown exceeds its current or retirement envelope. Reconcile its total before comparing scenarios.');
   const empty = (): MonthlyResult => ({ months: [], years: [], issues: [...issues], supported: false, firstShortfall: null, legacyTarget: null, legacyGap: null });
   const start = budget.timeline?.startYear;
@@ -77,6 +80,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   if(data.income.some(s=>s.withholdingPercent!==undefined&&s.withholdingPercent!==null&&(!Number.isFinite(s.withholdingPercent)||s.withholdingPercent<0||s.withholdingPercent>100)))issues.add('Benefit withholding must be between zero and 100 percent.');
   const payoff=overrides.mortgagePayoff;
   const homeMove=overrides.homeMove;
+  if(homeMove && data.realEstate?.properties.length)issues.add('Compare home moves separately from rental-property plans; multiple-property sales are not modeled.');
   if(homeMove && (!calculateHomeMove(homeMove,data.household.filingStatus,0).supported || data.housing.homeValue<=0 || data.debts.filter(d=>d.kind==='mortgage').length>1 || data.debts.some(d=>d.kind==='mortgage'&&d.id!==homeMove.mortgageId))) issues.add('Home moves require the opening home value, complete standard-case inputs, and the one linked mortgage (or no mortgage). Multiple liens and new financing require separate rules.');
   if(homeMove&&payoff)issues.add('Compare a home move and a separate mortgage payoff in different scenarios; combined transaction sequencing is not supported.');
   if(payoff && (!data.debts.some(d=>d.id===payoff.debtId&&d.kind==='mortgage') || !/^\d{4}-(0[1-9]|1[0-2])$/.test(payoff.month) || payoff.destination==='invest' && !data.accounts.some(a=>a.id===payoff.accountId&&a.kind==='taxable'))) issues.add('Complete the mortgage payoff month, loan and optional taxable investing destination.');
@@ -122,11 +126,11 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
     const distributions = { you: 0, partner: 0 };
     let wages = 0, pensions = 0, ss = 0, interest = 0, gains = 0, conversions = 0, eventTaxable = 0, qcdTaxable = 0, withholding = 0;
     const tax = () => {
-      const ordinaryOther = wages + pensions + interest + distributions.you + distributions.partner + conversions + eventTaxable + qcdTaxable;
+      const ordinaryOther = wages + pensions + interest + distributions.you + distributions.partner + conversions + eventTaxable + rental.taxable*12 + qcdTaxable;
       const social = calculateTaxableSocialSecurity({ benefits: ss, otherIncome: ordinaryOther + gains, taxExemptInterest: data.assumptions.taxExemptInterest, filingStatus: data.household.filingStatus, marriedFilingSeparatelyLivedApart: data.household.marriedFilingSeparatelyLivedApart });
       const ordinary = ordinaryOther + social.taxableBenefits;
       const federal = calculateFederalIncomeTax(ordinary, data.household.filingStatus, Math.pow(1 + Math.max(-0.99, infl), year - 2026)).tax;
-      const capital = calculateCapitalGainsTax({ filingStatus: data.household.filingStatus, grossOrdinaryIncome: ordinary, netLongTermCapitalGain: gains, modifiedAdjustedGrossIncome: ordinary + gains, netInvestmentIncome: gains + interest, inflationFactor: Math.pow(1 + Math.max(-0.99, infl), year - 2026), overrideRatePercent: data.assumptions.capitalGainsRate }).totalCapitalGainsTax;
+      const capital = calculateCapitalGainsTax({ filingStatus: data.household.filingStatus, grossOrdinaryIncome: ordinary, netLongTermCapitalGain: gains, modifiedAdjustedGrossIncome: ordinary + gains, netInvestmentIncome: gains + interest + rental.taxable*12, inflationFactor: Math.pow(1 + Math.max(-0.99, infl), year - 2026), overrideRatePercent: data.assumptions.capitalGainsRate }).totalCapitalGainsTax;
       const state = Math.max(0, ordinary + gains) * nonnegative(data.assumptions.stateEffectiveTaxRate) / 100;
       let early = 0;
       for (const owner of ['you', 'partner'] as const) {
@@ -174,7 +178,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
       const age = data.household.currentAge + y;
       const monthIndex = y * 12 + m;
       wages += b.taxableWages; withholding += b.withholding;
-      cash += b.takeHome;
+      cash += b.takeHome + rental.rent;
       let mortgagePayoff=0, payoffDraws=0, releasedPaymentInvested=0,homeProceeds=0;
       let pension = 0, social = 0;
       let pensionWithholding=0,socialWithholding=0;
@@ -227,7 +231,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
       const eventExpense = sum(matchingEvents.filter(e => e.kind === 'expense').map(e => e.amount!));
       eventTaxable += sum(matchingEvents.filter(e => e.kind === 'cashReceipt').map(e => e.taxableAmount!));
       cash += eventIncome;
-      const regularSpending = essential + discretionary + housing + healthcare + timed + eventExpense + (debtRow?.principalPaid ?? 0) + (debtRow?.interestPaid ?? 0);
+      const regularSpending = rental.costs + essential + discretionary + housing + healthcare + timed + eventExpense + (debtRow?.principalPaid ?? 0) + (debtRow?.interestPaid ?? 0);
       const spending=regularSpending+mortgagePayoff;
       let withdrawals = payoffDraws+raiseCash(regularSpending);
       const regularPaid=Math.min(cash,regularSpending);cash-=regularPaid;
@@ -294,7 +298,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
       // End-of-month cash covers the next selected months, including the actual
       // due month of nonmonthly bills. A reserve allocation is never an expense.
       const coverageMonths=Math.min(nonnegative(settings.cashCoverageMonths),Math.max(0,yearsCount*12-monthIndex-1));
-      let cashTarget=nonnegative(settings.reserveExtra);
+      let cashTarget=nonnegative(settings.reserveExtra)+rental.reserveTarget;
       for(let next=1;next<=Math.ceil(coverageMonths);next++){
         const futureIndex=monthIndex+next,fy=Math.floor(futureIndex/12),fm=futureIndex%12;
         const future=calendar[fy]?.[fm];if(!future)break;
@@ -314,12 +318,12 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
       if (settings.refillCash && m !== 11) withdrawals += raiseCash(cashTarget);
       const closing = portfolio();
       if (spending-spendingPaid>0.005 && (debtRow?.principalPaid??0)+(debtRow?.interestPaid??0)>0) issues.add('A shortfall occurs while debt payments are scheduled; projected debt balances assume those payments are made and require review.');
-      const externalChange = b.takeHome + pension + social + b.employeeSavings + b.employerSavings + eventIncome + investmentReturn + cashInterest + homeProceeds - spendingPaid - taxSettlement + taxRefund - qcd;
-      const row: MonthlyRow = {openingCash,cashPayrollSavings,savingsToInvestments,incomeByOwner, month: b.month, age, openingPortfolio: opening, portfolio: closing, cash, investmentReturn, pay: b.takeHome, pension, socialSecurity: social, cashInterest, essential, discretionary, discretionaryReduction: reduction, housing, healthcare, timedCosts: timed, debtPrincipal: (debtRow?.principalPaid ?? 0)+mortgagePayoff, debtInterest: debtRow?.interestPaid ?? 0, spending, spendingPaid, unfundedSpending: spending - spendingPaid, taxSettlement, taxRefund, withholding: b.withholding+benefitWithholding, unfundedTax, requestedSavings: b.requestedSavings, savingsFunded, savingsUnfunded: b.requestedSavings - savingsFunded, payrollSavings: b.employeeSavings, employerSavings: b.employerSavings, withdrawals, rmd, conversionRequested, converted, charitableGift: qcd, eventIncome, eventExpense, cashTarget, bufferGap: Math.max(0, cashTarget - cash), liabilities: debtRow?.totalBalance ?? debt.at(-1)?.totalBalance ?? 0, conservationResidual: closing - opening - externalChange, accounts: Object.fromEntries(accounts.map(a => [a.id, a.balance])),mortgagePayoff,releasedPaymentInvested,homeProceeds,homeValue,coverageMonths,totalNetWorth:closing+homeValue-(debtRow?.totalBalance??debt.at(-1)?.totalBalance??0) };
+      const externalChange = rental.rent + b.takeHome + pension + social + b.employeeSavings + b.employerSavings + eventIncome + investmentReturn + cashInterest + homeProceeds - spendingPaid - taxSettlement + taxRefund - qcd;
+      const row: MonthlyRow = {rentalIncome:rental.rent,rentalCosts:rental.costs,rentalValue:rental.value,openingCash,cashPayrollSavings,savingsToInvestments,incomeByOwner, month: b.month, age, openingPortfolio: opening, portfolio: closing, cash, investmentReturn, pay: b.takeHome, pension, socialSecurity: social, cashInterest, essential, discretionary, discretionaryReduction: reduction, housing, healthcare, timedCosts: timed, debtPrincipal: (debtRow?.principalPaid ?? 0)+mortgagePayoff, debtInterest: debtRow?.interestPaid ?? 0, spending, spendingPaid, unfundedSpending: spending - spendingPaid, taxSettlement, taxRefund, withholding: b.withholding+benefitWithholding, unfundedTax, requestedSavings: b.requestedSavings, savingsFunded, savingsUnfunded: b.requestedSavings - savingsFunded, payrollSavings: b.employeeSavings, employerSavings: b.employerSavings, withdrawals, rmd, conversionRequested, converted, charitableGift: qcd, eventIncome, eventExpense, cashTarget, bufferGap: Math.max(0, cashTarget - cash), liabilities: debtRow?.totalBalance ?? debt.at(-1)?.totalBalance ?? 0, conservationResidual: closing - opening - externalChange, accounts: Object.fromEntries(accounts.map(a => [a.id, a.balance])),mortgagePayoff,releasedPaymentInvested,homeProceeds,homeValue,coverageMonths,totalNetWorth:closing+homeValue+rental.value-(debtRow?.totalBalance??debt.at(-1)?.totalBalance??0) };
       months.push(row);
     }
     const rows = months.slice(-12);
-    years.push({ year, portfolio: portfolio(), cash, income: sum(rows.map(r => r.pay + r.pension + r.socialSecurity + r.eventIncome + r.cashInterest)), spending: sum(rows.map(r => r.spending)), taxes: lastAssessment.total, taxPaid: sum(rows.map(r => r.taxSettlement)) + withholding, taxRefund: sum(rows.map(r => r.taxRefund)), withholding, unfunded: sum(rows.map(r => r.unfundedSpending + r.unfundedTax)), savings: sum(rows.map(r => r.savingsFunded + r.payrollSavings + r.employerSavings)), converted: conversions, conversionRequested: sum(rows.map(r => r.conversionRequested)), federalTax: lastAssessment.federal, stateTax: lastAssessment.state, capitalGainsTax: lastAssessment.capital, earlyTax: lastAssessment.early, financialNetWorth:portfolio()-rows.at(-1)!.liabilities,totalNetWorth:portfolio()+homeValue-rows.at(-1)!.liabilities });
+    years.push({ year, portfolio: portfolio(), cash, income: sum(rows.map(r => r.rentalIncome + r.pay + r.pension + r.socialSecurity + r.eventIncome + r.cashInterest)), spending: sum(rows.map(r => r.spending)), taxes: lastAssessment.total, taxPaid: sum(rows.map(r => r.taxSettlement)) + withholding, taxRefund: sum(rows.map(r => r.taxRefund)), withholding, unfunded: sum(rows.map(r => r.unfundedSpending + r.unfundedTax)), savings: sum(rows.map(r => r.savingsFunded + r.payrollSavings + r.employerSavings)), converted: conversions, conversionRequested: sum(rows.map(r => r.conversionRequested)), federalTax: lastAssessment.federal, stateTax: lastAssessment.state, capitalGainsTax: lastAssessment.capital, earlyTax: lastAssessment.early, financialNetWorth:portfolio()-rows.at(-1)!.liabilities,totalNetWorth:portfolio()+homeValue+rental.value-rows.at(-1)!.liabilities });
   }
   if (calendar.some(ms => ms.some(m => m.averageSchedules > 0))) issues.add('Undated recurring amounts use monthly averages; dated bills and pay use their scheduled months.');
   const blockers = [...issues].filter(s => !s.startsWith('Undated'));

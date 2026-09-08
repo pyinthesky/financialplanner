@@ -9,7 +9,11 @@ import { ScenarioLaboratory, MonthlyResults, MonthlyPrintReport } from '@/compon
 import { projectMonthly } from '@/lib/monthly-projection';
 import { CompactBudgetEditor } from "@/components/compact-budget-editor";
 import { PayrollEditor } from '@/components/payroll-editor';
+import { RealEstateEditor, PropertyLaboratory, PropertyReport } from '@/components/real-estate';
+import { Refinance } from '@/components/refinance';
+import { validSnapshot, refinanceOpportunities, type RateSnapshot } from '@/lib/refinance';
 import { SummaryCashFlow } from '@/components/summary-cash-flow';
+import { Outlook } from '@/components/outlook';
 import { PrintPlanDetails } from '@/components/print-plan-details';
 import { createSaveGuard, isBlankPlan } from '@/lib/plan-lifecycle';
 import { RETURN_REFERENCES } from '@/lib/references';
@@ -40,7 +44,7 @@ import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
-type SectionId = "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "debt" | "health" | "taxes" | "data";
+type SectionId = "realEstate" | "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "debt" | "health" | "taxes" | "data";
 type VaultStatus = "off" | "locked" | "unlocked";
 type SaveStatus = "unsaved" | "locked" | "saving" | "saved" | "failed";
 
@@ -51,6 +55,7 @@ const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "portfolio", label: "Cash & Investments", icon: BriefcaseBusiness },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
   { id: "debt", label: "Loans & Debts", icon: WalletCards },
+  { id: "realEstate", label: "Real Estate", icon: Home },
   { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
   { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
   { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
@@ -170,7 +175,7 @@ function EmptyRow({ message }: { message: string }) {
   );
 }
 
-function PlannerNavigation({ activeSection, onSelect }: { activeSection: SectionId; onSelect: (section: SectionId) => void }) {
+function PlannerNavigation({ activeSection, onSelect, opportunities }: { opportunities:number; activeSection: SectionId; onSelect: (section: SectionId) => void }) {
   const { isMobile, setOpenMobile } = useSidebar();
 
   return (
@@ -178,6 +183,7 @@ function PlannerNavigation({ activeSection, onSelect }: { activeSection: Section
       {sections.map((section) => (
         <SidebarMenuItem key={section.id}>
           <SidebarMenuButton
+            aria-label={section.label}
             isActive={activeSection === section.id}
             aria-current={activeSection === section.id ? "page" : undefined}
             onClick={() => {
@@ -186,7 +192,7 @@ function PlannerNavigation({ activeSection, onSelect }: { activeSection: Section
             }}
           >
             <section.icon />
-            <span>{section.label}</span>
+            <span>{section.label}</span>{section.id==="debt"&&opportunities>0&&<span className="opportunity-badge" aria-label={`${opportunities} loans worth comparing`}>{opportunities}</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
       ))}
@@ -195,7 +201,7 @@ function PlannerNavigation({ activeSection, onSelect }: { activeSection: Section
 }
 
 function PrintReport({ data, projection, successRate, debtMonths }: { data: PlannerData; projection: ReturnType<typeof projectPlan>; successRate: number; debtMonths: number }) {
-  if (data.laboratory?.settings.enabled) return <article className="print-report"><header className="report-header"><h1>Retirement Plan Summary</h1><p>Monthly Engine</p></header><MonthlyPrintReport plan={data} result={projectMonthly(data)}/><PrintPlanDetails plan={data}/><footer>Local-only educational planning estimate. Values are nominal and depend on entered assumptions. Not tax, investment, legal or medical advice.</footer></article>;
+  if (data.laboratory?.settings.enabled || data.realEstate?.properties.length) return <article className="print-report"><header className="report-header"><h1>Retirement Plan Summary</h1><p>Monthly Engine</p></header><Outlook plan={data} print/><MonthlyPrintReport plan={data} result={projectMonthly(data)}/><PrintPlanDetails plan={data}/><PropertyReport plan={data}/><footer>Local-only educational planning estimate. Values are nominal and depend on entered assumptions. Not tax, investment, legal or medical advice.</footer></article>;
   const retirement = projection.find((row) => row.age === data.household.retirementAge) ?? projection[0];
   const last = projection.at(-1)!;
   const printChart = buildPrintPortfolioChart(projection);
@@ -210,6 +216,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
         </div>
         <p>Generated {new Date().toLocaleDateString()}</p>
       </header>
+      <Outlook plan={data} print/>
       <div className="report-metrics">
         <div>
           <span>Monte Carlo range</span>
@@ -297,13 +304,15 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
           </ul>
         </section>
       </div>
-      <PrintPlanDetails plan={data}/>
+      <PrintPlanDetails plan={data}/><PropertyReport plan={data}/>
       <footer>This is an educational estimate, not tax, investment, legal, or medical advice. Values are nominal and depend on the assumptions entered.</footer>
     </article>
   );
 }
 
 export default function HomePage() {
+  const [rateSnapshot,setRateSnapshot]=useState<RateSnapshot|null>(null);
+  useEffect(()=>{fetch(new URL('mortgage-rates.json',document.baseURI)).then(r=>r.ok?r.json():null).then(s=>{if(validSnapshot(s))setRateSnapshot(s);}).catch(()=>{});},[]);
   const [plan, setPlan] = useState<PlannerData>(DEFAULT_PLAN);
   const [activeSection, setActiveSection] = useState<SectionId>("data");
   const [vaultStatus, setVaultStatus] = useState<VaultStatus>("off");
@@ -1357,7 +1366,7 @@ export default function HomePage() {
           </Table>
         </div>
       </Panel>
-      {renderHousing()}
+      <Refinance plan={plan} onChange={setPlan} snapshot={rateSnapshot}/>
     </>
   );
 
@@ -2303,7 +2312,7 @@ export default function HomePage() {
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
-    : activeSection === "scenarios" ? <ScenarioLaboratory plan={plan} onChange={setPlan}/> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{plan.laboratory?.settings.enabled ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>
@@ -2322,7 +2331,7 @@ export default function HomePage() {
             <SidebarGroup>
               <SidebarGroupLabel>YOUR PLAN</SidebarGroupLabel>
               <SidebarGroupContent>
-                <PlannerNavigation activeSection={activeSection} onSelect={setActiveSection} />
+                <PlannerNavigation opportunities={refinanceOpportunities(plan,rateSnapshot).length} activeSection={activeSection} onSelect={setActiveSection} />
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>

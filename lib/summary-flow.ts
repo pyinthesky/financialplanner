@@ -11,7 +11,7 @@ export function summaryFlow(plan:PlannerData,row:MonthlyRow){
     const b=buildBudgetYear(plan.budget,plan.household,year,start)[m];
     const groups:Record<string,number>={};
     for(const l of b.lines){const category=plan.budget.lines.find(v=>v.id===l.id)?.category??'Other';const scale=l.essential?(b.essential?row.essential/b.essential:0):(b.discretionary?row.discretionary/b.discretionary:0);groups[category]=(groups[category]??0)+(l.amount??0)*scale;}
-    spending=[...Object.entries(groups).map(([name,amount])=>({name,amount})),{name:'Home Tax & Insurance',amount:row.housing},{name:'Healthcare & Care',amount:row.healthcare},{name:'Timed Expenses',amount:row.timedCosts},{name:'Life Events',amount:row.eventExpense},{name:'Debt Payments',amount:row.debtPrincipal+row.debtInterest}];
+    spending=[...Object.entries(groups).map(([name,amount])=>({name,amount})),{name:'Rental Operating Costs',amount:row.rentalCosts??0},{name:'Home Tax & Insurance',amount:row.housing},{name:'Healthcare & Care',amount:row.healthcare},{name:'Timed Expenses',amount:row.timedCosts},{name:'Life Events',amount:row.eventExpense},{name:'Debt Payments',amount:row.debtPrincipal+row.debtInterest}];
   }
   const uses=base.uses.flatMap(p=>p.name==='Funded Spending & Debt Payments'?spending:[p]).filter(p=>p.amount>0);
   return {...base,sources,uses,residual:sources.reduce((n,p)=>n+p.amount,0)-uses.reduce((n,p)=>n+p.amount,0)};
