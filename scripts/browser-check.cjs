@@ -36,7 +36,9 @@ const server = http.createServer((req, res) => {
         console.log(`Checking ${name} at ${width}px`);
         const navigate = async label => {
           const nav = page.getByRole('button', { name: label, exact: true });
-          if (!await nav.isVisible()) await page.getByRole('button', { name: 'Toggle Sidebar' }).click();
+          // Initial React mounting can briefly precede navigation. Desktop has no drawer toggle.
+          if (width>=768) await nav.waitFor({state:'visible'});
+          else if (!await nav.isVisible()) await page.getByRole('button', { name: 'Toggle Sidebar' }).click();
           if(width<768){
             const drawer=page.locator('[data-mobile="true"][data-state="open"]');
             await drawer.waitFor({state:'visible'});
@@ -220,12 +222,19 @@ const server = http.createServer((req, res) => {
         await noOverflow('sample compact budget');
         await page.screenshot({path:path.join(out,`${name}-${width}-sample-budget.png`),fullPage:true});
         await navigate('Data & Privacy');
+        await page.getByRole('button',{name:'Create local vault',exact:true}).click();
+        await page.getByLabel('Vault passphrase',{exact:true}).fill('Public-Synthetic-Test-Only');
+        await page.getByRole('button',{name:'Create vault',exact:true}).click();
+        await page.getByRole('dialog').waitFor({state:'hidden'});
+        await page.waitForFunction(()=>localStorage.length===1);
         await page.getByRole('button',{name:'Create New Plan',exact:true}).click();
         await page.getByRole('button',{name:'Erase and Create New Plan',exact:true}).click();
         await navigate('Current Budget');
         await expandFood();
         assert.ok((await page.locator('main input[type=number]').evaluateAll(inputs=>inputs.map(i=>i.value))).every(v=>v===''),'New plan is blank');
         assert.equal(await page.evaluate(()=>localStorage.length),0,'New plan has no saved vault');
+        await page.waitForTimeout(700);
+        assert.equal(await page.evaluate(()=>localStorage.length),0,'Delayed saving cannot recreate the erased vault');
         assert.deepEqual(errors, [], `${name} ${width} has no uncaught errors`);
         evidence.push({ engine: name, width, status: 'passed' });
         await page.close();

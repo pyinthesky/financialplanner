@@ -315,6 +315,7 @@ export default function HomePage() {
   const [replaceAction,setReplaceAction]=useState<'sample'|'new'|null>(null);
   const [planEpoch,setPlanEpoch]=useState(0);
   const saveGuard=useRef(createSaveGuard());
+  const vaultGuard=useRef(createSaveGuard());
   const fileInput = useRef<HTMLInputElement>(null);
   const passphraseRef = useRef("");
 
@@ -496,11 +497,20 @@ export default function HomePage() {
     }
   };
   const unlockOrCreateVault = async () => {
+    vaultGuard.current.cancel();
+    const isCurrent=vaultGuard.current.lease();
     setVaultError("");
     try {
       const existing = localStorage.getItem(VAULT_KEY);
-      if (existing) setPlan(normalizePlan(await decryptPlan(existing, passphrase)));
-      else localStorage.setItem(VAULT_KEY, await encryptPlan(plan, passphrase));
+      if (existing) {
+        const restored=normalizePlan(await decryptPlan(existing, passphrase));
+        if(!isCurrent())return;
+        setPlan(restored);
+      } else {
+        const encrypted=await encryptPlan(plan,passphrase);
+        if(!isCurrent())return;
+        localStorage.setItem(VAULT_KEY,encrypted);
+      }
       passphraseRef.current = passphrase;
       setVaultStatus("unlocked");
       setSaveStatus("saved");
@@ -508,10 +518,12 @@ export default function HomePage() {
       setPassphrase("");
       setVaultOpen(false);
     } catch (error) {
+      if(!isCurrent())return;
       setVaultError(error instanceof Error ? error.message : "Unable to open the vault.");
     }
   };
   const lockVault = () => {
+    vaultGuard.current.cancel();
     saveGuard.current.cancel();
     passphraseRef.current = "";
     setVaultStatus("locked");
@@ -519,6 +531,7 @@ export default function HomePage() {
     setSaveState("Local vault locked");
   };
   const eraseVault = () => {
+    vaultGuard.current.cancel();
     saveGuard.current.cancel();
     localStorage.removeItem(VAULT_KEY);
     passphraseRef.current = "";
@@ -530,6 +543,7 @@ export default function HomePage() {
 
   const replacePlan=(action:'sample'|'new')=>{
     const replacement=action==='sample'?normalizePlan(structuredClone(samplePlan)):structuredClone(DEFAULT_PLAN);
+    vaultGuard.current.cancel();
     saveGuard.current.cancel();
     localStorage.removeItem(VAULT_KEY);passphraseRef.current='';setPassphrase('');
     setVaultStatus('off');setSaveStatus('unsaved');setVaultOpen(false);setVaultError('');setConfirmErase(false);

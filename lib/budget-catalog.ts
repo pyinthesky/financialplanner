@@ -18,7 +18,7 @@ export function suggestedBills(existing: BudgetLine[], retirement=false): Budget
     .map(([category,key,name])=>({id:`suggested-${key}`,name,category,amount:null,frequency:'monthly',essential:false,owner:'household',nextDueDate:'',endDate:'',retirement:{rule:retirement?'retirementOnly':'continue',amount:null,reason:''}}));
 }
 export function matchingReference(line: BudgetLine, state:string) {
-  const entry=BILL_CATALOG.find(([category,,name])=>line.category===category&&line.name.toLowerCase()===name.toLowerCase());
+  const entry=BILL_CATALOG.find(([category,key,name])=>line.category===category&&(line.id===`suggested-${key}`||line.name.toLowerCase()===name.toLowerCase()));
   if(!entry)return null;
   return entry[1]==='electricity'?electricityReference(state):NATIONAL_BUDGET_REFERENCES.find(r=>r.id===`bls-2024-${entry[1]}`)??null;
 }

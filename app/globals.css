@@ -666,7 +666,9 @@ button, input, select { font: inherit; }
 .compact-name input { border-color:transparent; background:transparent; padding-left:0; }
 .compact-name input:hover, .compact-name input:focus { border-color:#cbd5e1; }
 .compact-name small { padding-left:.1rem; }
-.compact-amount input { width:100%; min-width:0; }
+.compact-amount input { width:100%; min-width:0; padding-left:.5rem; padding-right:.3rem; appearance:textfield; }
+.compact-amount > span { padding:0 .45rem; }
+.compact-amount input::-webkit-inner-spin-button, .compact-amount input::-webkit-outer-spin-button { appearance:none; margin:0; }
 .compact-tools { display:flex; justify-content:flex-end; }
 .compact-tools button { width:44px; height:44px; flex-shrink:0; }
 .compact-linked { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.6rem .4rem; border-bottom:1px solid #eef2f6; font-size:.9rem; overflow-wrap:anywhere; }
@@ -678,11 +680,16 @@ button, input, select { font: inherit; }
 .assumption-shortcut small { color:#64748b; font-size:.75rem; }
 .summary-sankey { margin-bottom:1.5rem; }
 .summary-sankey-svg { width:100%; height:auto; display:block; overflow:visible; }
+@media(max-width:360px) {
+  .monthly-results .budget-metrics { display:flex; flex-direction:column; gap:.5rem; }
+  .monthly-results .budget-metrics > div { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.75rem; }
+  .monthly-results .budget-metrics strong { font-size:1.05rem; white-space:nowrap; }
+}
 @media(max-width:600px) {
   .compact-section { padding:.7rem; }
-  .compact-column-labels { grid-template-columns:minmax(0,1fr) 100px; }
+  .compact-column-labels { grid-template-columns:minmax(0,1fr) 112px; }
   .compact-column-labels > :last-child { display:none; }
-  .compact-bill { grid-template-columns:minmax(0,1fr) 100px; padding:.4rem 0; gap:.1rem .5rem; }
+  .compact-bill { grid-template-columns:minmax(0,1fr) 112px; padding:.4rem 0; gap:.1rem .5rem; }
   .compact-tools { grid-column:1/-1; }
   .compact-linked { padding:.65rem 0; gap:.6rem; }
   .compact-linked strong { max-width:45%; }
