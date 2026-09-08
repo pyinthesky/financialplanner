@@ -439,6 +439,63 @@ button, input, select { font: inherit; }
 
 .site-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--border); padding: 1.3rem clamp(1rem, 3vw, 2.5rem); color: #8995a6; font-size: .7rem; }
 .print-report { display: none; }
+
+/* Enrollment: compact rows, progressively disclosed rules, no wide comparison tables. */
+.oe-page { gap:16px; }
+.oe-page .panel { padding:18px; }
+.oe-page h3, .oe-print h3 { font-weight:650; font-size:1rem; }
+.oe-inline, .oe-option-title { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; min-width:0; }
+.oe-inline > *, .oe-option-title > * { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+.oe-tabs, .oe-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.oe-results, .oe-detail { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+.oe-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:end; gap:10px; }
+.oe-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); align-items:start; gap:12px; }
+.oe-option { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; border:1px solid #dce4ee; border-radius:12px; padding:14px; min-width:0; background:#fafcfe; }
+.oe-page .budget-field { font-size:.78rem; gap:4px; }
+.oe-page .budget-field select { text-overflow:ellipsis; }
+.oe-page .input-affix { min-width:0; }
+.oe-page .field-help { font-size:.8rem; line-height:1.5; }
+.oe-page details { min-width:0; }
+.oe-page summary { font-size:.88rem; }
+.oe-person, .oe-care { border-top:1px solid #dce4ee; }
+.oe-person > summary, .oe-care > summary { display:list-item; list-style-position:inside; }
+.oe-person > summary > span, .oe-care > summary > span { color:#63718a; font-size:.8rem; margin-left:12px; }
+.oe-person > .oe-detail { padding:4px 0 14px; }
+.oe-result-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:12px; }
+.oe-result { border:1px solid #dce4ee; border-radius:12px; padding:14px; min-width:0; }
+.oe-price { font-size:1.75rem; display:block; color:#126a61; }
+.oe-result p { font-size:.78rem; }
+.oe-result dl { margin-top:12px; display:grid; gap:6px; font-size:.78rem; }
+.oe-result dl > div { display:flex; gap:10px; justify-content:space-between; }
+.oe-result dd { font-variant-numeric:tabular-nums; white-space:nowrap; }
+.oe-cost-bars { display:grid; gap:14px; }
+.oe-cost-bars svg { display:block; width:100%; height:24px; }
+.oe-cost-bars small { font-size:.75rem; color:#63718a; }
+.oe-legend { display:flex; flex-wrap:wrap; gap:8px 16px; font-size:.76rem; margin-top:8px; }
+.oe-legend span { display:inline-flex; align-items:center; gap:6px; }
+.oe-legend i { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.oe-line-plot { max-width:850px; width:100%; min-width:0; }
+.oe-line-plot svg { display:block; width:100%; height:auto; }
+.oe-line-plot text { font-size:11px; fill:#56647a; }
+.oe-person-results { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); gap:12px; }
+.oe-person-results > div { display:grid; gap:6px; font-size:.85rem; padding:10px; background:#f0f5fb; border-radius:8px; }
+.oe-person-results progress { width:100%; accent-color:#167a70; }
+.oe-ledger { display:grid; gap:8px; }
+.oe-ledger > div { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr)); gap:8px; border-top:1px solid #dce4ee; padding:10px 0; font-size:.78rem; }
+.oe-ledger small { display:block; color:#63718a; }
+.oe-issues ul { list-style:disc; padding:8px 0 8px 22px; font-size:.85rem; }
+.oe-print section { break-inside:avoid; margin-top:20px; }
+.oe-print h1 { font-size:22px; margin-bottom:8px; }
+.oe-print h2 { font-size:16px; font-weight:650; }
+.oe-print p { font-size:11px; margin:6px 0; }
+.oe-print .oe-result-grid { grid-template-columns:repeat(2,minmax(0,1fr)); margin:14px 0; }
+.oe-print .oe-cost-bars { margin:15px 0; break-inside:avoid; }
+@media (max-width:600px) {
+  .oe-page .panel { padding:12px; border-radius:12px; }
+  .oe-page .oe-fields { grid-template-columns:minmax(0,1fr); }
+  .oe-person > summary > span { display:block; margin:5px 0 0 16px; }
+  .oe-page .oe-option { padding:12px; }
+}
 [data-slot="dialog-content"] { max-height:calc(100dvh - 2rem); overflow-y:auto; grid-template-columns:minmax(0,1fr); }
 [data-slot="dialog-content"] > * { min-width:0; }
 [data-slot="dialog-header"] { padding-right:1.5rem; }

@@ -66,6 +66,9 @@ const server = http.createServer((req, res) => {
           });
           assert.deepEqual(violations,[],`${name} ${width}: dialog text and buttons fit the popup`);
         };
+        await navigate('Open Enrollment');
+        assert.equal(await page.locator('main .oe-person').count(),0,'Enrollment starts without people');
+        assert.ok((await page.locator('main input[type=number]').evaluateAll(inputs=>inputs.map(i=>i.value))).every(v=>v===''),'Enrollment starts blank');
         await navigate('Current Budget');
         assert.ok((await page.locator('main input[type=number]').evaluateAll(inputs=>inputs.map(i=>i.value))).every(v=>v===''), 'No prefilled financial entries');
         await navigate('Household');
@@ -272,6 +275,7 @@ const server = http.createServer((req, res) => {
           if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-complete-report.pdf'),format:'Letter',printBackground:true});
           await page.emulateMedia({media:'screen'});
         }
+        await require('./enrollment-browser.cjs')({page,navigate,noOverflow,name,width,out});
         await navigate('Loans & Debts');
         const refinance=page.locator('section').filter({has:page.getByRole('heading',{name:'Refinance Comparison',exact:true})}).last();
         await refinance.locator('summary').filter({hasText:/^Mortgage(?:\s|$)/}).first().click();

@@ -12,6 +12,7 @@ export function baselineSnapshot(plan: PlannerData): string {
   copy.laboratory = { ...(copy.laboratory ?? structuredClone(EMPTY_LAB)), scenarios: [] };
   delete copy.laboratory.simulation;
   delete copy.refinancing;
+  delete copy.enrollment;
   if(copy.realEstate){delete copy.realEstate.trial;if(!copy.realEstate.properties.length)delete copy.realEstate;}
   return JSON.stringify(sorted(normalizePlan(copy)));
 }

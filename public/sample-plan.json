@@ -553,5 +553,268 @@
       "benchmarkEligible": false,
       "snoozeUntil": ""
     }
-  ]
+  ],
+  "enrollment": {
+    "startMonth": "2026-01",
+    "people": [
+      {
+        "id": "enrollment-person-a",
+        "hsaEligible": "yes",
+        "annualMedical": 9000,
+        "basis": "allowed",
+        "timing": "once",
+        "month": 2,
+        "care": [
+          {
+            "id": "enrollment-rx-a",
+            "kind": "prescription",
+            "label": "Prescription A",
+            "allowed": 800,
+            "count": 12,
+            "timing": "spread",
+            "month": null,
+            "payAtService": true,
+            "hsaExcluded": false
+          }
+        ]
+      },
+      {
+        "id": "enrollment-person-b",
+        "hsaEligible": "yes",
+        "annualMedical": 2400,
+        "basis": "allowed",
+        "timing": "spread",
+        "month": null,
+        "care": [
+          {
+            "id": "enrollment-visit-b",
+            "kind": "medical",
+            "label": "Office Visits",
+            "allowed": 180,
+            "count": 4,
+            "timing": "spread",
+            "month": null,
+            "payAtService": true,
+            "hsaExcluded": false
+          },
+          {
+            "id": "enrollment-preventive-b",
+            "kind": "preventive",
+            "label": "Covered Preventive Visit",
+            "allowed": 220,
+            "count": 1,
+            "timing": "once",
+            "month": 4,
+            "payAtService": false,
+            "hsaExcluded": false
+          }
+        ]
+      }
+    ],
+    "options": [
+      {
+        "id": "enrollment-hsa",
+        "label": "Fictional HSA Option",
+        "network": "PPO",
+        "premium": 150,
+        "payPeriods": 26,
+        "premiumTaxRate": 22,
+        "deductibleMode": "embedded",
+        "individualDeductible": 3500,
+        "familyDeductible": 7000,
+        "individualMax": 6500,
+        "familyMax": 13000,
+        "coinsurance": 20,
+        "rxIndividualDeductible": null,
+        "rxFamilyDeductible": null,
+        "rxIndividualMax": null,
+        "rxFamilyMax": null,
+        "rules": {
+          "enrollment-rx-a": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "shared",
+            "payment": "coinsurance",
+            "amount": 20,
+            "countsOop": "yes"
+          },
+          "enrollment-visit-b": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "shared",
+            "payment": "coinsurance",
+            "amount": 20,
+            "countsOop": "yes"
+          },
+          "enrollment-preventive-b": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "shared",
+            "payment": "coinsurance",
+            "amount": 0,
+            "countsOop": "yes"
+          }
+        },
+        "hsa": true,
+        "eligibilityConfirmed": true,
+        "contributionLimit": 8750,
+        "employerHsa": 1800,
+        "employerTiming": "monthly",
+        "ownHsa": 3600,
+        "openingHsa": 500,
+        "taxRate": 22
+      },
+      {
+        "id": "enrollment-ppo1",
+        "label": "Fictional PPO Option 1",
+        "network": "PPO",
+        "premium": 280,
+        "payPeriods": 26,
+        "premiumTaxRate": 22,
+        "deductibleMode": "embedded",
+        "individualDeductible": 750,
+        "familyDeductible": 1500,
+        "individualMax": 4000,
+        "familyMax": 8000,
+        "coinsurance": 20,
+        "rxIndividualDeductible": null,
+        "rxFamilyDeductible": null,
+        "rxIndividualMax": null,
+        "rxFamilyMax": null,
+        "rules": {
+          "enrollment-rx-a": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "exempt",
+            "payment": "copay",
+            "amount": 75,
+            "countsOop": "yes"
+          },
+          "enrollment-visit-b": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "exempt",
+            "payment": "copay",
+            "amount": 35,
+            "countsOop": "yes"
+          },
+          "enrollment-preventive-b": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "shared",
+            "payment": "coinsurance",
+            "amount": 0,
+            "countsOop": "yes"
+          }
+        },
+        "hsa": false,
+        "eligibilityConfirmed": false,
+        "contributionLimit": null,
+        "employerHsa": null,
+        "employerTiming": "monthly",
+        "ownHsa": null,
+        "openingHsa": null,
+        "taxRate": null
+      },
+      {
+        "id": "enrollment-ppo2",
+        "label": "Fictional PPO Option 2",
+        "network": "PPO",
+        "premium": 370,
+        "payPeriods": 26,
+        "premiumTaxRate": 22,
+        "deductibleMode": "embedded",
+        "individualDeductible": 250,
+        "familyDeductible": 500,
+        "individualMax": 2500,
+        "familyMax": 5000,
+        "coinsurance": 10,
+        "rxIndividualDeductible": null,
+        "rxFamilyDeductible": null,
+        "rxIndividualMax": null,
+        "rxFamilyMax": null,
+        "rules": {
+          "enrollment-rx-a": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "exempt",
+            "payment": "copay",
+            "amount": 40,
+            "countsOop": "yes"
+          },
+          "enrollment-visit-b": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "exempt",
+            "payment": "copay",
+            "amount": 20,
+            "countsOop": "yes"
+          },
+          "enrollment-preventive-b": {
+            "allowedOverride": null,
+            "coverage": "covered",
+            "deductible": "shared",
+            "payment": "coinsurance",
+            "amount": 0,
+            "countsOop": "yes"
+          }
+        },
+        "hsa": false,
+        "eligibilityConfirmed": false,
+        "contributionLimit": null,
+        "employerHsa": null,
+        "employerTiming": "monthly",
+        "ownHsa": null,
+        "openingHsa": null,
+        "taxRate": null
+      }
+    ],
+    "processingMonths": 1,
+    "dueMonths": 1,
+    "reimbursementMonths": 0,
+    "qualifiedConfirmed": true,
+    "quotes": [
+      {
+        "id": "term-employer",
+        "label": "Fictional Employer Quote",
+        "ownership": "employer",
+        "coverage": 500000,
+        "premium": 480,
+        "years": 15,
+        "guaranteedYears": 1,
+        "portable": "unknown"
+      },
+      {
+        "id": "term-10",
+        "label": "Fictional 10-Year Quote",
+        "ownership": "individual",
+        "coverage": 500000,
+        "premium": 320,
+        "years": 10,
+        "guaranteedYears": 10,
+        "portable": "yes"
+      },
+      {
+        "id": "term-15",
+        "label": "Fictional 15-Year Quote",
+        "ownership": "individual",
+        "coverage": 500000,
+        "premium": 410,
+        "years": 15,
+        "guaranteedYears": 15,
+        "portable": "yes"
+      },
+      {
+        "id": "term-30",
+        "label": "Fictional 30-Year Quote",
+        "ownership": "individual",
+        "coverage": 500000,
+        "premium": 690,
+        "years": 30,
+        "guaranteedYears": 30,
+        "portable": "yes"
+      }
+    ],
+    "employmentYears": 3
+  }
 }

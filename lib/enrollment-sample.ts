@@ -1,0 +1,14 @@
+// Independently invented demonstration; not a rate quote or a real household.
+import { EMPTY_ENROLLMENT, newPerson, newOption, type Enrollment, type Rule } from './enrollment.ts';
+export function sampleEnrollment(): Enrollment {
+  const e:Enrollment={...structuredClone(EMPTY_ENROLLMENT),startMonth:'2026-01',processingMonths:1,dueMonths:1,reimbursementMonths:0,qualifiedConfirmed:true,employmentYears:3};
+  e.people=[{...newPerson('enrollment-person-a'),hsaEligible:'yes',annualMedical:9000,timing:'once',month:2,care:[{id:'enrollment-rx-a',kind:'prescription',label:'Prescription A',allowed:800,count:12,timing:'spread',month:null,payAtService:true}]},{...newPerson('enrollment-person-b'),hsaEligible:'yes',annualMedical:2400,care:[{id:'enrollment-visit-b',kind:'medical',label:'Office Visits',allowed:180,count:4,timing:'spread',month:null,payAtService:true},{id:'enrollment-preventive-b',kind:'preventive',label:'Covered Preventive Visit',allowed:220,count:1,timing:'once',month:4,payAtService:false}]}];
+  const rule=(amount:number,payment:Rule['payment']='coinsurance',deductible:Rule['deductible']='shared'):Rule=>({coverage:'covered',countsOop:'yes',payment,deductible,amount});
+  e.options=[
+    {...newOption('enrollment-hsa'),label:'Fictional HSA Option',network:'PPO',premium:150,payPeriods:26,premiumTaxRate:22,deductibleMode:'embedded',individualDeductible:3500,familyDeductible:7000,individualMax:6500,familyMax:13000,coinsurance:20,hsa:true,eligibilityConfirmed:true,contributionLimit:8750,employerHsa:1800,employerTiming:'monthly',ownHsa:3600,openingHsa:500,taxRate:22,rules:{'enrollment-rx-a':rule(20),'enrollment-visit-b':rule(20),'enrollment-preventive-b':rule(0)}},
+    {...newOption('enrollment-ppo1'),label:'Fictional PPO Option 1',network:'PPO',premium:280,payPeriods:26,premiumTaxRate:22,individualDeductible:750,familyDeductible:1500,individualMax:4000,familyMax:8000,coinsurance:20,rules:{'enrollment-rx-a':rule(75,'copay','exempt'),'enrollment-visit-b':rule(35,'copay','exempt'),'enrollment-preventive-b':rule(0)}},
+    {...newOption('enrollment-ppo2'),label:'Fictional PPO Option 2',network:'PPO',premium:370,payPeriods:26,premiumTaxRate:22,individualDeductible:250,familyDeductible:500,individualMax:2500,familyMax:5000,coinsurance:10,rules:{'enrollment-rx-a':rule(40,'copay','exempt'),'enrollment-visit-b':rule(20,'copay','exempt'),'enrollment-preventive-b':rule(0)}},
+  ];
+  e.quotes=[{id:'term-employer',label:'Fictional Employer Quote',ownership:'employer',coverage:500000,premium:480,years:15,guaranteedYears:1,portable:'unknown'},...[10,15,30].map(years=>({id:`term-${years}`,label:`Fictional ${years}-Year Quote`,ownership:'individual' as const,coverage:500000,premium:years===10?320:years===15?410:690,years,guaranteedYears:years,portable:'yes' as const}))];
+  return e;
+}

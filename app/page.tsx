@@ -1,5 +1,7 @@
 "use client";
 
+import { OpenEnrollment, EnrollmentPrint } from '@/components/open-enrollment';
+import { EMPTY_ENROLLMENT } from '@/lib/enrollment';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Activity, BriefcaseBusiness, Building2, Calculator, ChevronRight, CircleDollarSign, Download, FileUp, HeartPulse, Home, Landmark, Lock, LockKeyhole, Menu, Plus, Printer, ReceiptText, ShieldCheck, Trash2, Unlock, WalletCards } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
@@ -45,7 +47,7 @@ import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
-type SectionId = "realEstate" | "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "debt" | "health" | "taxes" | "data";
+type SectionId = "enrollment" | "realEstate" | "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "debt" | "health" | "taxes" | "data";
 type VaultStatus = "off" | "locked" | "unlocked";
 type SaveStatus = "unsaved" | "locked" | "saving" | "saved" | "failed";
 
@@ -58,6 +60,7 @@ const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "debt", label: "Loans & Debts", icon: WalletCards },
   { id: "realEstate", label: "Real Estate", icon: Home },
   { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
+  { id: "enrollment", label: "Open Enrollment", icon: ShieldCheck },
   { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
   { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
   { id: "taxes", label: "Taxes & Withdrawals", icon: Calculator },
@@ -2313,7 +2316,7 @@ export default function HomePage() {
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
-    : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    : activeSection === "enrollment" ? <OpenEnrollment plan={plan} onChange={setPlan}/> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>
@@ -2417,7 +2420,7 @@ export default function HomePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <PrintReport data={plan} projection={projection} successRate={successRate} debtMonths={payoffMonths} />
+      {activeSection === "enrollment" ? <EnrollmentPrint enrollment={plan.enrollment ?? EMPTY_ENROLLMENT}/> : <PrintReport data={plan} projection={projection} successRate={successRate} debtMonths={payoffMonths} />}
     </>
   );
 }

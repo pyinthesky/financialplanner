@@ -1,10 +1,12 @@
 // Fictional public demonstration only. Never ingest private plans or screenshots here.
 import fs from 'node:fs';
+import {sampleEnrollment} from '../lib/enrollment-sample.ts';
 import {normalizePlan} from '../lib/planner.ts';
 import {baselineSnapshot} from '../lib/scenarios.ts';
 const path=new URL('../public/sample-plan.json',import.meta.url);
 const p=normalizePlan(JSON.parse(fs.readFileSync(path,'utf8')));
 p.laboratory.scenarios=[];
+p.enrollment=sampleEnrollment();
 Object.assign(p.rothConversionPlanning,{baselineGrossOrdinaryIncome:50000,taxableConversionAmount:20000,targetBracketRate:22,annualConversionYou:12000,startAgeYou:62,endAgeYou:66});
 Object.assign(p.medicareIrmaaPlanning,{magi2024:220000,filingCategory:'marriedJoint',partBEnrollees:2,partDEnrollees:2});
 Object.assign(p.acaPlanning,{householdMagi:60000,taxFamilySize:2,location:'contiguous',annualEnrollmentPremium:18000,annualBenchmarkPremium:20000});

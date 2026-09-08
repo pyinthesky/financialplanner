@@ -1,3 +1,4 @@
+import { normalizeEnrollment, type Enrollment } from './enrollment.ts';
 import { normalizeRealEstate, type RealEstate } from './real-estate.ts';
 import { normalizeRefinancing, type RefinanceCase } from './refinance.ts';
 import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
@@ -70,6 +71,7 @@ export interface RecurringCost {
 }
 
 export interface PlannerData {
+  enrollment?: Enrollment;
   realEstate?: RealEstate;
   refinancing?: RefinanceCase[];
   returnReferences?: Partial<Record<'preRetirementReturn'|'retirementReturn'|'cashReturn', import('./references.ts').ReturnReceipt>>;
@@ -1177,6 +1179,7 @@ export function normalizePlan(input: unknown): PlannerData {
   return {
     ...candidate,
     schemaVersion: 2,
+    enrollment: normalizeEnrollment(candidate.enrollment),
     realEstate: normalizeRealEstate(candidate.realEstate),
     refinancing: normalizeRefinancing(candidate.refinancing),
     budget: normalizeBudget(candidate.budget),
