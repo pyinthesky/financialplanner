@@ -1,40 +1,142 @@
 # Open Retirement Planner
 
-A free, ad-free, marketing-free, tracking-free retirement planning application that runs entirely in the browser.
+Free retirement planning that runs in your browser: no ads, marketing, tracking, accounts, names or email addresses.
 
-The live site is published at <https://pyinthesky.github.io/financialplanner/>. No account is required, and the application never asks for a name or email.
+**[Open the planner](https://pyinthesky.github.io/financialplanner/)** · [Delivery roadmap](#delivery-roadmap) · [Calculation boundaries](#calculation-boundaries) · [Run locally](#run-locally)
 
-## What works today
+Start with blank inputs or explicitly load the fictional sample plan. Build a current budget, describe what changes in retirement, and explore the consequences using your own assumptions. The experience should be comforting, informative and practical, without shame or false certainty.
 
-- Compact, expandable current/retirement budgets with editable bill names, timing controls, matching public references, and linked pay, benefits, housing, health and actual debt payments
-- Current / In Retirement Sankey switch in Plan Summary, using the monthly funding ledger; funded uses balance to sources and unpaid obligations remain visible
-- One-click fictional sample plan and confirmed Create New Plan, including cancellation of pending encrypted saves
-- Interactive annual retirement projection through age 120
-- Taxable, 401(k)/403(b)/traditional IRA, Roth, cash, and HSA account treatment
-- Pension and Social Security income streams with claiming ages and COLAs
-- Married and single household timelines
-- Baseline spending plus time-bounded large recurring expenses
-- Healthcare, Medicare-years, healthcare inflation, and a long-term-care stress reserve
-- Home value, assessment percentage, mill rate, home insurance, and a mortgage-payoff scenario
-- Debt avalanche and debt snowball schedules with payment rollover
-- Transparent withdrawal order with owner-specific RMDs/QCDs, early-distribution checks, 2026 progressive federal and long-term-capital-gains tax, NIIT, and an editable state estimate
-- Owner-specific Roth conversion ladder with taxable Social Security, LTCG/NIIT, and clearly labeled 2026-rule ACA/IRMAA sensitivities
-- Deterministic projections and a seeded 240-path Monte Carlo planning range
-- Interactive Recharts visualizations
-- Print-optimized PDF report through the browser's **Save as PDF** flow
-- Raw JSON download and re-upload
-- Optional encrypted local vault using Web Crypto AES-256-GCM and PBKDF2-SHA-256
-- Responsive layout with no analytics, trackers, ads, cookies for plan data, or remote API calls
+## What Works Today
 
-## Privacy and security
+| Area | Supported experience |
+| --- | --- |
+| Data & Privacy | Session-only planning, optional encrypted local vault, raw JSON export/import, fictional sample loading and confirmed plan reset |
+| Household | Individual/partner timelines, payroll details, optional local ZIP and state selection, explicit Apply/Undo for dated public references |
+| Cash & Investments | Account balances, tax treatment, ownership, aggregate taxable basis and supported account-access assumptions |
+| Pensions & Social Security | Entered benefit amounts, ages, COLAs and withholding; automatic benefit optimization remains planned |
+| Loans & Debts | Loan entry, home carrying costs, annual-dollar property tax or assessment/mills, and mortgage principal-and-interest/escrow reconciliation |
+| Current and Retirement Budgets | Compact expandable categories, editable bill names, timing controls, retirement changes and shared timed costs; linked pay, benefits, healthcare, housing and scheduled loan payments |
+| Taxes & Withdrawals | Dated federal worksheets, owner-specific RMD/QCD and distribution checks, conversion comparisons, LTCG/NIIT and an entered state-tax estimate, subject to the boundaries below |
+| Scenario Laboratory | Saved baseline snapshots, explicit overrides, compare/duplicate/reset/rebase, isolated debt-strategy experiments, funded mortgage payoff, supported home-sale/downsize comparisons, cash coverage and hypothetical stresses |
+| Plan Summary | Current/retirement Sankeys and funding details, existing planning signals, read-only debt payoff/cascade view and annual or monthly projection results |
+| PDF Report | Printable projection/scenario charts, budgets, both Sankeys, assumptions, accounts, benefits, housing, care costs and policy details |
 
-Plan calculations happen locally. The optional vault encrypts the plan before storing it in browser local storage. The passphrase is held only in memory for the current page session and is never stored or transmitted.
+Snowball and Avalanche retain paid-off minimums and roll available payments into the next debt. Custom uses assigned extra payments without rollover. Property tax and insurance continue after a mortgage is paid; escrow cannot become extra principal. A timed expense is not converted into a loan just because it recurs.
 
-Encryption protects saved data from casual browser-profile access, unencrypted backups, and offline disk inspection. It cannot protect an unlocked plan from malware, a malicious browser extension, keylogging, screen capture, or a compromised operating system. See [SECURITY.md](SECURITY.md).
+Inputs remain blank until entered or a reference is explicitly applied. References are dated illustrations, not personalized forecasts. Imported legacy spending amounts remain available until users select the retirement worksheet; the disabled envelope-breakdown editor is not part of the current compact entry flow.
 
-Raw JSON exports are intentionally readable and are **not encrypted**. Store them accordingly.
+## Privacy and Security
 
-## Run locally
+All plan calculations run locally. The optional vault uses Web Crypto AES-256-GCM and PBKDF2-SHA-256 before saving to browser local storage. Its passphrase stays in memory for the open session and is never stored or transmitted. Raw JSON exports are readable and unencrypted.
+
+Encryption protects saved data against casual browser-profile access and offline inspection. It cannot protect an unlocked plan against malware, malicious extensions, keylogging, screenshots or a compromised operating system. See [SECURITY.md](SECURITY.md).
+
+No plan data, credentials or personal screenshots belong in the repository, logs, test fixtures or CI artifacts. Tests use independently invented fictional data. The app has no runtime third-party plan-data requests. Proposed public-reference updates must preserve that boundary.
+
+## Calculation Boundaries
+
+These are educational estimates, not a complete tax return or a guarantee of retirement success. Annual worksheets and the monthly funding engine have different supported scopes; improvements to one do not establish correctness of every other path.
+
+- Federal ordinary-income and long-term-gain calculations use published 2026 rules with labeled planning indexation in future years. State tax remains an entered effective estimate. Do not infer jurisdiction-specific deductions, credits or gain treatment.
+- Benefits are entered from statements. Automatic claiming, spousal/survivor, death-year and specialized pension transitions remain open.
+- ACA/IRMAA worksheets and conversion sensitivities use dated rules; they are not automatic forecasts of future premiums or eligibility.
+- Monthly account access is conservative. Inherited accounts, detailed IRA basis, tax lots, special home-sale cases and automatic qualified HSA reimbursements remain unsupported dependencies.
+- The supported home-move comparison covers specified personal-home sales and cash-funded replacement housing. Income-property operation, rental taxes and new property financing are planned under Real Estate.
+- Hypothetical investment paths are not calibrated probabilities or historical replay. Unsupported rules, missing inputs and unfunded obligations must remain visible; no recommendation should hide them.
+
+[Calculation sources and reference methodology](docs/calculation-sources.md) preserve effective dates, exclusions and the methods behind the inflation, portfolio and cash shortcuts. A historical arithmetic portfolio return is not a compound-growth forecast; the existing two-bank cash reference is not a national HYSA average.
+
+## Delivery Roadmap
+
+This section is the authoritative priority list. Historical checkboxes are retained in [delivery history](docs/delivery-history.md), not used as the current work queue. Status terms are **Planned**, **In Progress**, **Supported with Limits**, and **Complete**. Complete applies only to the stated scope and its acceptance evidence.
+
+The shared entry journey is **Data & Privacy → Household → Cash & Investments → Pensions & Social Security → Loans & Debts → Health → Current Budget → Retirement Budget → Taxes → Scenario Laboratory → Plan Summary**. Enter a fact once; budgets, scenarios, charts and reports should reuse it without double counting.
+
+### Next Priorities
+
+| Order | Work | Status | Completion criteria |
+| --- | --- | --- | --- |
+| 1 | Documentation consolidation | Complete | One visible roadmap; history and calculation methodology linked separately; Real Estate and remaining dependencies retained |
+| 2 | Outlook assessment and compact month navigation | Planned | Summary opens with explainable, input-aware assessment and tested next actions; accessible month/year picker replaces the long dropdown |
+| 3 | Explainable debt visualization | Planned | Total/per-loan balances, principal/interest payment bars, payoff markers and visible minimum-payment transfers use the actual monthly ledger |
+| 4 | Real Estate | Planned | Existing property records and isolated income-property comparisons connect to budgets, loans, cash flow and net worth with explicit tax boundaries |
+| 5 | Refinancing opportunity indicators | Planned | Dated comparable benchmarks, local opportunity badges and a fee/term-aware comparison; no personalized quote claims or transmitted plan data |
+
+### Outlook Assessment
+
+Lead Plan Summary with an answer to “How does my plan look?” Use age, retirement timing, assets and account accessibility together with current/retirement budgets, benefits, debt, cash reserves and modeled funding needs. Do not grade people by age and wealth alone.
+
+- Show “On Track Under These Assumptions,” “Potential Gap,” or “More Inputs Needed,” with the main reasons. Explain unsupported cases rather than generating a reassuring score from partial data.
+- Show time to retirement, the retirement spending gap, cash coverage and any projected shortfall. Separate input completeness and model limitations from financial outcomes.
+- Offer at most three prioritized actions. Where the model supports it, compare explicit changes such as additional saving, lower spending or later retirement and show their quantified effects and trade-offs.
+- Use the same baseline, horizon and assumptions for each comparison. Recommendations must be reproducible from the ledger and must not silently apply edits. Clearly label untested educational suggestions.
+- Use local calculation rules; AI is not a prerequisite. Retain transparent debt-payment burden/resilience components rather than presenting an opaque credit-like score or guaranteed success probability.
+- Keep the assessment and its assumptions consistent in the PDF. Acceptance includes blank/incomplete plans, high assets with high spending, low assets with dependable benefits, inaccessible assets and funding shortfalls.
+
+### Compact Sankey Month Navigation
+
+Replace the long month dropdown with a calendar icon, readable selected month and accessible month/year picker. Add previous/next-month controls and supported milestone jumps such as retirement and final scheduled debt payoff. Keep Current / In Retirement shortcuts, constrain dates to the modeled horizon, and make adjacent cash-flow details use the same selection. Include keyboard, screen-reader, mobile and empty-horizon acceptance; a day picker would imply precision the monthly engine does not have.
+
+### Explainable Debt Visualization
+
+The ledger and baseline/scenario strategy controls are already supported; this priority improves their presentation.
+
+- Show total balance or balances by loan, with every monthly observation and payoff milestone retained.
+- Add principal-versus-interest payment bars and payoff markers explaining which minimum payment became available to the next loan. Keep the existing per-debt payment ledger available.
+- Compare strategies using the same starting debts and an explicitly comparable payment budget. Surface unpaid interest and unfunded scheduled payments.
+- Do not force an exponential shape. With zero interest and a constant total payment budget, aggregate debt falls linearly until paid. At positive rates, declining interest can increase principal repayment even when the total payment budget stays constant. Individual loans can show a sharper change when they receive rolled payments.
+- Acceptance includes zero-interest linear payoff, positive-interest amortization, mixed rates, same-month rollovers, Custom without rollover and a loan not repaid within the horizon.
+
+### Real Estate
+
+Make Real Estate a first-class planning area with **existing property records** and **Scenario Laboratory experiments**. Build the shared property model and a bounded comparison before exposing a dedicated tab; do not imply rental support by renaming the current home-only form.
+
+- Record primary-residence and income-property value, linked financing, property tax, insurance and operating costs. Rental inputs include gross rent, vacancy, management, maintenance and capital-replacement reserves. No tenant identity, address, listing or bank connection is required.
+- Link each mortgage to its property without duplicating the loan. Feed income, expenses, debt service, equity and net worth into the shared plan once. Reserves, transfers and actual expenditure need distinct treatment to avoid charging the same repair twice.
+- Compare buying a rental against investing the same starting cash; keep versus sell; and changes in rent, vacancy, financing or major repairs. Include down payment, purchase/closing costs, initial liquidity needs and the same comparison horizon.
+- Separate operating cash flow, interest, principal reduction, cash invested, equity and net sale proceeds. Handle purchase/sale timing, financing shortfalls and retained costs explicitly.
+- Require supported, sourced rental tax treatment before presenting tax-complete retirement outcomes. A bounded pre-tax comparison may ship first if clearly labeled and excluded from tax-complete rankings. Do not guess depreciation, passive-loss limits, recapture or sale exclusions.
+- Acceptance includes financed and unfinanced properties, zero rent/vacancy stress, maintenance costs, sale-loan settlement and conservation of cash/assets/debt across the comparison.
+
+### Refinancing Opportunity Indicators
+
+Use a restrained notification count on Loans & Debts and a marker on each relevant loan, labeled “Worth Comparing.” Provide a reason, source date and dismiss/snooze behavior; do not imply qualification or a lender offer.
+
+- Start with loan types for which a suitable benchmark exists. Match term/product and disclose population differences. A mortgage benchmark must not be reused for auto, student or credit-card debt.
+- Prefer regularly refreshed public snapshots served with the app; compare against the user's debt entirely locally. A future data-only update workflow is separate from timed feature development and is not enabled by this roadmap.
+- Validate source schema, values, observation date and usage rights. Preserve the last valid snapshot on failure, show stale data, and suppress fresh-opportunity claims when the benchmark is stale or unsuitable.
+- [Freddie Mac PMMS](https://www.freddiemac.com/pmms) is a candidate weekly mortgage reference, not a personalized refinance quote. Check its methodology and supported borrower/product population before implementation.
+- Credit bands are optional and remain local. Use them only where a source supports meaningful comparisons; never manufacture an exact credit-score rate adjustment.
+- Compare closing costs/points, financed fees, remaining and proposed terms, expected holding period, payment changes, total interest and remaining balance at a common horizon. Expose term extension and break-even assumptions; rate spread alone is not enough.
+- Acceptance includes small balances, short remaining terms, longer replacement terms, no-cost/financed-fee offers, stale or missing data and an attractive headline rate that does not justify refinancing.
+
+### Continuing Feature Development
+
+| Area | Status | Remaining scope |
+| --- | --- | --- |
+| Private foundation and portability (Batch 1) | Supported with Limits | Preserve blank onboarding, vault safety and raw export/import; continue real-device/keyboard-open accessibility and mobile checks |
+| Federal worksheets and monthly integration (Batches 2 / 5A) | Supported with Limits | Audit each supported path; retain explicit tax/account-access exclusions and avoid declaring the full annual engine repaired solely from monthly tests |
+| Benefits (Batch 3) | Planned | PIA/earnings-based estimates, early/delayed claiming, spousal/survivor and death-year transitions, pension survivor/lump-sum comparisons; military systems, FERS/CSRS, TSP, FEGLI and FEHB |
+| State, health and references (Batch 4) | Planned | Versioned state/local rules, optional ZIP/locality assistance and international/manual path, exchange-premium lookup guidance, Medicare/LTC references, property-tax assistance and refreshed economic/cohort references |
+| Budgets and scenarios (Batch 5) | Supported with Limits | Preserve compact bill editing, shared current/retirement facts, funded comparisons, cash policies and dated events; add the next priorities above and retain specialized-rule exclusions |
+| HSA planning | Planned | Effective-dated contribution, investing, receipt, qualified-expense, Medicare-enrollment and reimbursement treatment |
+| Education and guidance | Planned | Neutral will/trust/provider education; fiduciary/RIA/Form ADV and official SEC/state registration checks; sourced fee guidance; appropriate diversified-index alternatives; evidence-grounded health/longevity prompts |
+| Trust and accessibility (Batch 6) | Planned | Expanded audit trail, calculation explanations, accessibility, performance and downloadable ledgers; improve household/owner entry and progressively reveal relevant questions |
+| Optional AI or cloud connections | Planned, deferred | Only after core tax, benefits, health/state and scenario dependencies are complete; separate explicit design/authorization, no project storage of credentials or financial data |
+
+The goal is to improve on CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate and typical bank tools through connected reasoning, clear assumptions and privacy. Benchmark public workflows for missing questions, fragmented results, opaque estimates and unnecessary data collection. Budget usability and helpful sourced shortcuts are core requirements, not end-stage polish.
+
+## Development Continuity and Release Gates
+
+Before implementing, read this roadmap, [development state](docs/development-state.md) and the relevant [Batch 5 contract](docs/batch-5-plan.md), [experience contract](docs/batch-5-experience.md) or [compact-budget revision](docs/compact-budget-round.md). This roadmap governs priority; older documents retain design detail and historical context. Resolve conflicts against the latest agreed user requirements and verified code. Do not infer completion from an old batch label.
+
+Work in coherent, reviewable slices. Mark only work actually underway as In Progress, attach evidence when updating status, and move release narratives to [delivery history](docs/delivery-history.md). Keep original batch identifiers for continuity without scattering duplicate active checklists across documents. Timed feature builds remain disabled.
+
+Every relevant release must preserve local-only privacy, blank onboarding, explicit references/overrides, saved-plan compatibility and reconciliation of shared facts. Calculation changes need meaningful boundary/conservation tests and authoritative effective-dated sources. UI changes need mobile/keyboard checks; print changes need populated charts and visual PDF inspection. Never hide unsupported outcomes behind success percentages.
+
+Latest application verification before this documentation cleanup: [September 8 release](https://github.com/pyinthesky/financialplanner/commit/e3829160d62a5e4c07ff32943354207c4f8fe8a3), [Pages workflow](https://github.com/pyinthesky/financialplanner/actions/runs/34265147085): 144 tests, TypeScript/build, Chromium and WebKit at six widths, and an eight-page fictional PDF visually inspected. WebKit passed on retry after a renderer crash. This evidence describes that release, not future roadmap work or universal real-device compatibility.
+
+## Run Locally
 
 Requires Node.js 22 or newer.
 
@@ -52,181 +154,12 @@ npx vite --config vite.github.config.ts
 
 ## Deployment
 
-The workflow in `.github/workflows/pages.yml` builds `dist-pages` and deploys it with GitHub's official Pages actions. In the repository settings, Pages must use **GitHub Actions** as its source.
-
-## Calculation boundaries
-
-This is an educational planning estimate, not tax, investment, legal, insurance, or medical advice. Values are nominal. Federal ordinary-income and long-term-capital-gains tax use published 2026 thresholds for all four filing statuses, with planning-only inflation indexing of indexed amounts in later years. It is not a complete tax-return engine: state tax remains a user-entered effective estimate, and the federal worksheets explicitly identify excluded forms, elections, special gain categories, credits, deductions, and eligibility rules. Social Security and pension benefits are entered from official statements rather than inferred from earnings histories.
-
-## Delivery roadmap
-
-The work is organized into bounded batches so each batch can ship independently.
-
-### Priority delivery sequence
-
-The entry journey is **Data & Privacy → Household → Cash & Investments → Benefits → Loans & Debts → Health → Current Budget → Retirement Budget → Taxes → Scenarios → Plan Summary**. Shared inputs flow into both budgets. The detailed [Batch 5 plan](docs/batch-5-plan.md) and [compact-budget revision](docs/compact-budget-round.md) describe the delivery contracts. Pull in specific Batch 3/4 benefit, health, and state-data dependencies when needed; do not imply they work merely because a scenario selector exists.
-
-### Compact budgets and Summary revision — September 8, 2026
-
-- [x] Follow-up corrections: annual-dollar property-tax mode hides unused assessment/mill inputs while retaining them for mode switching; popup descriptions and buttons wrap within their dialog; monthly PDF export retains both budgets, printable current/retirement Sankeys, assumptions, accounts, benefits, housing/debt, care costs and policy details alongside projection/scenario charts. Browser gates verify dialog bounds, tax-input visibility and full report section/graphic coverage.
-- [x] Safe Load Sample Plan / Create New Plan; no sample values appear until requested. Dirty plans require confirmation and offer an export. Replacement erases the current plan and local vault and invalidates queued/in-flight saves.
-- [x] Collapse bill categories, edit subcategory names and amounts inline, and open timing/settings from icons. Suggestions are view-only until edited. Imported breakdowns remain in exports but their editor is disabled; only parent totals count.
-- [x] Move pay into Household and source entry before budgets. Selected-month budgets link the actual debt cascade, surviving mortgage costs, benefits, healthcare and dated costs. Paid-off loans are omitted. Portfolio draws and tax settlement appear in the funding ledger rather than being treated as earnings.
-- [x] Remove duplicate annual retirement-spending inputs. Existing aggregate plans retain their amount until the user explicitly selects the retirement worksheet.
-- [x] Direct historical-inflation, 90/10, 70/30 and dated HYSA sample-average shortcuts with Undo. Inputs remain blank until edited or a reference is applied.
-- [x] Optional local-only ZIP plus a state dropdown. Automatic ZIP-to-jurisdiction/rate inference remains in Batch 4; the app does not guess local taxes from postal boundaries.
-- [x] Summary Current / In Retirement Sankeys, month selection, category uses and accessible numeric details. Monthly-engine requirements and unfunded obligations are explicit. Flows show net cash, exclude direct payroll investments/conversions/QCD transfers, and include the annual tax settlement in December.
-- [x] Fictional sample includes supported, fresh comparisons for later retirement, lower spending and funded mortgage payoff. Regenerate snapshots with `node --experimental-strip-types scripts/refresh-sample.mjs` after intentional sample changes.
-
-Reference methodology: inflation is `(313.689 / 188.9)^(1/20) - 1`, using BLS annual-average CPI-U for 2004–2024; it is not labeled a current rolling window. Portfolio shortcuts are the published **arithmetic calendar-year averages**, 11.1% for 90% stocks/10% bonds and 9.8% for 70% stocks/30% bonds, over 1928–2025 from [Vanguard's model-portfolio data](https://investor.vanguard.com/investor-resources-education/education/model-portfolio-allocation) and its [2026 chart](https://investor.vanguard.com/content/dam/retail/digital/en/data-viz/vanguard-range-of-calendar-year-returns-2026.svg). They are historical illustrations, not compound-growth forecasts or recommended expected returns. The cash shortcut is the equally weighted **two-bank sample APY**, `(3.40% + 3.75%) / 2 = 3.575%`, observed September 8, 2026 at [Marcus](https://www.marcus.com/us/en/savings/high-yield-savings) and [Bask Bank](https://baskbank.com/products/interest-savings-account); it is not a national HYSA market average. APYs are variable. The monthly engine needs a nominal annual rate, so the button applies `12 × ((1 + APY)^(1/12) - 1)`. These bundled references cause no runtime network request.
-
-Read [development state](docs/development-state.md) before resuming. Timed builds are disabled. Budget usability, source shortcuts, and mobile acceptance are core delivery requirements, not optional polish left at the end of the backlog.
-
-### Batch 1 — Private planning foundation (complete)
-
-- Core household, portfolio, income, expense, housing, healthcare, and debt data model
-- Projection and debt engines
-- Interactive charts and printable PDF report
-- Encrypted local persistence and portable JSON
-- GitHub Pages deployment
-
-### Batch 1A — Immediate usability corrections
-
-- [x] Rebuild narrow-screen navigation, summaries, forms, tables, and charts around mobile task flows, with usable tap targets, print-report isolation, and no clipped or horizontally trapped content
-- [x] Render untouched numeric inputs as blank rather than `0`; select existing values on focus for predictable replacement while preserving intentional zero values
-- [x] Unify field, affix, and secondary-surface borders, backgrounds, and corner radii so compound inputs have no white seams or mismatched rounding
-
-### Batch 1B — Review-driven experience corrections
-
-- [x] Reorder the guided journey so **Data & Privacy** is the welcoming start, explains and offers the encrypted vault before sensitive entry, and **Plan Summary** is the final destination
-- [x] Apply consistent title case to page headings, panel titles, navigation labels, chart labels, and legends; replace internal keys such as `hsaWithdrawal` with human-readable labels
-- [x] Give every quantitative input a visible, unambiguous unit or currency affix where applicable, while preserving blank zero-value onboarding
-- [x] Add a restrained save-state animation to the unlocked-vault indicator, with reduced-motion support and distinct saving/saved/failed states
-- [x] Fix the missing separation above Timed Expenses and audit vertical rhythm between every card and section
-- [x] Restore the portfolio-projection chart in printed/PDF output with deterministic SVG geometry and regression checks that verify finite, non-degenerate stacked areas rather than merely chart markup
-- [ ] Repeat the mobile audit on real narrow Safari/Chrome viewports: eliminate page-level horizontal scrolling, reduce excessive padding, stack remaining hostile controls, restore missing inter-card gaps, and test long labels and keyboard-open states
-- [x] Prevent descenders and focus rings from clipping in native selects; constrain long option labels and affixed controls so they cannot widen narrow pages
-- [x] Remove redundant in-content navigation actions such as **Review Assumptions** when the primary menu already provides the destination
-- [x] Reshape rough Planning Signals cards into a calm, prioritized summary with a plain-language reason and next useful action for each signal; never label an untouched plan as funded
-
-### Batch 2 — Federal tax worksheets delivered; integration repairs required
-
-The items below record delivered functionality. A September 7, 2026 review found tax-funding feedback, cash-withdrawal reporting, and conversion integration gaps. These are explicitly reopened prerequisites in [5A](docs/batch-5-plan.md#5a--reconcile-the-engine-before-comparing-plans); the earlier “complete” label did not establish that the full projection was validated for decision comparisons.
-
-- [x] 2026 federal brackets and basic standard deductions by filing status, with future-year planning indexation
-- [x] Social Security taxation worksheet using provisional income, filing-status thresholds, tax-exempt interest, and the married-filing-separately lived-apart distinction
-- [x] RMDs, QCDs, early-withdrawal constraints, and taxable cost basis
-  - [x] Account-level taxable adjusted basis, contribution basis tracking, proportional gain realization, and explicit tax-lot limitations
-  - [x] Owner-specific non-inherited RMD projection using optional birth years, prior year-end balances, and the IRS Uniform Lifetime Table, with 1959 and special-rule review states
-  - [x] Effective-dated QCD source, age, annual-limit, and RMD-capacity check, without guessing through age-70 distribution dates or ongoing SEP/SIMPLE status
-  - [x] Apply owner-specific intended QCDs and entered post-70½ deductible-contribution offsets to IRA balances, RMD satisfaction, taxable income, Social Security provisional income, and distribution charts without treating gifts as spendable cash; hold the known 2026 ceiling flat in later planning years
-  - [x] Owner-specific pre-59½ traditional-account distribution check with a 10% additional-tax estimate, user-confirmed annual exception amounts, age-59 date review, and explicit unassigned-account/Roth review states; exception eligibility is never inferred
-- [x] Roth conversion ladder and bracket-filling comparison
-  - [x] Current-year 2026 bracket-fill comparison showing gross-income capacity, incremental federal tax, resulting marginal rate, and explicit IRA-basis and interaction limitations
-  - [x] Apply owner-specific conversions to account balances and a year-by-year ladder that recomputes taxable Social Security, ordinary tax, LTCG/NIIT, and the entered state estimate, with separately labeled 2026-rule ACA PTC and IRMAA sensitivities rather than forecasts
-- [x] Medicare IRMAA and ACA premium-tax-credit interactions
-  - [x] Exact 2026 Medicare Part B and Part D IRMAA worksheet using 2024 Medicare MAGI, filing-category boundaries, separate enrollee counts, annual household costs, and next-tier distance
-  - [x] Integrate published 2026 IRMAA tiers into the conversion ladder as a clearly labeled current-law sensitivity; actual future thresholds, premiums, and two-year lookback results are not projected as law
-  - [x] Add an effective-dated 2026 ACA premium-tax-credit worksheet using 2025 poverty guidelines, household MAGI, tax-family size, location, enrolled and benchmark premiums, standard 100%–400% FPL eligibility limits, and the planned taxable Roth conversion's estimated subsidy impact; do not infer non-income eligibility
-- [x] Replace the manually entered flat capital-gains rate with an effective-dated 2026 federal long-term-capital-gains worksheet that stacks realized gains above ordinary taxable income, applies unused standard deduction and the 0% / 15% / 20% bands, separately calculates the 3.8% NIIT, feeds projections, and retains an explicit override for unmodeled regular-gain cases
-- [x] Replace ambiguous labels such as **VA effective rate** with **estimated effective state income-tax rate** and explain that the input applies only to modeled ordinary taxable income, not jurisdiction-specific deductions, credits, exclusions, capital gains, or conversion rules
-
-### Batch 3 — Social Security and pension decisions
-
-- Benefit estimates from PIA or earnings records
-- Early/delayed claiming adjustments
-- Spousal and survivor rules
-- Pension survivor-election and lump-sum comparison
-- Household death-year scenarios
-- Military and government retirement paths, including authoritative, effective-dated treatment for military retirement systems and survivor benefits, FERS/CSRS, TSP, FEGLI, FEHB retirement eligibility, and related tax distinctions
-
-### Batch 4 — State, health, and long-term care data
-
-- Versioned state and local income-tax and retirement-income rules
-- Optional U.S. ZIP/locality assistance, replacing the free-form State field, using authoritative, effective-dated data to suggest state/local tax assumptions, assessment conventions, and mill rates; keep every derived jurisdiction visible, reviewable, and overridable, never require a ZIP, and retain a manual country-aware path for international users
-- Guided state-exchange / HealthCare.gov workflow that helps users identify the correct marketplace, look up current plan-year premiums, and locally populate subsidy and net-premium inputs without transmitting the rest of the plan
-- Medicare premium assumptions and state long-term-care cost references
-- Property-tax presets while preserving user-entered assessed values; allow entry by either mill rate or annual tax from a statement, derive the other value when possible, and avoid double counting
-- Effective-dated economic defaults, beginning with a clearly sourced rolling 20-year historical inflation average that users can review and override
-
-### Batch 5 — Budgets and Scenario Laboratory
-
-Enhanced Current Budget and Retirement Budget share canonical bills, income and linked obligations. Use a total first, optionally allocate it into bills, and change only what retirement changes. [The experience contract](docs/batch-5-experience.md) and [detailed plan](docs/batch-5-plan.md) retain the complete acceptance criteria.
-
-- [x] **5A supported monthly foundation:** reconciled payroll/savings, month-specific owner transitions, annual tax settlement with tax-funding feedback, account-level balances, confirmed pretax conversion sources and conservative five-tax-year conversion access. Existing annual worksheets remain separately labeled estimates.
-- [x] **5B supported budget journey:** blank inputs; simple/category views; envelope allocations without double-counting; linked current/retirement changes; dated edits; actual scheduled versus average amounts; payroll savings and take-home transfers; active timed costs; benefit deposits after entered withholding. Net-only entry works before advanced projection inputs are ready.
-- [x] **5C housing and debt:** P&I/escrow reconciliation, annual-dollar tax or mills, persistent Snowball/Avalanche cascade including unused same-month payments, Custom assigned extras without cascade, and a per-debt payment ledger.
-- [x] **5D bundled reference catalog:** explicit Apply/Undo for BLS 2004–2024 compound inflation, selected BLS 2024 national spending categories and EIA 2024 residential electricity bills for all states/DC. Each includes population, geography, source, publication/observation dates and provenance; nothing is automatically filled or transmitted.
-- [x] **5E.1–5E.3 supported comparisons:** immutable local snapshots, duplicate/reset/rebase, three scenarios on common axes, timing/spending overrides, funded mortgage payoff versus retaining the loan and investing available released payments, monthly income by owner/source, reconciled cash-funding charts, annual/monthly ledgers and matching printable charts.
-- [x] **5F supported deterministic policies/stresses:** forward-looking essential cash coverage, irregular due months, optional dependable benefits, separate cash return and funded refill, discretionary floor/cut/recovery, explicit annual return stress, inflation, recurring care-cost shocks and longevity; optional locally computed matching seeded investment paths with explicit mean/volatility/fee/sample assumptions. Targets are allocations, not extra expenses or guarantees.
-- [x] **5G supported life events:** one-time or monthly repeating expenses, confirmed cash receipts with explicit ordinary taxable portion, standard personal-home sale and cash-funded downsize/rental replacement, and a financial-asset legacy target in today's or projected dollars. Mortgage payoff reduces proceeds, not taxable gain; the old home is removed and replacement housing/costs are included.
-
-**Dependencies remain open; Batch 5 is not an unrestricted financial simulator.** Automatic claiming/survivor/death transitions require Batch 3; move-state tax, ZIP assistance, local quotes and broader household-cohort data require sourced Batch 4 datasets/rules. Historical replay and empirically calibrated stochastic ranges still require a versioned licensed market dataset. The available lognormal simulation is explicitly hypothetical, uses one aggregate investment pool and does not infer asset correlations. Inherited retirement accounts, partial/depreciated home-sale exclusions, multiple liens/new mortgage financing, IRA basis/lot-specific tax treatment, and healthcare-driven HSA reimbursements remain explicitly unsupported. Reserve cash is pooled; independently earmarked subaccounts are not modeled. No automatic recommendation ranking or success score is inferred from incomplete cases.
-
-Verified enhanced release: [`9bc96fe`](https://github.com/pyinthesky/financialplanner/commit/9bc96fee3375432b19806d37c6fd04d534d29864), [successful Pages run](https://github.com/pyinthesky/financialplanner/actions/runs/34165304340). All 137 calculation/regression tests, TypeScript/build, and twelve Chromium/WebKit journeys passed at 320, 375, 390, 430, 768 and 1280px. The exact release's synthetic mobile/tablet captures and both populated PDF pages were visually inspected. Browser checks include visible descendant bounds, so clipped ancestors cannot conceal overflowing controls. See [development state](docs/development-state.md) for evidence and remaining limits.
-
-Privacy, blank onboarding, mobile containment, export/import and populated printable charts remain release gates. Tests/artifacts use independently invented synthetic data only. Timed builds remain disabled.
-
-### Batch 6 — Trust, accessibility, and optional AI
-
-- Full calculation audit trail and downloadable year-by-year ledger
-- Expanded automated tests, accessibility audit, and performance splitting
-- Optional user-supplied AI provider connection that sends only a user-approved redacted summary
-- No project-operated storage of credentials or financial data
-
-### Experience and guidance backlog
-
-- A calm, comforting, informative, and inspirational experience that explains uncertainty without using fear, shame, or false precision
-- Prioritized, explainable suggestions that show which changes could most improve the plan and why
-- A simple financial-resilience score that combines retirement funding with income-to-required-debt-payment burden; show the components and never present it as a credit score or guarantee
-- A guided monthly-bills worksheet with common categories, annual/irregular expense prompts, and a clear bridge from current cash flow to retirement spending
-- A dedicated retirement-spending worksheet, separate from general economic assumptions, that can be populated from the monthly-bills worksheet and reconciles current, retirement-only, and separately modeled costs
-- HSA contribution, investing, receipt-retention, qualified-expense, Medicare-enrollment, and retirement-withdrawal strategy, with current limits and rules kept effective-dated
-- Plain-language estate-planning education: why a will matters, common will/trust distinctions, when complexity may warrant an attorney, and a neutral checklist for evaluating providers—without referrals or affiliate links
-- Fiduciary-advisor education: RIA and Form ADV basics, fee-only versus fee-based distinctions, reasonable fee structures by service and asset level, conflicts to watch for, and an easy path to check SEC or state registration using official sources
-- A balanced self-directed alternative showing when a low-cost diversified index-fund portfolio may be sufficient, with guidance scaled to assets, complexity, confidence, and desired service—not a blanket recommendation
-- Evidence-grounded healthy-living planning prompts that can illustrate potential health and longevity effects without predicting an individual's medical outcome or blaming users for health costs
-- Household entry grouped into clear **You** and **Partner** rows/sections so ages, birth years, retirement timing, benefits, and individually owned accounts remain visually and logically aligned
-- Debt strategies with explicit behavior: Snowball first by default (smallest balance, freed minimums cascade, optional extra); Avalanche (highest APR, freed minimums cascade, optional extra); and Custom (user-directed extra payments without an implied cascade). Explain the behavioral versus interest-cost tradeoff without claiming one method is universally best
-
-### Guided-input architecture
-
-- Treat user-entered facts as a shared local data graph: capture each fact once, record its source/effective date when derived, and use it to populate every dependent worksheet, chart, scenario, and report
-- Distinguish entered, calculated, suggested, and overridden values visually; expose the dependency or formula and let the user change any suggestion without silently overwriting it later
-- Use earlier answers to reveal only materially relevant follow-up questions and prefill downstream fields, while preserving an international/manual path and never transmitting plan data
-- Reconcile duplicated concepts—especially spending, mortgage escrow, property tax, insurance, healthcare, income, and tax rates—so one update flows through the plan without double counting
-
-### Product benchmark
-
-The goal is to surpass CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate, and typical bank calculators on depth, synthesis, clarity, and privacy—not by collecting more data. Competitive reviews should focus on their public workflows and identify missing questions, shallow assumptions, opaque calculations, fragmented outputs, lock-in, and unnecessary data collection. The planner should ask only questions that materially change an explainable result, connect cash flow, debt, taxes, benefits, health, housing, and estate decisions, and keep every plan local by default.
-
-## Calculation sources
-
-- Federal tax year 2026 brackets and standard deductions: [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf), published October 9, 2025 and effective for taxable years beginning in 2026. Future projection years inflate these values for planning only; they are not predictions of future law.
-- Social Security benefit taxation: [IRS Publication 915 (2025)](https://www.irs.gov/pub/irs-pdf/p915.pdf), the latest completed edition checked September 5, 2026 and effective for tax year 2025. The planner applies Worksheet 1's statutory thresholds without inflation indexing and labels unmodeled exceptions.
-- Taxable investment basis and realized gains: [IRS Publication 550 (2025)](https://www.irs.gov/pub/irs-pdf/p550.pdf), dated March 5, 2026 for use in preparing 2025 returns. The projection uses account-level aggregate adjusted basis with proportional allocation; it does not claim to reproduce specific-lot accounting.
-- Required minimum distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf), published January 21, 2026, and the [2024 final Treasury regulations](https://www.irs.gov/irb/2024-33_IRB). The projection uses each named owner's prior year-end non-inherited tax-deferred balance and Table III. It does not guess the reserved 1959 applicable-age rule or silently apply IRA rules to joint, inherited, current-employer, 5%-owner, or younger-spouse cases.
-- Qualified charitable distributions: [IRS Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf) for source, direct-transfer, age, contribution-offset, and RMD rules, plus [IRS Notice 2025-67](https://www.irs.gov/pub/irs-drop/n-25-67.pdf), effective January 1, 2026, for the $111,000 annual exclusion limit. Owner elections reduce eligible IRA balances, satisfy applicable RMDs, and exclude only the portion remaining after the user-entered contribution offset. The known 2026 ceiling is held flat in later projection years rather than forecasting future indexing.
-- Early retirement-account distributions: the IRS [Retirement Topics exception table](https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-exceptions-to-tax-on-early-distributions), updated December 11, 2025; [Topic 558](https://www.irs.gov/taxtopics/tc558), updated May 27, 2026; and [Publication 590-B (2025)](https://www.irs.gov/pub/irs-pdf/p590b.pdf). The projection estimates the 10% additional tax on taxable, owner-assigned traditional withdrawals before age 59½ after a user-entered confirmed exception amount. It does not infer exception eligibility, resolve date-sensitive age 59, or apply IRA rules to unassigned and Roth withdrawals.
-- Roth conversions: [IRS Publication 590-A (2025)](https://www.irs.gov/pub/irs-pdf/p590a.pdf), published January 15, 2026, for conversion inclusion, IRA basis, and recharacterization rules, combined with [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf) for 2026 brackets. The current-year worksheet accepts a user-determined taxable amount. The ladder transfers only available owner-assigned tax-deferred balances after RMDs, includes the conversion in taxable income and related calculations, and does not determine Form 8606 basis, pro-rata taxability, eligibility, five-year rules, withholding, or future law.
-- Medicare IRMAA: the [SSA 2026 Medicare premium tables](https://www.ssa.gov/benefits/medicare/medicare-premiums.html) and [CMS 2026 premium fact sheet](https://www.cms.gov/newsroom/fact-sheets/2026-medicare-parts-b-premiums-deductibles), released November 14, 2025. The worksheet uses the published 2026 Part B and Part D tiers with 2024 MAGI, defined by SSA as adjusted gross income plus tax-exempt interest. The conversion ladder reuses those tiers only as a current-law income sensitivity; it does not extrapolate future thresholds, premiums, two-year lookback determinations, or Part D plan premiums.
-- ACA premium tax credit: [IRS Revenue Procedure 2025-25](https://www.irs.gov/pub/irs-drop/rp-25-25.pdf), effective for taxable and plan years beginning in 2026, for the applicable-percentage table; [2025 HHS poverty guidelines](https://www.federalregister.gov/documents/2025/01/17/2025-01377/annual-update-of-the-hhs-poverty-guidelines), which CMS continues using for all 2026 Marketplace applications; and [HealthCare.gov's 2026 premium guidance](https://www.healthcare.gov/lower-costs/save-on-monthly-premiums/), confirming the enhanced pandemic-era credits ended December 31, 2025. The worksheet calculates only a potential credit within the standard 100%–400% FPL range and does not infer Marketplace eligibility or fetch location-specific premiums.
-- Long-term capital gains and NIIT: [IRS Revenue Procedure 2025-32](https://www.irs.gov/pub/irs-drop/rp-25-32.pdf), effective for taxable years beginning in 2026, for the 0% / 15% / 20% taxable-income ceilings, and the IRS [Net Investment Income Tax guidance](https://www.irs.gov/individuals/net-investment-income-tax), updated July 1, 2026, for the 3.8% surtax and fixed filing-status thresholds. The planner applies unused basic standard deduction, stacks net long-term gain above ordinary taxable income, and separately estimates NIIT. It excludes qualified dividends, special 25%/28% gain categories, detailed loss/basis rules, itemized deductions, and state treatment.
+[The Pages workflow](.github/workflows/pages.yml) builds `dist-pages`, runs its gates and deploys through GitHub's official Pages actions. Repository Pages settings must use GitHub Actions as the source. Public-reference updates and new feature work remain separate concerns.
 
 ## Contributing
 
-Issues and pull requests are welcome. Financial-law changes must cite an authoritative source and include an effective date. Calculation changes should include tests and keep the result explainable in the UI.
+Issues and pull requests are welcome. Explain the user problem, supported behavior, assumptions and validation. Financial-law changes require authoritative sources and effective dates. Preserve privacy, accessibility and clear calculation boundaries.
 
 ## License
 
 MIT
-
-
-### September 8 Navigation and Debt Review
-
-- [x] Rename Accounts to **Cash & Investments**, including linked input guidance and the PDF.
-- [x] Consolidate the existing home carrying costs, escrow reconciliation and debt-entry forms under **Loans & Debts**. Remove the empty Baseline Spending panel. Home value remains an asset; property tax and insurance never become loan principal or available rollover payments.
-- [x] Move **Timed Costs** to both budget pages as one shared editor. Ordinary recurring bills belong in the category worksheet. Age-bounded tuition, support and other costs retain their existing timed-expense records and feed both budgets once; they are not converted into loans. Zero-interest financing remains a real loan with a balance and payoff schedule.
-- [x] Extract the payoff chart and month-by-month minimum-payment cascade into a view-only **Plan Summary** section. Baseline method and extra-payment inputs stay with loan entry.
-- [x] Add isolated **Debt Payoff Experiment** overrides to saved scenarios: Snowball, Avalanche or Custom, shared extra or per-loan Custom extras, blank-to-inherit and reset. The full monthly scenario projection uses the changed strategy, including cash funding and mortgage reconciliation; it does not mutate the current plan. Saved-plan import validates and preserves overrides.
-- [ ] **Income-property comparison / Real Estate:** Build a separate bounded Scenario Laboratory comparison before adding a dedicated tab. Inputs: purchase/down payment/closing costs, loan terms, gross rent, vacancy, management, maintenance, capital-replacement reserve, property tax and insurance. Show operating cash flow separately from principal reduction, initial cash invested, equity and sale proceeds. Compare the same starting assets against keeping those funds invested. Require explicit sourced tax treatment or label an initial comparison pre-tax and exclude it from tax-complete rankings; do not guess depreciation, passive-loss limits or sale recapture. No tenant names, addresses, listings, accounts or external plan transmission are needed. Promote to a Real Estate tab only when multiple existing properties justify it; do not imply rental support by relabeling the current owner-occupied home form.
