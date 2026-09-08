@@ -1,0 +1,73 @@
+name: Refresh Public Mortgage Rates
+
+on:
+  schedule:
+    # Freddie Mac normally publishes PMMS on Thursday. Run after the weekly release.
+    - cron: "0 21 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-public-mortgage-rates
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Fetch and Validate Freddie Mac Snapshot
+        run: node --experimental-strip-types scripts/refresh-mortgage-rates.mjs
+      - name: Detect Update
+        id: update
+        shell: bash
+        run: |
+          if git diff --quiet -- public/mortgage-rates.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            observed="$(node -p "JSON.parse(require('fs').readFileSync('public/mortgage-rates.json')).observed")"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "observed=$observed" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run Release Gates
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          npm test
+          npx tsc --noEmit
+          npm run build:pages
+      - name: Open Reviewable Pull Request
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OBSERVED: ${{ steps.update.outputs.observed }}
+        shell: bash
+        run: |
+          title="chore: refresh mortgage rates ($OBSERVED)"
+          if gh pr list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq 'length > 0' | grep -q true; then
+            echo "A pull request for $OBSERVED is already open."
+            exit 0
+          fi
+
+          branch="automation/mortgage-rates-$OBSERVED-$GITHUB_RUN_ID"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add public/mortgage-rates.json
+          git commit -m "$title"
+          git push origin "$branch"
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "$title" \
+            --body "Updates the bundled Freddie Mac PMMS snapshot observed on **$OBSERVED**. The refresh script validated the source host, schema, observation date, rate ranges, and non-regression of the observation date. Tests, TypeScript validation, and the production build passed before this pull request was opened. No visitor or plan data is involved."

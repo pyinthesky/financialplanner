@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { DEFAULT_PLAN, normalizePlan } from '../lib/planner.ts';
 import { baselineSnapshot } from '../lib/scenarios.ts';
 import { EMPTY_LAB } from '../lib/monthly-model.ts';
@@ -24,3 +25,4 @@ test('Property comparison settles loans, fees and cash on a common horizon witho
 
 test('Isolated property and refinance worksheets do not stale a household baseline; rental records do',()=>{const p=plan(),before=baselineSnapshot(p);p.refinancing=[emptyRefinance('test')];p.realEstate={properties:[],trial:trial()};assert.equal(baselineSnapshot(p),before);p.realEstate.properties=[rental()];assert.notEqual(baselineSnapshot(p),before);});
 test('High assets do not override a spending shortfall in Outlook',()=>{const p=plan();p.accounts[0].balance=100000;p.budget.lines[0].amount=20000;assert.equal(outlook(p).status,'Potential Gap');});
+test('Public mortgage rates refresh through a gated pull request, never directly to main',()=>{const workflow=readFileSync(new URL('../.github/workflows/refresh-mortgage-rates.yml',import.meta.url),'utf8');assert.match(workflow,/schedule:[\s\S]*cron: "0 21 \* \* 4"/);assert.match(workflow,/pull-requests: write/);assert.match(workflow,/npm test[\s\S]*npx tsc --noEmit[\s\S]*npm run build:pages/);assert.match(workflow,/gh pr create/);assert.doesNotMatch(workflow,/git push origin (?:main|HEAD:main)/);});
