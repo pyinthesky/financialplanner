@@ -274,14 +274,16 @@ const server = http.createServer((req, res) => {
         }
         await navigate('Loans & Debts');
         const refinance=page.locator('section').filter({has:page.getByRole('heading',{name:'Refinance Comparison',exact:true})}).last();
-        await refinance.locator('details').last().locator('summary').click();
-        for(const [label,value] of [['New Term / Years — Mortgage','15'],['Offered Rate / % — Mortgage','2'],['Closing Costs and Points — Mortgage','500'],['Holding Period / Months — Mortgage','60']])await page.getByLabel(label,{exact:true}).fill(value);
+        const primaryRefinance=refinance.locator('details').filter({has:refinance.locator('summary').filter({hasText:/^Mortgage/})}).first();
+        await primaryRefinance.locator('summary').click();
+        for(const [label,value] of [['New Term / Years — Mortgage','15'],['Offered Rate / % — Mortgage','2'],['Closing Costs and Points — Mortgage','500'],['Holding Period / Months — Mortgage','60']])await primaryRefinance.getByLabel(label,{exact:true}).fill(value);
         await noOverflow('refinance comparison');
         await navigate('Real Estate');
         await page.getByRole('button',{name:'Add Rental Property',exact:true}).click();
-        await page.getByLabel('Property Label',{exact:true}).fill('Synthetic Rental');
-        for(const [label,value] of [['Current Market Value','10000'],['Scheduled Rent / Month','100'],['Vacancy Allowance','10'],['Management / Collected Rent','0'],['Property Tax / Year','120'],['Insurance / Year','120'],['Routine Maintenance / Year','120'],['Actual Repair Spending Allowance / Year','120'],['Desired Property Cash Reserve','200'],['Confirmed Passive Taxable Profit / Year','500']])await page.getByLabel(label,{exact:true}).fill(value);
-        await page.getByRole('checkbox',{name:/I confirmed the nonnegative taxable profit/}).check();
+        const newRental=page.locator('details').filter({has:page.locator('summary').filter({hasText:'Rental Property'})}).last();
+        await newRental.getByLabel('Property Label',{exact:true}).fill('Synthetic Rental');
+        for(const [label,value] of [['Current Market Value','10000'],['Scheduled Rent / Month','100'],['Vacancy Allowance','10'],['Management / Collected Rent','0'],['Property Tax / Year','120'],['Insurance / Year','120'],['Routine Maintenance / Year','120'],['Actual Repair Spending Allowance / Year','120'],['Desired Property Cash Reserve','200'],['Confirmed Passive Taxable Profit / Year','500']])await newRental.getByLabel(label,{exact:true}).fill(value);
+        await newRental.getByRole('checkbox',{name:/I confirmed the nonnegative taxable profit/}).check();
         await noOverflow('rental property entry');
         await navigate('Scenario Laboratory');
         const propertyLab=page.locator('section').filter({has:page.getByRole('heading',{name:'Income Property Laboratory',exact:true})}).last();
