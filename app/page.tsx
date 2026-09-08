@@ -13,6 +13,7 @@ import { RealEstateEditor, PropertyLaboratory, PropertyReport } from '@/componen
 import { Refinance } from '@/components/refinance';
 import { validSnapshot, refinanceOpportunities, type RateSnapshot } from '@/lib/refinance';
 import { SummaryCashFlow } from '@/components/summary-cash-flow';
+import { SummaryPosition } from '@/components/summary-position';
 import { Outlook } from '@/components/outlook';
 import { PrintPlanDetails } from '@/components/print-plan-details';
 import { createSaveGuard, isBlankPlan } from '@/lib/plan-lifecycle';
@@ -2312,7 +2313,7 @@ export default function HomePage() {
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
-    : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>

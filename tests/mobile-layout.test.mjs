@@ -172,3 +172,10 @@ test("plan summary uses prioritized signals without duplicate navigation", () =>
   assert.doesNotMatch(page, /Review assumptions/i);
   assert.match(css, /\.planning-signal-list li\[data-tone="attention"\]/);
 });
+
+test("plan summary keeps cash, investments and real estate visible with the monthly engine", async () => {
+  const position = await readFile(new URL("../components/summary-position.tsx", import.meta.url), "utf8");
+  assert.match(page, /<SummaryPosition plan=\{plan\}\/>/);
+  assert.match(position, />Cash & Investments</);
+  assert.match(position, />Real Estate</);
+});

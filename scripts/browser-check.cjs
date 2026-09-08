@@ -250,6 +250,9 @@ const server = http.createServer((req, res) => {
         await page.getByRole('button',{name:'Load Sample Plan',exact:true}).click();
         await page.getByRole('button',{name:'Erase and Load Sample',exact:true}).click();
         await navigate('Plan Summary');
+        await page.getByRole('heading',{name:'Cash & Investments',exact:true}).waitFor();
+        await page.getByRole('heading',{name:'Real Estate',exact:true}).waitFor();
+        await page.getByText('Maple Street Rental',{exact:true}).waitFor();
         await page.getByRole('img',{name:/^Current Cash Flow Sankey/}).waitFor();
         await page.getByRole('button',{name:'Choose Cash-Flow Month',exact:true}).click();
         await page.getByLabel('Sankey Month',{exact:true}).fill('2026-02');
