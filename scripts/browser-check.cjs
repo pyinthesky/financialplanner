@@ -279,7 +279,8 @@ const server = http.createServer((req, res) => {
         await noOverflow('refinance comparison');
         await navigate('Real Estate');
         await page.getByRole('button',{name:'Add Rental Property',exact:true}).click();
-        const newRental=page.locator('details').filter({has:page.locator('summary').filter({hasText:'Rental Property'})}).last();
+        const rentalSection=page.locator('section').filter({has:page.getByRole('heading',{name:'Existing Income Properties',exact:true})}).first();
+        const newRental=rentalSection.locator('details').last();
         await newRental.getByLabel('Property Label',{exact:true}).fill('Synthetic Rental');
         for(const [label,value] of [['Current Market Value','10000'],['Scheduled Rent / Month','100'],['Vacancy Allowance','10'],['Management / Collected Rent','0'],['Property Tax / Year','120'],['Insurance / Year','120'],['Routine Maintenance / Year','120'],['Actual Repair Spending Allowance / Year','120'],['Desired Property Cash Reserve','200'],['Confirmed Passive Taxable Profit / Year','500']])await newRental.getByLabel(label,{exact:true}).fill(value);
         await newRental.getByRole('checkbox',{name:/I confirmed the nonnegative taxable profit/}).check();
