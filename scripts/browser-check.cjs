@@ -282,6 +282,9 @@ const server = http.createServer((req, res) => {
         await noOverflow('rental property entry');
         await navigate('Scenario Laboratory');
         const propertyLab=page.locator('section').filter({has:page.getByRole('heading',{name:'Income Property Laboratory',exact:true})}).last();
+        await propertyLab.getByRole('button',{name:'Copy Synthetic Rental into Keep Comparison',exact:true}).click();
+        assert.equal(await propertyLab.getByLabel('Property Value / Purchase Price',{exact:true}).inputValue(),'10000');
+        await propertyLab.getByLabel('Property Comparison',{exact:true}).selectOption('purchase');
         for(const [label,value] of [['Property Value / Purchase Price','12000'],['Equity / Down Payment','6000'],['Purchase Closing Costs','120'],['Mortgage Rate','0'],['Remaining / New Loan Term','10'],['Comparison Horizon','1'],['Scheduled Rent / Month','100'],['Vacancy Allowance','0'],['Operating Costs / Month','20'],['Actual Repairs / Year','0'],['Property Growth / Year','0'],['Alternative Investment Return / Year','0'],['Selling Costs / Property Value','5']])await propertyLab.getByLabel(label,{exact:true}).fill(value);
         await propertyLab.getByText('Annual Comparison Ledger',{exact:true}).click();
         await noOverflow('income property comparison');

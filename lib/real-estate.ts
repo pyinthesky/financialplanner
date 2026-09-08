@@ -20,10 +20,11 @@ export function rentalIssues(plan:PlannerData){const issues:string[]=[],loans=ne
 export function rentalTotals(plan:PlannerData){let rent=0,costs=0,value=0,taxable=0,reserveTarget=0;for(const p of plan.realEstate?.properties??[]){const collected=(p.rent??0)*(1-(p.vacancy??0)/100);rent+=collected;costs+=collected*(p.management??0)/100+((p.tax??0)+(p.insurance??0)+(p.maintenance??0)+(p.repairs??0))/12;value+=p.value??0;taxable+=(p.taxableProfit??0)/12;reserveTarget+=p.reserveTarget??0;}return {rent,costs,value,taxable,reserveTarget};}
 /** Pre-tax same-cash comparison: matching outside contributions; positive rent reinvested. */
 export function propertyComparison(t:PropertyTrial){
- const keys=Object.keys(emptyPropertyTrial()).filter(k=>k!=='mode');if(keys.some(k=>t[k as keyof PropertyTrial]===null||!Number.isFinite(t[k as keyof PropertyTrial])))return null;
+ const cashOnly=t.value!==null&&t.value>0&&t.equity===t.value;
+ const keys=Object.keys(emptyPropertyTrial()).filter(k=>k!=='mode'&&!(cashOnly&&['rate','years'].includes(k)));if(keys.some(k=>t[k as keyof PropertyTrial]===null||!Number.isFinite(t[k as keyof PropertyTrial])))return null;
  const value=t.value!,equity=t.equity!,months=t.holdingYears!*12;
- if(value<=0||equity<0||equity>value||!Number.isInteger(months)||months<1||months>600||t.years!<=0||!Number.isInteger(t.years!*12)||t.years!>50||t.rate!<0||t.rate!>100||t.vacancy!<0||t.vacancy!>100||t.saleCostPercent!<0||t.saleCostPercent!>100||t.appreciation!<=-100||t.investmentReturn!<=-100||[t.rent!,t.costs!,t.repairs!,t.buyingCosts!].some(n=>n<0))return null;
- const loan=value-equity,monthly=payment(loan,t.rate!,t.years!*12),schedule=amortize(loan,t.rate!,monthly,months),sellingNow=equity-value*t.saleCostPercent!/100;
+ if(value<=0||equity<0||equity>value||!Number.isInteger(months)||months<1||months>600||(!cashOnly&&(t.years!<=0||!Number.isInteger(t.years!*12)||t.years!>50||t.rate!<0||t.rate!>100))||t.vacancy!<0||t.vacancy!>100||t.saleCostPercent!<0||t.saleCostPercent!>100||t.appreciation!<=-100||t.investmentReturn!<=-100||[t.rent!,t.costs!,t.repairs!,t.buyingCosts!].some(n=>n<0))return null;
+ const loan=value-equity,monthly=cashOnly?0:payment(loan,t.rate!,t.years!*12),schedule=amortize(loan,cashOnly?0:t.rate!,monthly,months),sellingNow=equity-value*t.saleCostPercent!/100;
  const initial=t.mode==='purchase'?equity+t.buyingCosts!:sellingNow;
  if(initial<0)return null; // underwater sale requires additional cash; not silently funded
  const investmentRate=Math.pow(1+t.investmentReturn!/100,1/12)-1;

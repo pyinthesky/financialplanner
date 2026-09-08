@@ -30,10 +30,10 @@ export function budgetView(plan:PlannerData,month:string) {
   const rentals=rentalTotals(plan);
   if(rentals.rent>0)income.push({id:'rental-income',name:'Collected Rent',amount:rentals.rent,source:'Real Estate · before income tax'});
   add('rental-costs','Rental Operating Costs',rentals.costs,'Real Estate · loan payments above');
-  add('property-tax','Property Tax',propertyTaxAnnual(plan)*inflation/12,'Loans & Debts');
-  add('home-insurance','Home Insurance',homeInsuranceAnnual(plan)*inflation/12,'Loans & Debts');
+  add('property-tax','Property Tax',propertyTaxAnnual(plan)*inflation/12,'Real Estate');
+  add('home-insurance','Home Insurance',homeInsuranceAnnual(plan)*inflation/12,'Real Estate');
   const statement=activeMortgageStatement(plan);
-  if(statement&&debt?.payments.some(p=>p.id===statement.debtId&&p.openingBalance>0))add('escrow-other','Mortgage Insurance & Other Escrow',(statement.mortgageInsurance??0)+(statement.otherEscrow??0),'Loans & Debts');
+  if(statement&&debt?.payments.some(p=>p.id===statement.debtId&&p.openingBalance>0))add('escrow-other','Mortgage Insurance & Other Escrow',(statement.mortgageInsurance??0)+(statement.otherEscrow??0),'Real Estate');
   const healthScale=Math.pow(1+plan.healthcare.healthInflation/100,y);
   add('health','Healthcare',(age<65?plan.healthcare.preMedicareAnnual:plan.healthcare.medicareAnnual)*healthScale/12,'Health & Long-Term Care');
   if(age>=plan.healthcare.longTermCareStartAge&&age<plan.healthcare.longTermCareStartAge+plan.healthcare.longTermCareYears)add('care','Long-Term Care',plan.healthcare.longTermCareAnnual*healthScale/12,'Health & Long-Term Care');

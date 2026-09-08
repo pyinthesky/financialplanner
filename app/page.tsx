@@ -312,7 +312,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
 
 export default function HomePage() {
   const [rateSnapshot,setRateSnapshot]=useState<RateSnapshot|null>(null);
-  useEffect(()=>{fetch(new URL('mortgage-rates.json',document.baseURI)).then(r=>r.ok?r.json():null).then(s=>{if(validSnapshot(s))setRateSnapshot(s);}).catch(()=>{});},[]);
+  useEffect(()=>{fetch(new URL('mortgage-rates.json',document.baseURI)).then(r=>r.ok?r.json():null).then(s=>{if(s?.observed&&validSnapshot(s,new Date(s.observed+'T00:00:00Z'))&&Date.parse(s.observed)<=Date.now())setRateSnapshot(s);}).catch(()=>{});},[]);
   const [plan, setPlan] = useState<PlannerData>(DEFAULT_PLAN);
   const [activeSection, setActiveSection] = useState<SectionId>("data");
   const [vaultStatus, setVaultStatus] = useState<VaultStatus>("off");

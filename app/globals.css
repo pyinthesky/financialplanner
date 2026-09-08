@@ -736,3 +736,12 @@ button, input, select { font: inherit; }
 
 .opportunity-badge { display:inline-flex; max-width:100%; padding: .15rem .4rem; border-radius:.6rem; background:#d8eee8; color:#15594c; font-size:.72rem; white-space:normal; }
 .month-navigation {display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; min-width:0;}
+
+@media print {
+  .monthly-print { break-before:page; }
+  .monthly-print svg { display:block; break-inside:avoid; }
+  .monthly-print h2 { break-after:avoid; font-size:16px; font-weight:650; margin:12px 0 8px; }
+  .monthly-print p, .print-report li { font-size:11px; line-height:1.5; }
+  .print-report .budget-card { padding:10px; gap:6px; margin:8px 0; break-inside:avoid; }
+}
+.budget-flow summary { overflow-wrap:anywhere; }
