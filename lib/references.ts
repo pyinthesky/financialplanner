@@ -30,3 +30,11 @@ export function applyInflationReference(value: number): { value: number; receipt
 export function canUndoInflationReference(value: number, receipt?: InflationReceipt): boolean {
   return !!receipt && Number.isFinite(receipt.previousValue) && receipt.appliedValue === value;
 }
+
+/** Published calendar-year averages, not compound-growth forecasts. */
+export const RETURN_REFERENCES = {
+  preRetirementReturn:{value:11.1,label:'90/10 Historical Average',period:'1928–2025'},
+  retirementReturn:{value:9.8,label:'70/30 Historical Average',period:'1928–2025'},
+  cashReturn:{value:3.575,label:'Two-Bank HYSA Average',period:'Observed 2026-09-08'},
+} as const;
+export interface ReturnReceipt { value:number; previousValue:number; label:string; period:string }

@@ -648,6 +648,45 @@ button, input, select { font: inherit; }
 .funding-track { height:7px; margin-top:.35rem; background:#e7edf3; border-radius:4px; overflow:hidden; }
 .funding-track > span { display:block; height:100%; }
 .funding-ribbons { width:100%; max-height:200px; }
+.budget-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.budget-toolbar .budget-field { max-width:16rem; }
+.compact-section { min-width:0; border:1px solid #dce4ed; border-radius:12px; background:#fff; padding:1rem; }
+.compact-section h2 { font-size:1.1rem; font-weight:650; margin-bottom:.7rem; }
+.compact-column-labels, .compact-bill { display:grid; grid-template-columns:minmax(0,1fr) 130px 132px; gap:.65rem; align-items:center; }
+.compact-column-labels { padding:.5rem; font-size:.75rem; color:#64748b; }
+.compact-category { border-top:1px solid #e2e8f0; }
+.compact-category > summary { display:flex; align-items:center; justify-content:space-between; gap:.7rem; min-height:52px; list-style:none; }
+.compact-category > summary > span { flex:1; min-width:0; }
+.compact-category > summary::before { content:'›'; color:#64748b; font-size:1.3rem; }
+.compact-category[open] > summary::before { transform:rotate(90deg); }
+.compact-category summary::-webkit-details-marker { display:none; }
+.compact-category small, .compact-name small, .compact-linked small { display:block; font-size:.72rem; color:#64748b; font-weight:400; }
+.compact-bill { padding:.45rem .5rem; border-top:1px solid #eff3f7; }
+.compact-name, .compact-amount, .compact-linked > span { min-width:0; }
+.compact-name input { border-color:transparent; background:transparent; padding-left:0; }
+.compact-name input:hover, .compact-name input:focus { border-color:#cbd5e1; }
+.compact-name small { padding-left:.1rem; }
+.compact-amount input { width:100%; min-width:0; }
+.compact-tools { display:flex; justify-content:flex-end; }
+.compact-tools button { width:44px; height:44px; flex-shrink:0; }
+.compact-linked { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.6rem .4rem; border-bottom:1px solid #eef2f6; font-size:.9rem; overflow-wrap:anywhere; }
+.compact-linked strong { text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }
+.budget-row-dialog { max-height:85dvh; overflow-y:auto; min-width:0; }
+.budget-row-dialog input, .budget-row-dialog select { max-width:100%; min-width:0; }
+.assumption-shortcut { display:flex; align-items:flex-start; flex-direction:column; gap:.4rem; margin:.4rem 0 1rem; min-width:0; }
+.assumption-shortcut button { white-space:normal; height:auto; min-height:44px; max-width:100%; }
+.assumption-shortcut small { color:#64748b; font-size:.75rem; }
+.summary-sankey { margin-bottom:1.5rem; }
+.summary-sankey-svg { width:100%; height:auto; display:block; overflow:visible; }
+@media(max-width:600px) {
+  .compact-section { padding:.7rem; }
+  .compact-column-labels { grid-template-columns:minmax(0,1fr) 100px; }
+  .compact-column-labels > :last-child { display:none; }
+  .compact-bill { grid-template-columns:minmax(0,1fr) 100px; padding:.4rem 0; gap:.1rem .5rem; }
+  .compact-tools { grid-column:1/-1; }
+  .compact-linked { padding:.65rem 0; gap:.6rem; }
+  .compact-linked strong { max-width:45%; }
+}
 /* Explicit transform endpoints keep the mobile drawer stable after opening.
    Avoid mixing the generic sheet transition with registered animation variables. */
 [data-mobile="true"][data-sidebar="sidebar"] {

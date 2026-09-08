@@ -13,7 +13,7 @@ const money = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency',
 export function Amount({ label, value, onChange, percent = false }: { label: string; value: number | null; onChange: (n: number | null) => void; percent?: boolean }) {
   return <label className="budget-field"><span>{label}</span><div className="input-affix"><span>{percent ? '%' : '$'}</span><Input aria-label={label} type="number" min={percent ? -100 : 0} step="any" value={value ?? ''} onFocus={e => e.currentTarget.select()} onChange={e => onChange(e.target.value === '' ? null : e.target.valueAsNumber)} /></div></label>;
 }
-function FrequencySelect({ value, onChange }: { value: Frequency; onChange: (v: Frequency) => void }) {
+export function FrequencySelect({ value, onChange }: { value: Frequency; onChange: (v: Frequency) => void }) {
   return <label className="budget-field"><span>Frequency</span><select aria-label="Frequency" value={value} onChange={e => onChange(e.target.value as Frequency)}>{Object.entries(FREQUENCIES).map(([key, f]) => <option key={key} value={key}>{f.label}</option>)}</select></label>;
 }
 export function BudgetEditor({ budget, onChange, retirement = false, married, linkedAnnual, legacyAnnual, accounts, household, benefits, onBenefitChange }: { benefits: IncomeStream[]; onBenefitChange:(id:string,patch:Partial<IncomeStream>)=>void; budget: BudgetData; onChange: (b: BudgetData) => void; retirement?: boolean; married: boolean; linkedAnnual: { housing: number; debt: number; health: number; timed:number }; legacyAnnual: number; accounts: Account[]; household: BudgetHousehold }) {

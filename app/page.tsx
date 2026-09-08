@@ -7,7 +7,13 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, L
 import { Button } from "@/components/ui/button";
 import { ScenarioLaboratory, MonthlyResults, MonthlyPrintReport } from '@/components/scenario-laboratory';
 import { projectMonthly } from '@/lib/monthly-projection';
-import { BudgetEditor } from "@/components/budget-editor";
+import { CompactBudgetEditor } from "@/components/compact-budget-editor";
+import { PayrollEditor } from '@/components/payroll-editor';
+import { SummaryCashFlow } from '@/components/summary-cash-flow';
+import { createSaveGuard, isBlankPlan } from '@/lib/plan-lifecycle';
+import { RETURN_REFERENCES } from '@/lib/references';
+import { US_STATES } from '@/lib/states';
+import samplePlan from '@/public/sample-plan.json';
 import { DebtCascade } from "@/components/debt-cascade";
 import { MortgageStatementEditor } from "@/components/mortgage-statement";
 import { homeInsuranceAnnual, mortgageAncillaryAnnual } from "@/lib/planner";
@@ -41,13 +47,13 @@ const VAULT_KEY = "open-retirement-planner-vault-v1";
 const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "data", label: "Data & Privacy", icon: ShieldCheck },
   { id: "household", label: "Household", icon: Home },
-  { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
-  { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
   { id: "portfolio", label: "Accounts", icon: BriefcaseBusiness },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
   { id: "spending", label: "Spending & Housing", icon: ReceiptText },
   { id: "debt", label: "Debt Payoff", icon: WalletCards },
   { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
+  { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
+  { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
   { id: "taxes", label: "Taxes & Withdrawals", icon: Calculator },
   { id: "scenarios", label: "Scenario Laboratory", icon: Activity },
   { id: "overview", label: "Plan Summary", icon: Activity },
@@ -306,6 +312,9 @@ export default function HomePage() {
   const [saveState, setSaveState] = useState("Blank plan — not saved");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("unsaved");
   const [confirmErase, setConfirmErase] = useState(false);
+  const [replaceAction,setReplaceAction]=useState<'sample'|'new'|null>(null);
+  const [planEpoch,setPlanEpoch]=useState(0);
+  const saveGuard=useRef(createSaveGuard());
   const fileInput = useRef<HTMLInputElement>(null);
   const passphraseRef = useRef("");
 
@@ -320,17 +329,22 @@ export default function HomePage() {
     if (vaultStatus !== "unlocked" || !passphraseRef.current) return;
     setSaveStatus("saving");
     setSaveState("Saving encrypted…");
+    const isCurrent=saveGuard.current.lease();
+    let active=true;
     const timer = window.setTimeout(async () => {
+      if(!isCurrent())return;
       try {
-        localStorage.setItem(VAULT_KEY, await encryptPlan(plan, passphraseRef.current));
+        const saved=await saveGuard.current.save(()=>encryptPlan(plan, passphraseRef.current),value=>localStorage.setItem(VAULT_KEY,value));
+        if(!saved)return;
         setSaveStatus("saved");
         setSaveState("Saved locally — encrypted");
       } catch {
+        if(!active)return;
         setSaveStatus("failed");
         setSaveState("Could not save vault");
       }
     }, 450);
-    return () => window.clearTimeout(timer);
+    return () => { active=false; window.clearTimeout(timer); saveGuard.current.cancel(); };
   }, [plan, vaultStatus]);
 
   const projection = useMemo(() => projectPlan(plan), [plan]);
@@ -498,12 +512,14 @@ export default function HomePage() {
     }
   };
   const lockVault = () => {
+    saveGuard.current.cancel();
     passphraseRef.current = "";
     setVaultStatus("locked");
     setSaveStatus("locked");
     setSaveState("Local vault locked");
   };
   const eraseVault = () => {
+    saveGuard.current.cancel();
     localStorage.removeItem(VAULT_KEY);
     passphraseRef.current = "";
     setVaultStatus("off");
@@ -512,9 +528,26 @@ export default function HomePage() {
     setConfirmErase(false);
   };
 
+  const replacePlan=(action:'sample'|'new')=>{
+    const replacement=action==='sample'?normalizePlan(structuredClone(samplePlan)):structuredClone(DEFAULT_PLAN);
+    saveGuard.current.cancel();
+    localStorage.removeItem(VAULT_KEY);passphraseRef.current='';setPassphrase('');
+    setVaultStatus('off');setSaveStatus('unsaved');setVaultOpen(false);setVaultError('');setConfirmErase(false);
+    setPlan(replacement);setPlanEpoch(n=>n+1);setReplaceAction(null);
+    setSaveState(action==='sample'?'Sample loaded — not saved':'Blank plan — not saved');
+  };
+  const requestReplacement=(action:'sample'|'new')=>{
+    if(!isBlankPlan(plan)||vaultStatus!=='off')setReplaceAction(action);else replacePlan(action);
+  };
+  const returnShortcut=(key:keyof typeof RETURN_REFERENCES)=>{
+    const r=RETURN_REFERENCES[key],receipt=plan.returnReferences?.[key];
+    // The monthly engine uses nominal annual cash rate / 12; bank sources quote APY.
+    const value=key==='cashReturn'?1200*(Math.pow(1+r.value/100,1/12)-1):r.value;
+    return <div className="assumption-shortcut"><Button variant="outline" disabled={!!receipt&&plan.assumptions[key]===receipt.value} onClick={()=>setPlan(p=>({...p,assumptions:{...p.assumptions,[key]:value},returnReferences:{...p.returnReferences,[key]:{value,previousValue:p.assumptions[key]??0,label:r.label,period:r.period}}}))}>{r.label} · {r.value.toFixed(2)}%</Button><small>{r.period}{key==='cashReturn'?' · variable APY; nominal rate applied':' · calendar-year average, not a growth forecast'}</small>{receipt&&plan.assumptions[key]===receipt.value&&<Button variant="ghost" onClick={()=>setPlan(p=>({...p,assumptions:{...p.assumptions,[key]:receipt.previousValue},returnReferences:{...p.returnReferences,[key]:undefined}}))}>Undo {r.label}</Button>}</div>;
+  };
+
   const renderOverview = () => (
     <>
-      <SectionHeading title="Plan Summary" description="A living projection from today through the end of your planning horizon." />
       {projection.some((row) => row.unfundedTaxes > 0.01) && <div className="notice" role="status">The projection has {currency.format(projection.reduce((sum, row) => sum + row.unfundedTaxes, 0))} in unpaid modeled taxes. A remaining account balance does not necessarily mean those taxes can be funded under the withdrawal rules.</div>}
       <div className="metric-grid">
         <div className="metric-card primary-metric">
@@ -644,26 +677,30 @@ export default function HomePage() {
             {plan.household.maritalStatus === "married" && <Field label="Partner retirement age" value={plan.household.partnerRetirementAge} onChange={(value) => setHousehold("partnerRetirementAge", value)} suffix="years old" max={99} />}
             <Field label="Plan through age" value={plan.household.planToAge} onChange={(value) => setHousehold("planToAge", value)} suffix="years old" min={plan.household.currentAge + 1} max={120} />
             <div className="field-stack">
-              <Label htmlFor="state">State</Label>
-              <Input id="state" value={plan.household.state} onChange={(event) => setHousehold("state", event.target.value)} />
+              <Label htmlFor="zip-code">ZIP Code (Optional)</Label>
+              <Input id="zip-code" inputMode="numeric" autoComplete="off" maxLength={5} value={plan.household.zipCode??''} onChange={e=>setHousehold('zipCode',e.target.value.replace(/\D/g,''))}/>
+              <Label htmlFor="state">State for References (Optional)</Label>
+              <select id="state" value={plan.household.state} onChange={e=>setHousehold('state',e.target.value)}><option value="">Outside the U.S. / Not Selected</option>{plan.household.state&&!US_STATES[plan.household.state]&&<option value={plan.household.state}>{plan.household.state} (Imported)</option>}{Object.entries(US_STATES).map(([code,name])=><option key={code} value={code}>{name}</option>)}</select>
+              <p className="field-help">ZIP stays on your device. Choose a state for available references; automatic local-rate lookup is not yet available. Tax calculations currently use U.S. rules.</p>
             </div>
           </div>
         </Panel>
         <Panel title="Economic Assumptions" eyebrow="ALL VALUES EDITABLE">
           <div className="form-grid">
             <Field label="General inflation" value={plan.assumptions.inflation} onChange={(value) => setAssumption("inflation", value)} suffix="%" step={0.1} max={20} />
-            <details className="budget-flow"><summary>Use a Historical Inflation Reference</summary>
-              <p>{INFLATION_REFERENCE.title}: <strong>{inflationReferenceValue().toFixed(2)}% / year</strong>. {INFLATION_REFERENCE.geography}. {INFLATION_REFERENCE.limitation}</p>
-              <p className="field-help">{INFLATION_REFERENCE.method}. Source reviewed {INFLATION_REFERENCE.reviewedOn}. <a href={INFLATION_REFERENCE.url} target="_blank" rel="noreferrer">BLS source table</a>.</p>
-              {canUndoInflationReference(plan.assumptions.inflation, plan.inflationReference) ? <><p className="field-help">Applied from BLS. Edit the inflation field to override it.</p><Button variant="outline" onClick={() => setAssumption('inflation', plan.inflationReference!.previousValue)}>Undo Reference</Button></> : <Button variant="outline" onClick={() => setPlan(current => { const result = applyInflationReference(current.assumptions.inflation); return { ...current, assumptions: { ...current.assumptions, inflation: result.value }, inflationReference: result.receipt }; })}>Use {inflationReferenceValue().toFixed(2)}% Historical Reference</Button>}
-            </details>
+            <div className="assumption-shortcut"><Button variant="outline" onClick={() => setPlan(current => { const result = applyInflationReference(current.assumptions.inflation); return { ...current, assumptions: { ...current.assumptions, inflation: result.value }, inflationReference: result.receipt }; })}>Use {inflationReferenceValue().toFixed(2)}% Historical Inflation</Button><small>2004–2024 · historical, not a forecast</small>{canUndoInflationReference(plan.assumptions.inflation, plan.inflationReference)&&<Button variant="ghost" onClick={()=>setAssumption('inflation',plan.inflationReference!.previousValue)}>Undo Reference</Button>}</div>
             <Field label="Return before retirement" value={plan.assumptions.preRetirementReturn} onChange={(value) => setAssumption("preRetirementReturn", value)} suffix="%" step={0.1} max={30} />
+            {returnShortcut('preRetirementReturn')}
             <Field label="Return in retirement" value={plan.assumptions.retirementReturn} onChange={(value) => setAssumption("retirementReturn", value)} suffix="%" step={0.1} max={30} />
+            {returnShortcut('retirementReturn')}
             <Field label="Cash interest rate" value={plan.assumptions.cashReturn ?? 0} onChange={(value) => setAssumption("cashReturn", value)} suffix="%" step={0.1} max={30} help="Cash uses this separate rate, with interest included in ordinary income. Simulated market returns do not apply to cash." />
-            <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" suffix="/ year" step={1000} help="Excludes healthcare, housing tax/insurance, debts, and recurring costs entered elsewhere." />
+            {returnShortcut('cashReturn')}
+            <p className="field-help">Everyday spending is managed in Retirement Budget.</p>
           </div>
         </Panel>
       </div>
+      <details className="panel budget-flow"><summary>Monthly Timeline & Retirement Dates</summary><p className="field-help">Opening balances are as of January 1. Retirement months stop pay and change assigned bills.</p><div className="budget-fields"><label className="budget-field">Opening-Balance Year<Input aria-label="Opening-Balance Year" type="number" min="2026" max="2100" value={plan.budget.timeline?.startYear??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,startYear:e.target.value===''?null:+e.target.value}}}))}/></label>{(['you',...(plan.household.maritalStatus==='married'?['partner']:[])] as const).map(owner=><label className="budget-field" key={owner}>{owner==='you'?'Your Retirement Month':'Partner Retirement Month'}<Input aria-label={owner==='you'?'Your Retirement Month':'Partner Retirement Month'} type="month" value={plan.budget.timeline?.[owner==='you'?'retirementMonthYou':'retirementMonthPartner']??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{startYear:null,retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,[owner==='you'?'retirementMonthYou':'retirementMonthPartner']:e.target.value}}}))}/></label>)}</div></details>
+      <PayrollEditor budget={plan.budget} accounts={plan.accounts} married={plan.household.maritalStatus==='married'} onChange={budget=>setPlan(p=>({...p,budget}))}/>
     </>
   );
 
@@ -1011,7 +1048,7 @@ export default function HomePage() {
       <div className="two-column">
         <Panel title="Baseline Spending" eyebrow="RETIREMENT">
           <div className="form-grid single">
-            <Field label="Annual retirement spending" value={plan.assumptions.annualSpending} onChange={(value) => setAssumption("annualSpending", value)} prefix="$" suffix="/ year" step={1000} />
+            <p className="field-help">Everyday spending is managed in Retirement Budget.</p>
             <p className="panel-copy">Enter normal living expenses here. Healthcare, property tax, home insurance, debts, and the large recurring costs below are added separately.</p>
           </div>
         </Panel>
@@ -2184,6 +2221,7 @@ export default function HomePage() {
   const renderData = () => (
     <>
       <SectionHeading title="Data & Privacy" description="Start here: choose whether this browser should save your plan before entering financial details." />
+      <Panel title="Explore or Start Fresh" eyebrow="YOUR PLAN"><p className="panel-copy">Load fictional example data to explore the planner, or start a new blank plan.</p><div className="budget-actions"><Button onClick={()=>requestReplacement('sample')}>Load Sample Plan</Button>{(!isBlankPlan(plan)||vaultStatus!=='off')&&<Button variant="outline" onClick={()=>requestReplacement('new')}>Create New Plan</Button>}</div></Panel>
       <div className="privacy-banner">
         <ShieldCheck />
         <div>
@@ -2266,8 +2304,8 @@ export default function HomePage() {
   );
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
-    ? <BudgetEditor benefits={plan.income} onBenefitChange={updateIncome} accounts={plan.accounts} household={plan.household} budget={plan.budget} onChange={budget => setPlan(current => ({ ...current, budget }))} retirement={activeSection === "retirementBudget"} married={plan.household.maritalStatus === "married"} legacyAnnual={plan.assumptions.annualSpending} linkedAnnual={{ housing: propertyTaxAnnual(plan) + homeInsuranceAnnual(plan) + mortgageAncillaryAnnual(plan), debt: debtPayoffSchedule(plan).slice(1, 13).reduce((sum, m) => sum + m.principalPaid + m.interestPaid, 0), health: plan.household.currentAge < 65 ? plan.healthcare.preMedicareAnnual : plan.healthcare.medicareAnnual, timed:plan.recurringCosts.filter(c=>plan.household.currentAge>=c.startAge&&plan.household.currentAge<=c.endAge).reduce((n,c)=>n+c.annualAmount,0) }} />
-    : activeSection === "scenarios" ? <ScenarioLaboratory plan={plan} onChange={setPlan}/> : activeSection === "overview" ? (plan.laboratory?.settings.enabled ? <div className="budget-flow"><div className="section-heading"><h1>Plan Summary</h1><p>Monthly budget and funding model selected in Scenario Laboratory.</p></div><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    ? <CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>
+    : activeSection === "scenarios" ? <ScenarioLaboratory plan={plan} onChange={setPlan}/> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><SummaryCashFlow key={planEpoch} plan={plan}/>{plan.laboratory?.settings.enabled ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "spending" ? renderSpending() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>
@@ -2338,6 +2376,7 @@ export default function HomePage() {
           </footer>
         </SidebarInset>
       </SidebarProvider>
+      <Dialog open={!!replaceAction} onOpenChange={open=>{if(!open)setReplaceAction(null);}}><DialogContent><DialogHeader><DialogTitle>{replaceAction==='new'?'Create New Plan?':'Replace with Sample Plan?'}</DialogTitle><DialogDescription>All current plan data and the saved local vault will be erased. Download your current plan first if you want to keep it. The replacement starts without a saved vault.</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={exportData}>Download Current Plan</Button><Button variant="outline" onClick={()=>setReplaceAction(null)}>Cancel</Button><Button variant="destructive" onClick={()=>{if(replaceAction)replacePlan(replaceAction);}}>Erase and {replaceAction==='new'?'Create New Plan':'Load Sample'}</Button></DialogFooter></DialogContent></Dialog>
       <Dialog open={vaultOpen} onOpenChange={setVaultOpen}>
         <DialogContent>
           <DialogHeader>

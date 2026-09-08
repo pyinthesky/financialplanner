@@ -1,0 +1,491 @@
+{
+  "schemaVersion": 2,
+  "budget": {
+    "version": 1,
+    "presentation": "category",
+    "retirementSpendingSource": "worksheet",
+    "reviewed": true,
+    "timeline": {
+      "startYear": 2026,
+      "retirementMonthYou": "2028-01",
+      "retirementMonthPartner": "2030-01"
+    },
+    "pay": [
+      {
+        "id": "pay-you",
+        "name": "Your Take-Home Pay",
+        "owner": "you",
+        "amount": 6000,
+        "frequency": "semimonthly",
+        "nextPayDate": "2026-01-15",
+        "payroll": {
+          "gross": 8500,
+          "taxableWages": 8000,
+          "incomeTaxWithheld": 1500,
+          "otherDeductions": 500,
+          "employeeSavings": 500,
+          "employerSavings": 0,
+          "accountId": "traditional-you"
+        }
+      },
+      {
+        "id": "pay-partner",
+        "name": "Partner Take-Home Pay",
+        "owner": "partner",
+        "amount": 4500,
+        "frequency": "semimonthly",
+        "nextPayDate": "2026-01-15",
+        "payroll": {
+          "gross": 6500,
+          "taxableWages": 6000,
+          "incomeTaxWithheld": 1200,
+          "otherDeductions": 400,
+          "employeeSavings": 400,
+          "employerSavings": 0,
+          "accountId": "traditional-partner"
+        }
+      }
+    ],
+    "savings": [
+      {
+        "id": "save",
+        "name": "Brokerage Saving",
+        "accountId": "taxable",
+        "amount": 2500,
+        "frequency": "monthly",
+        "owner": "household"
+      }
+    ],
+    "lines": [
+      {
+        "id": "home",
+        "name": "Home Maintenance",
+        "category": "Housing",
+        "amount": 700,
+        "frequency": "monthly",
+        "essential": true,
+        "flexibility": "fixed",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "continue",
+          "amount": null,
+          "reason": ""
+        }
+      },
+      {
+        "id": "utilities",
+        "name": "Utilities",
+        "category": "Utilities",
+        "amount": 500,
+        "frequency": "monthly",
+        "essential": true,
+        "flexibility": "fixed",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "replace",
+          "amount": 425,
+          "reason": ""
+        }
+      },
+      {
+        "id": "food",
+        "name": "Groceries",
+        "category": "Food",
+        "amount": 1200,
+        "frequency": "monthly",
+        "essential": true,
+        "flexibility": "fixed",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "percent",
+          "amount": -10,
+          "reason": ""
+        }
+      },
+      {
+        "id": "dining",
+        "name": "Dining Out",
+        "category": "Food",
+        "amount": 500,
+        "frequency": "monthly",
+        "essential": false,
+        "flexibility": "flexible",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "replace",
+          "amount": 700,
+          "reason": ""
+        }
+      },
+      {
+        "id": "transport",
+        "name": "Transportation",
+        "category": "Transport",
+        "amount": 1000,
+        "frequency": "monthly",
+        "essential": true,
+        "flexibility": "fixed",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "percent",
+          "amount": -30,
+          "reason": ""
+        }
+      },
+      {
+        "id": "health",
+        "name": "Current Healthcare",
+        "category": "Health",
+        "amount": 400,
+        "frequency": "monthly",
+        "essential": true,
+        "flexibility": "fixed",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "stop",
+          "amount": null,
+          "reason": ""
+        }
+      },
+      {
+        "id": "travel",
+        "name": "Travel",
+        "category": "Travel & Leisure",
+        "amount": 1000,
+        "frequency": "monthly",
+        "essential": false,
+        "flexibility": "flexible",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "replace",
+          "amount": 2000,
+          "reason": ""
+        }
+      },
+      {
+        "id": "fitness",
+        "name": "Retirement Fitness",
+        "category": "Health",
+        "amount": 0,
+        "frequency": "monthly",
+        "essential": false,
+        "flexibility": "flexible",
+        "owner": "household",
+        "nextDueDate": "",
+        "endDate": "",
+        "retirement": {
+          "rule": "retirementOnly",
+          "amount": 300,
+          "reason": ""
+        }
+      }
+    ]
+  },
+  "household": {
+    "maritalStatus": "married",
+    "filingStatus": "marriedJoint",
+    "marriedFilingSeparatelyLivedApart": false,
+    "currentAge": 60,
+    "birthYear": 1966,
+    "partnerAge": 58,
+    "partnerBirthYear": 1968,
+    "retirementAge": 62,
+    "partnerRetirementAge": 62,
+    "planToAge": 95,
+    "state": "VA"
+  },
+  "assumptions": {
+    "annualSpending": 0,
+    "inflation": 2.5,
+    "preRetirementReturn": 6,
+    "retirementReturn": 5,
+    "cashReturn": 3,
+    "stateEffectiveTaxRate": 4.5,
+    "capitalGainsRate": 15,
+    "taxableGainFraction": 40,
+    "targetOrdinaryIncome": 100000,
+    "taxExemptInterest": 0
+  },
+  "qcdPlanning": {
+    "annualGiftYou": 0,
+    "annualGiftPartner": 0,
+    "unusedDeductibleContributionOffsetYou": 0,
+    "unusedDeductibleContributionOffsetPartner": 0
+  },
+  "earlyWithdrawalPlanning": {
+    "annualConfirmedExceptionYou": 0,
+    "annualConfirmedExceptionPartner": 0
+  },
+  "rothConversionPlanning": {
+    "baselineGrossOrdinaryIncome": 50000,
+    "taxableConversionAmount": 20000,
+    "targetBracketRate": 22,
+    "annualConversionYou": 12000,
+    "startAgeYou": 62,
+    "endAgeYou": 66,
+    "annualConversionPartner": 0,
+    "startAgePartner": 0,
+    "endAgePartner": 0
+  },
+  "medicareIrmaaPlanning": {
+    "magi2024": 220000,
+    "filingCategory": "marriedJoint",
+    "partBEnrollees": 2,
+    "partDEnrollees": 2
+  },
+  "acaPlanning": {
+    "householdMagi": 60000,
+    "taxFamilySize": 2,
+    "location": "contiguous",
+    "annualEnrollmentPremium": 18000,
+    "annualBenchmarkPremium": 20000
+  },
+  "capitalGainsPlanning": {
+    "grossOrdinaryIncome": 50000,
+    "netLongTermCapitalGain": 20000,
+    "modifiedAdjustedGrossIncome": 70000,
+    "netInvestmentIncome": 20000
+  },
+  "housing": {
+    "propertyTaxMode": "annual",
+    "annualPropertyTax": 8000,
+    "homeValue": 850000,
+    "assessedPercent": 100,
+    "millRate": 10,
+    "annualInsurance": 2800,
+    "includeInNetWorth": true,
+    "payoffMortgageAtRetirement": false,
+    "statement": {
+      "enabled": true,
+      "debtId": "mortgage",
+      "total": 3100,
+      "principalInterest": 2200,
+      "propertyTax": 666.67,
+      "insurance": 233.33,
+      "mortgageInsurance": 0,
+      "otherEscrow": 0
+    }
+  },
+  "healthcare": {
+    "preMedicareAnnual": 18000,
+    "medicareAnnual": 14000,
+    "healthInflation": 5,
+    "longTermCareAnnual": 90000,
+    "longTermCareStartAge": 84,
+    "longTermCareYears": 3
+  },
+  "debtStrategy": {
+    "method": "snowball",
+    "extraMonthlyPayment": 750
+  },
+  "accounts": [
+    {
+      "id": "cash",
+      "name": "Cash Reserve",
+      "kind": "cash",
+      "owner": "joint",
+      "balance": 150000,
+      "annualContribution": 0,
+      "qcdEligibleIra": false
+    },
+    {
+      "id": "taxable",
+      "name": "Joint Brokerage",
+      "kind": "taxable",
+      "owner": "joint",
+      "balance": 600000,
+      "costBasis": 400000,
+      "annualContribution": 0,
+      "qcdEligibleIra": false
+    },
+    {
+      "id": "traditional-you",
+      "name": "401(k)",
+      "kind": "traditional",
+      "owner": "you",
+      "balance": 800000,
+      "annualContribution": 0,
+      "conversionEligiblePretax": true,
+      "qcdEligibleIra": false
+    },
+    {
+      "id": "traditional-partner",
+      "name": "403(b)",
+      "kind": "traditional",
+      "owner": "partner",
+      "balance": 500000,
+      "annualContribution": 0,
+      "conversionEligiblePretax": true,
+      "qcdEligibleIra": false
+    },
+    {
+      "id": "roth-you",
+      "name": "Roth IRA",
+      "kind": "roth",
+      "owner": "you",
+      "balance": 175000,
+      "annualContribution": 0,
+      "rothQualifiedFromYear": 2015,
+      "qcdEligibleIra": false
+    },
+    {
+      "id": "hsa",
+      "name": "HSA",
+      "kind": "hsa",
+      "owner": "you",
+      "balance": 50000,
+      "annualContribution": 0,
+      "qcdEligibleIra": false
+    }
+  ],
+  "income": [
+    {
+      "id": "pension",
+      "name": "Pension",
+      "owner": "you",
+      "kind": "pension",
+      "startAge": 65,
+      "annualAmount": 18000,
+      "cola": 2,
+      "survivorPercent": 50,
+      "withholdingPercent": 10
+    },
+    {
+      "id": "ss-you",
+      "name": "Your Social Security",
+      "owner": "you",
+      "kind": "socialSecurity",
+      "startAge": 67,
+      "annualAmount": 36000,
+      "cola": 2.5,
+      "survivorPercent": 100,
+      "withholdingPercent": 10
+    },
+    {
+      "id": "ss-partner",
+      "name": "Partner Social Security",
+      "owner": "partner",
+      "kind": "socialSecurity",
+      "startAge": 67,
+      "annualAmount": 30000,
+      "cola": 2.5,
+      "survivorPercent": 100,
+      "withholdingPercent": 10
+    }
+  ],
+  "debts": [
+    {
+      "id": "card",
+      "name": "Credit Card",
+      "kind": "creditCard",
+      "balance": 10000,
+      "interestRate": 19,
+      "minimumPayment": 350
+    },
+    {
+      "id": "auto",
+      "name": "Auto Loan",
+      "kind": "auto",
+      "balance": 24000,
+      "interestRate": 5,
+      "minimumPayment": 500
+    },
+    {
+      "id": "mortgage",
+      "name": "Mortgage",
+      "kind": "mortgage",
+      "balance": 300000,
+      "interestRate": 3.25,
+      "minimumPayment": 2200
+    }
+  ],
+  "recurringCosts": [
+    {
+      "id": "education",
+      "name": "Education Support",
+      "annualAmount": 18000,
+      "startAge": 60,
+      "endAge": 63,
+      "inflationLinked": true
+    }
+  ],
+  "laboratory": {
+    "version": 1,
+    "settings": {
+      "enabled": true,
+      "cashCoverageMonths": 12,
+      "dependableIncomeMonthly": null,
+      "dependableIncomeSource": "benefits",
+      "reserveExtra": 20000,
+      "refillCash": true,
+      "guardrailFloor": 7000,
+      "discretionaryCutPercent": 20,
+      "legacyTarget": 1000000,
+      "legacyRealDollars": true
+    },
+    "simulation": {
+      "mean": 5,
+      "volatility": 12,
+      "fee": 0.25,
+      "samples": 100,
+      "seed": 20260908
+    },
+    "events": [
+      {
+        "id": "celebration",
+        "name": "Family Celebration",
+        "month": "2032-06",
+        "kind": "expense",
+        "amount": 25000,
+        "taxableAmount": 0,
+        "confirmedCashTreatment": true
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "demo-retire-later",
+        "name": "Work One More Year",
+        "baseline": "{\"acaPlanning\":{\"annualBenchmarkPremium\":20000,\"annualEnrollmentPremium\":18000,\"householdMagi\":60000,\"location\":\"contiguous\",\"taxFamilySize\":2},\"accounts\":[{\"annualContribution\":0,\"balance\":150000,\"id\":\"cash\",\"kind\":\"cash\",\"name\":\"Cash Reserve\",\"owner\":\"joint\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":600000,\"costBasis\":400000,\"id\":\"taxable\",\"kind\":\"taxable\",\"name\":\"Joint Brokerage\",\"owner\":\"joint\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":800000,\"conversionEligiblePretax\":true,\"id\":\"traditional-you\",\"kind\":\"traditional\",\"name\":\"401(k)\",\"owner\":\"you\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":500000,\"conversionEligiblePretax\":true,\"id\":\"traditional-partner\",\"kind\":\"traditional\",\"name\":\"403(b)\",\"owner\":\"partner\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":175000,\"id\":\"roth-you\",\"kind\":\"roth\",\"name\":\"Roth IRA\",\"owner\":\"you\",\"qcdEligibleIra\":false,\"rothQualifiedFromYear\":2015},{\"annualContribution\":0,\"balance\":50000,\"id\":\"hsa\",\"kind\":\"hsa\",\"name\":\"HSA\",\"owner\":\"you\",\"qcdEligibleIra\":false}],\"assumptions\":{\"annualSpending\":0,\"capitalGainsRate\":15,\"cashReturn\":3,\"inflation\":2.5,\"preRetirementReturn\":6,\"retirementReturn\":5,\"stateEffectiveTaxRate\":4.5,\"targetOrdinaryIncome\":100000,\"taxExemptInterest\":0,\"taxableGainFraction\":40},\"budget\":{\"lines\":[{\"amount\":700,\"category\":\"Housing\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"home\",\"name\":\"Home Maintenance\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":null,\"reason\":\"\",\"rule\":\"continue\"}},{\"amount\":500,\"category\":\"Utilities\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"utilities\",\"name\":\"Utilities\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":425,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":1200,\"category\":\"Food\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"food\",\"name\":\"Groceries\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":-10,\"reason\":\"\",\"rule\":\"percent\"}},{\"amount\":500,\"category\":\"Food\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"dining\",\"name\":\"Dining Out\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":700,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":1000,\"category\":\"Transport\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"transport\",\"name\":\"Transportation\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":-30,\"reason\":\"\",\"rule\":\"percent\"}},{\"amount\":400,\"category\":\"Health\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"health\",\"name\":\"Current Healthcare\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":null,\"reason\":\"\",\"rule\":\"stop\"}},{\"amount\":1000,\"category\":\"Travel & Leisure\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"travel\",\"name\":\"Travel\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":2000,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":0,\"category\":\"Health\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"fitness\",\"name\":\"Retirement Fitness\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":300,\"reason\":\"\",\"rule\":\"retirementOnly\"}}],\"pay\":[{\"amount\":6000,\"frequency\":\"semimonthly\",\"id\":\"pay-you\",\"name\":\"Your Take-Home Pay\",\"nextPayDate\":\"2026-01-15\",\"owner\":\"you\",\"payroll\":{\"accountId\":\"traditional-you\",\"employeeSavings\":500,\"employerSavings\":0,\"gross\":8500,\"incomeTaxWithheld\":1500,\"otherDeductions\":500,\"taxableWages\":8000}},{\"amount\":4500,\"frequency\":\"semimonthly\",\"id\":\"pay-partner\",\"name\":\"Partner Take-Home Pay\",\"nextPayDate\":\"2026-01-15\",\"owner\":\"partner\",\"payroll\":{\"accountId\":\"traditional-partner\",\"employeeSavings\":400,\"employerSavings\":0,\"gross\":6500,\"incomeTaxWithheld\":1200,\"otherDeductions\":400,\"taxableWages\":6000}}],\"presentation\":\"category\",\"retirementSpendingSource\":\"worksheet\",\"reviewed\":true,\"savings\":[{\"accountId\":\"taxable\",\"amount\":2500,\"frequency\":\"monthly\",\"id\":\"save\",\"name\":\"Brokerage Saving\",\"owner\":\"household\"}],\"timeline\":{\"retirementMonthPartner\":\"2030-01\",\"retirementMonthYou\":\"2028-01\",\"startYear\":2026},\"version\":1},\"capitalGainsPlanning\":{\"grossOrdinaryIncome\":50000,\"modifiedAdjustedGrossIncome\":70000,\"netInvestmentIncome\":20000,\"netLongTermCapitalGain\":20000},\"debtStrategy\":{\"extraMonthlyPayment\":750,\"method\":\"snowball\"},\"debts\":[{\"balance\":10000,\"id\":\"card\",\"interestRate\":19,\"kind\":\"creditCard\",\"minimumPayment\":350,\"name\":\"Credit Card\"},{\"balance\":24000,\"id\":\"auto\",\"interestRate\":5,\"kind\":\"auto\",\"minimumPayment\":500,\"name\":\"Auto Loan\"},{\"balance\":300000,\"id\":\"mortgage\",\"interestRate\":3.25,\"kind\":\"mortgage\",\"minimumPayment\":2200,\"name\":\"Mortgage\"}],\"earlyWithdrawalPlanning\":{\"annualConfirmedExceptionPartner\":0,\"annualConfirmedExceptionYou\":0},\"healthcare\":{\"healthInflation\":5,\"longTermCareAnnual\":90000,\"longTermCareStartAge\":84,\"longTermCareYears\":3,\"medicareAnnual\":14000,\"preMedicareAnnual\":18000},\"household\":{\"birthYear\":1966,\"currentAge\":60,\"filingStatus\":\"marriedJoint\",\"maritalStatus\":\"married\",\"marriedFilingSeparatelyLivedApart\":false,\"partnerAge\":58,\"partnerBirthYear\":1968,\"partnerRetirementAge\":62,\"planToAge\":95,\"retirementAge\":62,\"state\":\"VA\"},\"housing\":{\"annualInsurance\":2800,\"annualPropertyTax\":8000,\"assessedPercent\":100,\"homeValue\":850000,\"includeInNetWorth\":true,\"millRate\":10,\"payoffMortgageAtRetirement\":false,\"propertyTaxMode\":\"annual\",\"statement\":{\"debtId\":\"mortgage\",\"enabled\":true,\"insurance\":233.33,\"mortgageInsurance\":0,\"otherEscrow\":0,\"principalInterest\":2200,\"propertyTax\":666.67,\"total\":3100}},\"income\":[{\"annualAmount\":18000,\"cola\":2,\"id\":\"pension\",\"kind\":\"pension\",\"name\":\"Pension\",\"owner\":\"you\",\"startAge\":65,\"survivorPercent\":50,\"withholdingPercent\":10},{\"annualAmount\":36000,\"cola\":2.5,\"id\":\"ss-you\",\"kind\":\"socialSecurity\",\"name\":\"Your Social Security\",\"owner\":\"you\",\"startAge\":67,\"survivorPercent\":100,\"withholdingPercent\":10},{\"annualAmount\":30000,\"cola\":2.5,\"id\":\"ss-partner\",\"kind\":\"socialSecurity\",\"name\":\"Partner Social Security\",\"owner\":\"partner\",\"startAge\":67,\"survivorPercent\":100,\"withholdingPercent\":10}],\"laboratory\":{\"events\":[{\"amount\":25000,\"confirmedCashTreatment\":true,\"id\":\"celebration\",\"kind\":\"expense\",\"month\":\"2032-06\",\"name\":\"Family Celebration\",\"taxableAmount\":0}],\"scenarios\":[],\"settings\":{\"cashCoverageMonths\":12,\"dependableIncomeMonthly\":null,\"dependableIncomeSource\":\"benefits\",\"discretionaryCutPercent\":20,\"enabled\":true,\"guardrailFloor\":7000,\"legacyRealDollars\":true,\"legacyTarget\":1000000,\"refillCash\":true,\"reserveExtra\":20000},\"version\":1},\"medicareIrmaaPlanning\":{\"filingCategory\":\"marriedJoint\",\"magi2024\":220000,\"partBEnrollees\":2,\"partDEnrollees\":2},\"qcdPlanning\":{\"annualGiftPartner\":0,\"annualGiftYou\":0,\"unusedDeductibleContributionOffsetPartner\":0,\"unusedDeductibleContributionOffsetYou\":0},\"recurringCosts\":[{\"annualAmount\":18000,\"endAge\":63,\"id\":\"education\",\"inflationLinked\":true,\"name\":\"Education Support\",\"startAge\":60}],\"rothConversionPlanning\":{\"annualConversionPartner\":0,\"annualConversionYou\":12000,\"baselineGrossOrdinaryIncome\":50000,\"endAgePartner\":0,\"endAgeYou\":66,\"startAgePartner\":0,\"startAgeYou\":62,\"targetBracketRate\":22,\"taxableConversionAmount\":20000},\"schemaVersion\":2}",
+        "overrides": {
+          "retirementMonthYou": "2029-01",
+          "retirementMonthPartner": "2031-01"
+        }
+      },
+      {
+        "id": "demo-spend-less",
+        "name": "Trim Everyday Spending by 10%",
+        "baseline": "{\"acaPlanning\":{\"annualBenchmarkPremium\":20000,\"annualEnrollmentPremium\":18000,\"householdMagi\":60000,\"location\":\"contiguous\",\"taxFamilySize\":2},\"accounts\":[{\"annualContribution\":0,\"balance\":150000,\"id\":\"cash\",\"kind\":\"cash\",\"name\":\"Cash Reserve\",\"owner\":\"joint\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":600000,\"costBasis\":400000,\"id\":\"taxable\",\"kind\":\"taxable\",\"name\":\"Joint Brokerage\",\"owner\":\"joint\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":800000,\"conversionEligiblePretax\":true,\"id\":\"traditional-you\",\"kind\":\"traditional\",\"name\":\"401(k)\",\"owner\":\"you\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":500000,\"conversionEligiblePretax\":true,\"id\":\"traditional-partner\",\"kind\":\"traditional\",\"name\":\"403(b)\",\"owner\":\"partner\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":175000,\"id\":\"roth-you\",\"kind\":\"roth\",\"name\":\"Roth IRA\",\"owner\":\"you\",\"qcdEligibleIra\":false,\"rothQualifiedFromYear\":2015},{\"annualContribution\":0,\"balance\":50000,\"id\":\"hsa\",\"kind\":\"hsa\",\"name\":\"HSA\",\"owner\":\"you\",\"qcdEligibleIra\":false}],\"assumptions\":{\"annualSpending\":0,\"capitalGainsRate\":15,\"cashReturn\":3,\"inflation\":2.5,\"preRetirementReturn\":6,\"retirementReturn\":5,\"stateEffectiveTaxRate\":4.5,\"targetOrdinaryIncome\":100000,\"taxExemptInterest\":0,\"taxableGainFraction\":40},\"budget\":{\"lines\":[{\"amount\":700,\"category\":\"Housing\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"home\",\"name\":\"Home Maintenance\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":null,\"reason\":\"\",\"rule\":\"continue\"}},{\"amount\":500,\"category\":\"Utilities\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"utilities\",\"name\":\"Utilities\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":425,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":1200,\"category\":\"Food\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"food\",\"name\":\"Groceries\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":-10,\"reason\":\"\",\"rule\":\"percent\"}},{\"amount\":500,\"category\":\"Food\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"dining\",\"name\":\"Dining Out\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":700,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":1000,\"category\":\"Transport\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"transport\",\"name\":\"Transportation\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":-30,\"reason\":\"\",\"rule\":\"percent\"}},{\"amount\":400,\"category\":\"Health\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"health\",\"name\":\"Current Healthcare\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":null,\"reason\":\"\",\"rule\":\"stop\"}},{\"amount\":1000,\"category\":\"Travel & Leisure\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"travel\",\"name\":\"Travel\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":2000,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":0,\"category\":\"Health\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"fitness\",\"name\":\"Retirement Fitness\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":300,\"reason\":\"\",\"rule\":\"retirementOnly\"}}],\"pay\":[{\"amount\":6000,\"frequency\":\"semimonthly\",\"id\":\"pay-you\",\"name\":\"Your Take-Home Pay\",\"nextPayDate\":\"2026-01-15\",\"owner\":\"you\",\"payroll\":{\"accountId\":\"traditional-you\",\"employeeSavings\":500,\"employerSavings\":0,\"gross\":8500,\"incomeTaxWithheld\":1500,\"otherDeductions\":500,\"taxableWages\":8000}},{\"amount\":4500,\"frequency\":\"semimonthly\",\"id\":\"pay-partner\",\"name\":\"Partner Take-Home Pay\",\"nextPayDate\":\"2026-01-15\",\"owner\":\"partner\",\"payroll\":{\"accountId\":\"traditional-partner\",\"employeeSavings\":400,\"employerSavings\":0,\"gross\":6500,\"incomeTaxWithheld\":1200,\"otherDeductions\":400,\"taxableWages\":6000}}],\"presentation\":\"category\",\"retirementSpendingSource\":\"worksheet\",\"reviewed\":true,\"savings\":[{\"accountId\":\"taxable\",\"amount\":2500,\"frequency\":\"monthly\",\"id\":\"save\",\"name\":\"Brokerage Saving\",\"owner\":\"household\"}],\"timeline\":{\"retirementMonthPartner\":\"2030-01\",\"retirementMonthYou\":\"2028-01\",\"startYear\":2026},\"version\":1},\"capitalGainsPlanning\":{\"grossOrdinaryIncome\":50000,\"modifiedAdjustedGrossIncome\":70000,\"netInvestmentIncome\":20000,\"netLongTermCapitalGain\":20000},\"debtStrategy\":{\"extraMonthlyPayment\":750,\"method\":\"snowball\"},\"debts\":[{\"balance\":10000,\"id\":\"card\",\"interestRate\":19,\"kind\":\"creditCard\",\"minimumPayment\":350,\"name\":\"Credit Card\"},{\"balance\":24000,\"id\":\"auto\",\"interestRate\":5,\"kind\":\"auto\",\"minimumPayment\":500,\"name\":\"Auto Loan\"},{\"balance\":300000,\"id\":\"mortgage\",\"interestRate\":3.25,\"kind\":\"mortgage\",\"minimumPayment\":2200,\"name\":\"Mortgage\"}],\"earlyWithdrawalPlanning\":{\"annualConfirmedExceptionPartner\":0,\"annualConfirmedExceptionYou\":0},\"healthcare\":{\"healthInflation\":5,\"longTermCareAnnual\":90000,\"longTermCareStartAge\":84,\"longTermCareYears\":3,\"medicareAnnual\":14000,\"preMedicareAnnual\":18000},\"household\":{\"birthYear\":1966,\"currentAge\":60,\"filingStatus\":\"marriedJoint\",\"maritalStatus\":\"married\",\"marriedFilingSeparatelyLivedApart\":false,\"partnerAge\":58,\"partnerBirthYear\":1968,\"partnerRetirementAge\":62,\"planToAge\":95,\"retirementAge\":62,\"state\":\"VA\"},\"housing\":{\"annualInsurance\":2800,\"annualPropertyTax\":8000,\"assessedPercent\":100,\"homeValue\":850000,\"includeInNetWorth\":true,\"millRate\":10,\"payoffMortgageAtRetirement\":false,\"propertyTaxMode\":\"annual\",\"statement\":{\"debtId\":\"mortgage\",\"enabled\":true,\"insurance\":233.33,\"mortgageInsurance\":0,\"otherEscrow\":0,\"principalInterest\":2200,\"propertyTax\":666.67,\"total\":3100}},\"income\":[{\"annualAmount\":18000,\"cola\":2,\"id\":\"pension\",\"kind\":\"pension\",\"name\":\"Pension\",\"owner\":\"you\",\"startAge\":65,\"survivorPercent\":50,\"withholdingPercent\":10},{\"annualAmount\":36000,\"cola\":2.5,\"id\":\"ss-you\",\"kind\":\"socialSecurity\",\"name\":\"Your Social Security\",\"owner\":\"you\",\"startAge\":67,\"survivorPercent\":100,\"withholdingPercent\":10},{\"annualAmount\":30000,\"cola\":2.5,\"id\":\"ss-partner\",\"kind\":\"socialSecurity\",\"name\":\"Partner Social Security\",\"owner\":\"partner\",\"startAge\":67,\"survivorPercent\":100,\"withholdingPercent\":10}],\"laboratory\":{\"events\":[{\"amount\":25000,\"confirmedCashTreatment\":true,\"id\":\"celebration\",\"kind\":\"expense\",\"month\":\"2032-06\",\"name\":\"Family Celebration\",\"taxableAmount\":0}],\"scenarios\":[],\"settings\":{\"cashCoverageMonths\":12,\"dependableIncomeMonthly\":null,\"dependableIncomeSource\":\"benefits\",\"discretionaryCutPercent\":20,\"enabled\":true,\"guardrailFloor\":7000,\"legacyRealDollars\":true,\"legacyTarget\":1000000,\"refillCash\":true,\"reserveExtra\":20000},\"version\":1},\"medicareIrmaaPlanning\":{\"filingCategory\":\"marriedJoint\",\"magi2024\":220000,\"partBEnrollees\":2,\"partDEnrollees\":2},\"qcdPlanning\":{\"annualGiftPartner\":0,\"annualGiftYou\":0,\"unusedDeductibleContributionOffsetPartner\":0,\"unusedDeductibleContributionOffsetYou\":0},\"recurringCosts\":[{\"annualAmount\":18000,\"endAge\":63,\"id\":\"education\",\"inflationLinked\":true,\"name\":\"Education Support\",\"startAge\":60}],\"rothConversionPlanning\":{\"annualConversionPartner\":0,\"annualConversionYou\":12000,\"baselineGrossOrdinaryIncome\":50000,\"endAgePartner\":0,\"endAgeYou\":66,\"startAgePartner\":0,\"startAgeYou\":62,\"targetBracketRate\":22,\"taxableConversionAmount\":20000},\"schemaVersion\":2}",
+        "overrides": {
+          "spendingChangePercent": -10
+        }
+      },
+      {
+        "id": "demo-payoff",
+        "name": "Pay Off the Mortgage at Retirement",
+        "baseline": "{\"acaPlanning\":{\"annualBenchmarkPremium\":20000,\"annualEnrollmentPremium\":18000,\"householdMagi\":60000,\"location\":\"contiguous\",\"taxFamilySize\":2},\"accounts\":[{\"annualContribution\":0,\"balance\":150000,\"id\":\"cash\",\"kind\":\"cash\",\"name\":\"Cash Reserve\",\"owner\":\"joint\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":600000,\"costBasis\":400000,\"id\":\"taxable\",\"kind\":\"taxable\",\"name\":\"Joint Brokerage\",\"owner\":\"joint\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":800000,\"conversionEligiblePretax\":true,\"id\":\"traditional-you\",\"kind\":\"traditional\",\"name\":\"401(k)\",\"owner\":\"you\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":500000,\"conversionEligiblePretax\":true,\"id\":\"traditional-partner\",\"kind\":\"traditional\",\"name\":\"403(b)\",\"owner\":\"partner\",\"qcdEligibleIra\":false},{\"annualContribution\":0,\"balance\":175000,\"id\":\"roth-you\",\"kind\":\"roth\",\"name\":\"Roth IRA\",\"owner\":\"you\",\"qcdEligibleIra\":false,\"rothQualifiedFromYear\":2015},{\"annualContribution\":0,\"balance\":50000,\"id\":\"hsa\",\"kind\":\"hsa\",\"name\":\"HSA\",\"owner\":\"you\",\"qcdEligibleIra\":false}],\"assumptions\":{\"annualSpending\":0,\"capitalGainsRate\":15,\"cashReturn\":3,\"inflation\":2.5,\"preRetirementReturn\":6,\"retirementReturn\":5,\"stateEffectiveTaxRate\":4.5,\"targetOrdinaryIncome\":100000,\"taxExemptInterest\":0,\"taxableGainFraction\":40},\"budget\":{\"lines\":[{\"amount\":700,\"category\":\"Housing\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"home\",\"name\":\"Home Maintenance\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":null,\"reason\":\"\",\"rule\":\"continue\"}},{\"amount\":500,\"category\":\"Utilities\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"utilities\",\"name\":\"Utilities\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":425,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":1200,\"category\":\"Food\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"food\",\"name\":\"Groceries\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":-10,\"reason\":\"\",\"rule\":\"percent\"}},{\"amount\":500,\"category\":\"Food\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"dining\",\"name\":\"Dining Out\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":700,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":1000,\"category\":\"Transport\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"transport\",\"name\":\"Transportation\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":-30,\"reason\":\"\",\"rule\":\"percent\"}},{\"amount\":400,\"category\":\"Health\",\"endDate\":\"\",\"essential\":true,\"flexibility\":\"fixed\",\"frequency\":\"monthly\",\"id\":\"health\",\"name\":\"Current Healthcare\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":null,\"reason\":\"\",\"rule\":\"stop\"}},{\"amount\":1000,\"category\":\"Travel & Leisure\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"travel\",\"name\":\"Travel\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":2000,\"reason\":\"\",\"rule\":\"replace\"}},{\"amount\":0,\"category\":\"Health\",\"endDate\":\"\",\"essential\":false,\"flexibility\":\"flexible\",\"frequency\":\"monthly\",\"id\":\"fitness\",\"name\":\"Retirement Fitness\",\"nextDueDate\":\"\",\"owner\":\"household\",\"retirement\":{\"amount\":300,\"reason\":\"\",\"rule\":\"retirementOnly\"}}],\"pay\":[{\"amount\":6000,\"frequency\":\"semimonthly\",\"id\":\"pay-you\",\"name\":\"Your Take-Home Pay\",\"nextPayDate\":\"2026-01-15\",\"owner\":\"you\",\"payroll\":{\"accountId\":\"traditional-you\",\"employeeSavings\":500,\"employerSavings\":0,\"gross\":8500,\"incomeTaxWithheld\":1500,\"otherDeductions\":500,\"taxableWages\":8000}},{\"amount\":4500,\"frequency\":\"semimonthly\",\"id\":\"pay-partner\",\"name\":\"Partner Take-Home Pay\",\"nextPayDate\":\"2026-01-15\",\"owner\":\"partner\",\"payroll\":{\"accountId\":\"traditional-partner\",\"employeeSavings\":400,\"employerSavings\":0,\"gross\":6500,\"incomeTaxWithheld\":1200,\"otherDeductions\":400,\"taxableWages\":6000}}],\"presentation\":\"category\",\"retirementSpendingSource\":\"worksheet\",\"reviewed\":true,\"savings\":[{\"accountId\":\"taxable\",\"amount\":2500,\"frequency\":\"monthly\",\"id\":\"save\",\"name\":\"Brokerage Saving\",\"owner\":\"household\"}],\"timeline\":{\"retirementMonthPartner\":\"2030-01\",\"retirementMonthYou\":\"2028-01\",\"startYear\":2026},\"version\":1},\"capitalGainsPlanning\":{\"grossOrdinaryIncome\":50000,\"modifiedAdjustedGrossIncome\":70000,\"netInvestmentIncome\":20000,\"netLongTermCapitalGain\":20000},\"debtStrategy\":{\"extraMonthlyPayment\":750,\"method\":\"snowball\"},\"debts\":[{\"balance\":10000,\"id\":\"card\",\"interestRate\":19,\"kind\":\"creditCard\",\"minimumPayment\":350,\"name\":\"Credit Card\"},{\"balance\":24000,\"id\":\"auto\",\"interestRate\":5,\"kind\":\"auto\",\"minimumPayment\":500,\"name\":\"Auto Loan\"},{\"balance\":300000,\"id\":\"mortgage\",\"interestRate\":3.25,\"kind\":\"mortgage\",\"minimumPayment\":2200,\"name\":\"Mortgage\"}],\"earlyWithdrawalPlanning\":{\"annualConfirmedExceptionPartner\":0,\"annualConfirmedExceptionYou\":0},\"healthcare\":{\"healthInflation\":5,\"longTermCareAnnual\":90000,\"longTermCareStartAge\":84,\"longTermCareYears\":3,\"medicareAnnual\":14000,\"preMedicareAnnual\":18000},\"household\":{\"birthYear\":1966,\"currentAge\":60,\"filingStatus\":\"marriedJoint\",\"maritalStatus\":\"married\",\"marriedFilingSeparatelyLivedApart\":false,\"partnerAge\":58,\"partnerBirthYear\":1968,\"partnerRetirementAge\":62,\"planToAge\":95,\"retirementAge\":62,\"state\":\"VA\"},\"housing\":{\"annualInsurance\":2800,\"annualPropertyTax\":8000,\"assessedPercent\":100,\"homeValue\":850000,\"includeInNetWorth\":true,\"millRate\":10,\"payoffMortgageAtRetirement\":false,\"propertyTaxMode\":\"annual\",\"statement\":{\"debtId\":\"mortgage\",\"enabled\":true,\"insurance\":233.33,\"mortgageInsurance\":0,\"otherEscrow\":0,\"principalInterest\":2200,\"propertyTax\":666.67,\"total\":3100}},\"income\":[{\"annualAmount\":18000,\"cola\":2,\"id\":\"pension\",\"kind\":\"pension\",\"name\":\"Pension\",\"owner\":\"you\",\"startAge\":65,\"survivorPercent\":50,\"withholdingPercent\":10},{\"annualAmount\":36000,\"cola\":2.5,\"id\":\"ss-you\",\"kind\":\"socialSecurity\",\"name\":\"Your Social Security\",\"owner\":\"you\",\"startAge\":67,\"survivorPercent\":100,\"withholdingPercent\":10},{\"annualAmount\":30000,\"cola\":2.5,\"id\":\"ss-partner\",\"kind\":\"socialSecurity\",\"name\":\"Partner Social Security\",\"owner\":\"partner\",\"startAge\":67,\"survivorPercent\":100,\"withholdingPercent\":10}],\"laboratory\":{\"events\":[{\"amount\":25000,\"confirmedCashTreatment\":true,\"id\":\"celebration\",\"kind\":\"expense\",\"month\":\"2032-06\",\"name\":\"Family Celebration\",\"taxableAmount\":0}],\"scenarios\":[],\"settings\":{\"cashCoverageMonths\":12,\"dependableIncomeMonthly\":null,\"dependableIncomeSource\":\"benefits\",\"discretionaryCutPercent\":20,\"enabled\":true,\"guardrailFloor\":7000,\"legacyRealDollars\":true,\"legacyTarget\":1000000,\"refillCash\":true,\"reserveExtra\":20000},\"version\":1},\"medicareIrmaaPlanning\":{\"filingCategory\":\"marriedJoint\",\"magi2024\":220000,\"partBEnrollees\":2,\"partDEnrollees\":2},\"qcdPlanning\":{\"annualGiftPartner\":0,\"annualGiftYou\":0,\"unusedDeductibleContributionOffsetPartner\":0,\"unusedDeductibleContributionOffsetYou\":0},\"recurringCosts\":[{\"annualAmount\":18000,\"endAge\":63,\"id\":\"education\",\"inflationLinked\":true,\"name\":\"Education Support\",\"startAge\":60}],\"rothConversionPlanning\":{\"annualConversionPartner\":0,\"annualConversionYou\":12000,\"baselineGrossOrdinaryIncome\":50000,\"endAgePartner\":0,\"endAgeYou\":66,\"startAgePartner\":0,\"startAgeYou\":62,\"targetBracketRate\":22,\"taxableConversionAmount\":20000},\"schemaVersion\":2}",
+        "overrides": {
+          "mortgagePayoff": {
+            "debtId": "mortgage",
+            "month": "2030-01",
+            "destination": "cash",
+            "accountId": ""
+          }
+        }
+      }
+    ]
+  }
+}

@@ -6,6 +6,9 @@ The live site is published at <https://pyinthesky.github.io/financialplanner/>. 
 
 ## What works today
 
+- Compact, expandable current/retirement budgets with editable bill names, timing controls, matching public references, and linked pay, benefits, housing, health and actual debt payments
+- Current / In Retirement Sankey switch in Plan Summary, using the monthly funding ledger; funded uses balance to sources and unpaid obligations remain visible
+- One-click fictional sample plan and confirmed Create New Plan, including cancellation of pending encrypted saves
 - Interactive annual retirement projection through age 120
 - Taxable, 401(k)/403(b)/traditional IRA, Roth, cash, and HSA account treatment
 - Pension and Social Security income streams with claiming ages and COLAs
@@ -61,7 +64,20 @@ The work is organized into bounded batches so each batch can ship independently.
 
 ### Priority delivery sequence
 
-The primary journey is **Current Budget → Retirement Budget → Scenarios → Plan Summary**, beginning with Data & Privacy and a shared household model. The detailed [Batch 5 plan](docs/batch-5-plan.md) is the canonical delivery contract: reconcile the existing engine first, build linked budgets, correct and expose debt-payment cascading, provide optional sourced assumptions, then ship meaningful scenario comparisons. Pull in specific Batch 3/4 benefit, health, and state-data dependencies when needed; do not imply they work merely because a scenario selector exists.
+The entry journey is **Data & Privacy → Household → Accounts → Benefits → Housing → Debts → Health → Current Budget → Retirement Budget → Taxes → Scenarios → Plan Summary**. Shared inputs flow into both budgets. The detailed [Batch 5 plan](docs/batch-5-plan.md) and [compact-budget revision](docs/compact-budget-round.md) describe the delivery contracts. Pull in specific Batch 3/4 benefit, health, and state-data dependencies when needed; do not imply they work merely because a scenario selector exists.
+
+### Compact budgets and Summary revision — September 8, 2026
+
+- [x] Safe Load Sample Plan / Create New Plan; no sample values appear until requested. Dirty plans require confirmation and offer an export. Replacement erases the current plan and local vault and invalidates queued/in-flight saves.
+- [x] Collapse bill categories, edit subcategory names and amounts inline, and open timing/settings from icons. Suggestions are view-only until edited. Imported breakdowns remain in exports but their editor is disabled; only parent totals count.
+- [x] Move pay into Household and source entry before budgets. Selected-month budgets link the actual debt cascade, surviving mortgage costs, benefits, healthcare and dated costs. Paid-off loans are omitted. Portfolio draws and tax settlement appear in the funding ledger rather than being treated as earnings.
+- [x] Remove duplicate annual retirement-spending inputs. Existing aggregate plans retain their amount until the user explicitly selects the retirement worksheet.
+- [x] Direct historical-inflation, 90/10, 70/30 and dated HYSA sample-average shortcuts with Undo. Inputs remain blank until edited or a reference is applied.
+- [x] Optional local-only ZIP plus a state dropdown. Automatic ZIP-to-jurisdiction/rate inference remains in Batch 4; the app does not guess local taxes from postal boundaries.
+- [x] Summary Current / In Retirement Sankeys, month selection, category uses and accessible numeric details. Monthly-engine requirements and unfunded obligations are explicit. Flows show net cash, exclude direct payroll investments/conversions/QCD transfers, and include the annual tax settlement in December.
+- [x] Fictional sample includes supported, fresh comparisons for later retirement, lower spending and funded mortgage payoff. Regenerate snapshots with `node --experimental-strip-types scripts/refresh-sample.mjs` after intentional sample changes.
+
+Reference methodology: inflation is `(313.689 / 188.9)^(1/20) - 1`, using BLS annual-average CPI-U for 2004–2024; it is not labeled a current rolling window. Portfolio shortcuts are the published **arithmetic calendar-year averages**, 11.1% for 90% stocks/10% bonds and 9.8% for 70% stocks/30% bonds, over 1928–2025 from [Vanguard's model-portfolio data](https://investor.vanguard.com/investor-resources-education/education/model-portfolio-allocation) and its [2026 chart](https://investor.vanguard.com/content/dam/retail/digital/en/data-viz/vanguard-range-of-calendar-year-returns-2026.svg). They are historical illustrations, not compound-growth forecasts or recommended expected returns. The cash shortcut is the equally weighted **two-bank sample APY**, `(3.40% + 3.75%) / 2 = 3.575%`, observed September 8, 2026 at [Marcus](https://www.marcus.com/us/en/savings/high-yield-savings) and [Bask Bank](https://baskbank.com/products/interest-savings-account); it is not a national HYSA market average. APYs are variable. The monthly engine needs a nominal annual rate, so the button applies `12 × ((1 + APY)^(1/12) - 1)`. These bundled references cause no runtime network request.
 
 Read [development state](docs/development-state.md) before resuming. Timed builds are disabled. Budget usability, source shortcuts, and mobile acceptance are core delivery requirements, not optional polish left at the end of the backlog.
 

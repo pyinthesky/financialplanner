@@ -68,6 +68,7 @@ export interface RecurringCost {
 }
 
 export interface PlannerData {
+  returnReferences?: Partial<Record<'preRetirementReturn'|'retirementReturn'|'cashReturn', import('./references.ts').ReturnReceipt>>;
   schemaVersion: 1 | 2;
   budget: BudgetData;
   laboratory?: Laboratory;
@@ -84,6 +85,7 @@ export interface PlannerData {
     partnerRetirementAge: number;
     planToAge: number;
     state: string;
+    zipCode?: string;
   };
   assumptions: {
     annualSpending: number;
