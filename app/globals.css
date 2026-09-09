@@ -874,3 +874,11 @@ button, input, select { font: inherit; }
 .refinance-table caption { text-align: left; margin-bottom: .5rem; font-weight: 600; }
 .refinance-result, .refinance-result > * { min-width: 0; max-width: 100%; }
 .refinance-panel button { white-space: normal; height: auto; min-height: 44px; }
+
+/* Always-open sections give a long, flat menu a calm reading rhythm. */
+.planner-navigation { min-width: 0; padding-bottom: .25rem; }
+.planner-nav-group { padding-block: .25rem; }
+.planner-nav-group + .planner-nav-group { margin-top: .45rem; padding-top: .45rem; border-top: 1px solid var(--sidebar-border); }
+.planner-navigation [data-sidebar="group-label"] { height: 1.6rem; font-size: .72rem; font-weight: 700; letter-spacing: .045em; color: #a9bad2; }
+.planner-navigation [data-sidebar="menu-button"] { height: auto; }
+.planner-navigation [data-sidebar="menu-button"] > span:first-of-type { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }

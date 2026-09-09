@@ -29,7 +29,7 @@ test("mobile navigation closes after selecting a planning section", () => {
   assert.match(page, /aria-current=\{activeSection === section\.id \? "page"/);
 });
 
-test("the privacy page starts the guided journey and plan summary ends it", () => {
+test("the privacy page starts the guided journey and summary follows plan entry", () => {
   const privacyPosition = page.indexOf('{ id: "data", label: "Data & Privacy"');
   const householdPosition = page.indexOf('{ id: "household", label: "Household"');
   const summaryPosition = page.indexOf('{ id: "overview", label: "Plan Summary"');

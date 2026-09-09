@@ -63,12 +63,19 @@ const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "debt", label: "Loans & Debts", icon: WalletCards },
   { id: "realEstate", label: "Real Estate", icon: Home },
   { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
-  { id: "enrollment", label: "Open Enrollment", icon: ShieldCheck },
+  { id: "taxes", label: "Taxes & Withdrawals", icon: Calculator },
   { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
   { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
-  { id: "taxes", label: "Taxes & Withdrawals", icon: Calculator },
-  { id: "scenarios", label: "Scenario Laboratory", icon: Activity },
   { id: "overview", label: "Plan Summary", icon: Activity },
+  { id: "scenarios", label: "Scenario Laboratory", icon: Activity },
+  { id: "enrollment", label: "Open Enrollment", icon: ShieldCheck },
+];
+
+const navigationGroups: { id: string; label: string | null; sections: SectionId[] }[] = [
+  { id: "privacy", label: null, sections: ["data"] },
+  { id: "plan", label: "Your Plan", sections: ["household", "portfolio", "income", "debt", "realEstate", "health", "taxes", "currentBudget", "retirementBudget"] },
+  { id: "results", label: "Results", sections: ["overview"] },
+  { id: "explore", label: "Explore", sections: ["scenarios", "enrollment"] },
 ];
 
 const portfolioChartConfig = {
@@ -186,8 +193,11 @@ function PlannerNavigation({ activeSection, onSelect, opportunities }: { opportu
   const { isMobile, setOpenMobile } = useSidebar();
 
   return (
-    <SidebarMenu>
-      {sections.map((section) => (
+    <nav aria-label="Planner Sections" className="planner-navigation">
+      {navigationGroups.map(group => <SidebarGroup key={group.id} className="planner-nav-group" aria-labelledby={group.label ? `planner-nav-${group.id}` : undefined}>
+      {group.label && <SidebarGroupLabel asChild><h2 id={`planner-nav-${group.id}`}>{group.label}</h2></SidebarGroupLabel>}
+      <SidebarGroupContent><SidebarMenu>
+      {group.sections.map(id => sections.find(section => section.id === id)!).map((section) => (
         <SidebarMenuItem key={section.id}>
           <SidebarMenuButton
             aria-label={section.label}
@@ -203,7 +213,9 @@ function PlannerNavigation({ activeSection, onSelect, opportunities }: { opportu
           </SidebarMenuButton>
         </SidebarMenuItem>
       ))}
-    </SidebarMenu>
+      </SidebarMenu></SidebarGroupContent>
+      </SidebarGroup>)}
+    </nav>
   );
 }
 
@@ -2341,12 +2353,7 @@ export default function HomePage() {
             </div>
           </SidebarHeader>
           <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>YOUR PLAN</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <PlannerNavigation opportunities={refinanceOpportunities(plan,rateSnapshot).length} activeSection={activeSection} onSelect={setActiveSection} />
-              </SidebarGroupContent>
-            </SidebarGroup>
+            <PlannerNavigation opportunities={refinanceOpportunities(plan,rateSnapshot).length} activeSection={activeSection} onSelect={setActiveSection} />
           </SidebarContent>
           <SidebarFooter>
             <div className="sidebar-privacy" data-save-state={saveStatus} role="status" aria-live="polite">

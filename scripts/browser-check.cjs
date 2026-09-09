@@ -34,6 +34,7 @@ const server = http.createServer((req, res) => {
         page.on('pageerror', e => errors.push(e.message));
         await page.goto('http://127.0.0.1:4173/financialplanner/');
         console.log(`Checking ${name} at ${width}px`);
+        let navigationChecked=false;
         const navigate = async label => {
           const nav = page.getByRole('button', { name: label, exact: true });
           // Initial React mounting can briefly precede navigation. Desktop has no drawer toggle.
@@ -43,6 +44,14 @@ const server = http.createServer((req, res) => {
             const drawer=page.locator('[data-mobile="true"][data-state="open"]');
             await drawer.waitFor({state:'visible'});
             await drawer.evaluate(async el=>{await Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{})));});
+          }
+          if(!navigationChecked){
+            const menu=page.getByRole('navigation',{name:'Planner Sections',exact:true});
+            assert.deepEqual(await menu.getByRole('heading').allTextContents(),['Your Plan','Results','Explore']);
+            assert.deepEqual(await menu.getByRole('button').evaluateAll(items=>items.map(el=>el.getAttribute('aria-label'))),['Data & Privacy','Household','Cash & Investments','Pensions & Social Security','Loans & Debts','Real Estate','Health & Long-Term Care','Taxes & Withdrawals','Current Budget','Retirement Budget','Plan Summary','Scenario Laboratory','Open Enrollment']);
+            assert.equal(await menu.locator('details, [aria-expanded]').count(),0,'Groups never require expanding');
+            await page.screenshot({path:path.join(out,`${name}-${width}-grouped-navigation.png`)});
+            navigationChecked=true;
           }
           await page.getByRole('button', { name: label, exact: true }).click();
           const heading = label === 'Household' ? 'Household & Assumptions' : label;

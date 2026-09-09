@@ -1,5 +1,8 @@
 # Open Retirement Planner
 
+**Navigation update — September 9:** The menu stays flat and always open. Data & Privacy stands alone; **Your Plan** groups household, accounts, benefits, debt, property, health, taxes and budgets; **Results** contains Plan Summary; **Explore** contains Scenario Laboratory and Open Enrollment. Subtle rules and bold headings separate sections, with wrapping labels and the existing mobile drawer behavior.
+
+
 **September 9 follow-up — connected refinancing:** Loans & Debts now shows live keep/refinance amounts, specific missing inputs and a remaining-debt chart. **Save Refinance Scenario** captures the current baseline and the offer, then **View Saved Refinance Scenario** opens its monthly results. The scenario replaces the opening-January debt terms, retains cascading extras and reconciled escrow, and charges upfront fees once (or finances them into principal). It does not silently replace the current plan. Rental-loan refinancing, mid-plan closing dates, changed escrow/PMI and combined refinance/home-move/payoff transactions remain excluded. [Calculation and test contract](docs/refinance-scenarios.md).
 
 
