@@ -1,5 +1,8 @@
 # Open Retirement Planner
 
+**September 9 follow-up — connected refinancing:** Loans & Debts now shows live keep/refinance amounts, specific missing inputs and a remaining-debt chart. **Save Refinance Scenario** captures the current baseline and the offer, then **View Saved Refinance Scenario** opens its monthly results. The scenario replaces the opening-January debt terms, retains cascading extras and reconciled escrow, and charges upfront fees once (or finances them into principal). It does not silently replace the current plan. Rental-loan refinancing, mid-plan closing dates, changed escrow/PMI and combined refinance/home-move/payoff transactions remain excluded. [Calculation and test contract](docs/refinance-scenarios.md).
+
+
 Free retirement planning that runs in your browser: no ads, marketing, tracking, accounts, names or email addresses.
 
 **[Open the planner](https://pyinthesky.github.io/financialplanner/)** · [Delivery roadmap](#delivery-roadmap) · [Calculation boundaries](#calculation-boundaries) · [Run locally](#run-locally)

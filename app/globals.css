@@ -863,3 +863,14 @@ button, input, select { font: inherit; }
   .accounts-table td[colspan] { grid-column: 1 / -1; display: block; }
   .accounts-table td[colspan]::before { content: none; }
 }
+
+/* Refinance comparison stays readable within a narrow loan card. */
+.refinance-loan { min-width: 0; padding-block: .75rem; border-top: 1px solid var(--border); }
+.refinance-loan > summary small { display: block; font-weight: 400; margin-top: .35rem; }
+.refinance-loan > :not(summary) { margin-top: .9rem; }
+.refinance-panel .refinance-table { width: 100%; table-layout: fixed; font-size: .85rem; }
+.refinance-table th, .refinance-table td { padding: .5rem .25rem; overflow-wrap: anywhere; text-align: right; }
+.refinance-table th:first-child { text-align: left; }
+.refinance-table caption { text-align: left; margin-bottom: .5rem; font-weight: 600; }
+.refinance-result, .refinance-result > * { min-width: 0; max-width: 100%; }
+.refinance-panel button { white-space: normal; height: auto; min-height: 44px; }

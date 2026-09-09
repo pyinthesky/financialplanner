@@ -282,7 +282,18 @@ const server = http.createServer((req, res) => {
         const refinance=page.locator('section').filter({has:page.getByRole('heading',{name:'Refinance Comparison',exact:true})}).last();
         await refinance.locator('summary').filter({hasText:/^Mortgage(?:\s|$)/}).first().click();
         for(const [label,value] of [['New Term / Years — Mortgage','15'],['Offered Rate / % — Mortgage','2'],['Closing Costs and Points — Mortgage','500'],['Holding Period / Months — Mortgage','60']])await page.getByLabel(label,{exact:true}).fill(value);
+        await refinance.getByText('Remaining Debt Chart',{exact:true}).first().click();
+        await refinance.getByRole('img',{name:'Keep Loan and Refinance Balances — Mortgage',exact:true}).waitFor();
+        const refinanceResults=refinance.getByLabel('Refinance Results — Mortgage',{exact:true});
+        const oldComparison=await refinanceResults.textContent();
+        await page.getByLabel('Offered Rate / % — Mortgage',{exact:true}).fill('3');
+        assert.notEqual(await refinanceResults.textContent(),oldComparison,'Quote edits update the comparison');
         await noOverflow('refinance comparison');
+        await refinance.getByRole('button',{name:'Save Refinance Scenario',exact:true}).first().click();
+        await refinance.getByRole('button',{name:'View Saved Refinance Scenario',exact:true}).click();
+        await page.getByRole('heading',{name:'Saved Refinance Offer',exact:true}).waitFor();
+        await page.getByRole('heading',{name:'Selected Scenario Results',exact:true}).waitFor();
+        await noOverflow('saved refinance scenario');
         await navigate('Real Estate');
         await page.getByRole('button',{name:'Add Rental Property',exact:true}).click();
         await page.getByLabel('Property Label',{exact:true}).last().fill('Synthetic Rental');

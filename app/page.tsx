@@ -321,6 +321,7 @@ export default function HomePage() {
   const [rateSnapshot,setRateSnapshot]=useState<RateSnapshot|null>(null);
   useEffect(()=>{fetch(new URL('mortgage-rates.json',document.baseURI)).then(r=>r.ok?r.json():null).then(s=>{if(s?.observed&&validSnapshot(s,new Date(s.observed+'T00:00:00Z'))&&Date.parse(s.observed)<=Date.now())setRateSnapshot(s);}).catch(()=>{});},[]);
   const [plan, setPlan] = useState<PlannerData>(DEFAULT_PLAN);
+  const [selectedScenarioId, setSelectedScenarioId] = useState('');
   const [activeSection, setActiveSection] = useState<SectionId>("data");
   const [vaultStatus, setVaultStatus] = useState<VaultStatus>("off");
   const [vaultOpen, setVaultOpen] = useState(false);
@@ -1378,7 +1379,7 @@ export default function HomePage() {
           </Table>
         </div>
       </Panel>
-      <Refinance plan={plan} onChange={setPlan} snapshot={rateSnapshot}/>
+      <Refinance plan={plan} onChange={setPlan} snapshot={rateSnapshot} onOpenScenario={id=>{setSelectedScenarioId(id);setActiveSection("scenarios");}}/>
     </>
   );
 
@@ -2324,7 +2325,7 @@ export default function HomePage() {
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
-    : activeSection === "enrollment" ? <OpenEnrollment plan={plan} onChange={setPlan}/> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    : activeSection === "enrollment" ? <OpenEnrollment plan={plan} onChange={setPlan}/> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan} initialSelected={selectedScenarioId}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>

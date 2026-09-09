@@ -1,3 +1,7 @@
+# Refinance Follow-up — September 9, 2026
+
+Connected the loan comparison to saved household scenarios. Read [the refinance contract](refinance-scenarios.md). The baseline remains unchanged; the new refinance override adjusts opening debt/P&I and reconciled escrow, and appends upfront fees once to January spending. Existing cascade settings remain. Rental financing, changed escrow/PMI and concurrent home-move/payoff transactions are excluded. Local validation: 206 tests, TypeScript and production build. The Pages browser gate now edits a quote and opens its saved monthly scenario at all six widths. Timed builds remain disabled.
+
 # Latest Handoff — September 9, 2026
 
 Implemented the current enrollment/household feedback. Read [the new contract](household-enrollment-round.md) and the README latest delivery before older handoffs below. Employer sharing is an allowlist, never raw-plan redaction. Payroll election previews apply per-paycheck snapshots; monthly allocation sums and employer Roth tax are reconciled. Education is a separate beneficiary-level projection; explicit budget provisions affect retirement cash, while education-only edits do not stale saved household scenarios. Keep new fields blank, keep raw plan compatibility, and retain source/eligibility boundaries. Timed feature builds remain disabled.

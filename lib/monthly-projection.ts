@@ -1,3 +1,4 @@
+import { refinanceScenarioPlan } from './refinance-scenario.ts';
 import { rentalIssues, rentalTotals } from './real-estate.ts';
 import { debtScenarioPlan } from './debt-scenario.ts';
 import { buildBudgetYear, type BudgetMonth } from './budget-calendar.ts';
@@ -50,13 +51,15 @@ const nonnegative = (v: number | undefined | null) => Math.max(0, v ?? 0);
  * estimated-payment compliance calculation. Missing payroll is a hard gate.
  */
 export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides = {}): MonthlyResult {
-  data = debtScenarioPlan(data, overrides);
+  const refinance = overrides.refinance ? refinanceScenarioPlan(data, overrides.refinance) : null;
+  data = debtScenarioPlan(refinance?.plan ?? data, overrides);
   const lab = data.laboratory ?? EMPTY_LAB;
   const settings = { ...lab.settings, ...Object.fromEntries(['cashCoverageMonths', 'guardrailFloor', 'discretionaryCutPercent'].filter(k => overrides[k as keyof ScenarioOverrides] !== undefined).map(k => [k, overrides[k as keyof ScenarioOverrides]])) } as typeof lab.settings;
   let budget;
   try { budget = normalizeBudget(data.budget); } catch { return { months:[], years:[], issues:['Correct invalid or negative budget inputs before projecting.'], supported:false, firstShortfall:null, legacyTarget:null, legacyGap:null }; }
   if (overrides.retirementMonthYou || overrides.retirementMonthPartner) budget.timeline = { startYear: budget.timeline?.startYear ?? null, retirementMonthYou: overrides.retirementMonthYou ?? budget.timeline?.retirementMonthYou ?? '', retirementMonthPartner: overrides.retirementMonthPartner ?? budget.timeline?.retirementMonthPartner ?? '' };
-  const issues = new Set<string>(rentalIssues(data));
+  const issues = new Set<string>([...rentalIssues(data), ...(refinance?.issues ?? [])]);
+  if (overrides.refinance && (overrides.homeMove || overrides.mortgagePayoff)) issues.add('Compare refinancing separately from a home move or lump-sum mortgage payoff.');
   const rental=rentalTotals(data);
   for(const pay of budget.pay) for(const allocation of pay.payroll?.allocations??[]) if(!data.accounts.some(a=>a.id===allocation.accountId&&a.kind===allocation.kind&&a.owner===pay.owner)) issues.add('Review payroll savings: account ownership or tax treatment no longer matches the saved allocation.');
   if(budget.lines.some(l=>budgetAllocation(l).overallocated||budgetAllocation(l,true).overallocated))issues.add('A bill breakdown exceeds its current or retirement envelope. Reconcile its total before comparing scenarios.');
@@ -100,7 +103,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
     if (m.missingAmounts) issues.add('Complete missing budget, pay and savings amounts, including explicit zeros.');
     for (const t of m.transfers) if (t.amount > 0 && !accountIds.includes(t.accountId)) issues.add('Assign every savings transfer to an existing account.');
   }
-  const events = overrides.events ?? lab.events;
+  const events = [...(overrides.events ?? lab.events), ...(refinance?.feeEvent ? [refinance.feeEvent] : [])];
   const finalMonth=`${startYear+yearsCount-1}-12`;
   for(const event of [payoff,homeMove,...events])if(event&&(event.month<`${startYear}-01`||event.month>finalMonth))issues.add('A dated event falls outside this projection horizon; change its date or extend the horizon before comparing.');
   for(const event of events)if(event.throughMonth&&(event.kind!=='expense'||event.throughMonth<event.month||!/^\d{4}-(0[1-9]|1[0-2])$/.test(event.throughMonth)))issues.add('Complete a valid ending month for the repeating expense.');

@@ -1,3 +1,4 @@
+import { normalizeRefinancing, type RefinanceCase } from './refinance.ts';
 import type { HomeMove } from './home-move.ts';
 import type { SimulationInputs } from './stochastic.ts';
 export interface MonthlySettings {
@@ -22,6 +23,7 @@ export interface PlanEvent {
   confirmedCashTreatment: boolean;
 }
 export interface ScenarioOverrides {
+  refinance?: RefinanceCase;
   debtStrategy?: { method?: 'snowball' | 'avalanche' | 'custom'; extraMonthlyPayment?: number; customExtraPayments?: Record<string, number> };
   homeMove?: HomeMove;
   mortgagePayoff?: { debtId: string; month: string; destination: 'cash' | 'invest'; accountId: string };
@@ -79,6 +81,7 @@ export function normalizeLaboratory(input: unknown): Laboratory {
     if (!scenario.id || ids.has(scenario.id) || typeof scenario.name !== 'string' || typeof scenario.baseline !== 'string' || scenario.baseline.length > 2_000_000 || !scenario.overrides) throw new Error('Invalid scenario.');
     ids.add(scenario.id);
     const o = scenario.overrides;
+    if (o.refinance !== undefined) normalizeRefinancing([o.refinance]);
     if(o.debtStrategy!==undefined){
       const d=o.debtStrategy;
       if(!d||typeof d!=='object'||Array.isArray(d)||(d.method!==undefined&&!['snowball','avalanche','custom'].includes(d.method))||(d.extraMonthlyPayment!==undefined&&(!Number.isFinite(d.extraMonthlyPayment)||d.extraMonthlyPayment<0))||(d.customExtraPayments!==undefined&&(!d.customExtraPayments||typeof d.customExtraPayments!=='object'||Array.isArray(d.customExtraPayments)||Object.values(d.customExtraPayments).some(v=>!Number.isFinite(v)||v<0))))throw new Error('Invalid scenario debt strategy.');
