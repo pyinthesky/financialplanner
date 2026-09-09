@@ -1,0 +1,35 @@
+/* Fictional sample only. Exercises expanded forms with the normal user controls. */
+const assert=require('node:assert/strict');
+const path=require('node:path');
+module.exports=async function({page,navigate,noOverflow,name,width,out}){
+ await navigate('Household');
+ const members=page.locator('section').filter({has:page.getByRole('heading',{name:'Household Members',exact:true})}).last();
+ await members.locator('.oe-person > summary').first().click();
+ await members.getByText('College Goal',{exact:true}).first().click();
+ await members.getByLabel('College Years',{exact:true}).first().fill('4');
+ await noOverflow('dependent college goal');
+ await members.locator('.oe-person > summary').first().click();
+ await page.getByText('Payroll Breakdown & Savings',{exact:true}).first().click();
+ await page.getByText('401(k) / 403(b) Contribution Builder',{exact:true}).first().click();
+ await page.getByLabel('Employee Contribution Mode',{exact:true}).first().selectOption('maximum');
+ await page.getByLabel('Include Age-Eligible Catch-Up Contributions',{exact:true}).first().check();
+ await page.getByLabel('Prior-Year Social Security Wages from This Employer',{exact:true}).first().fill('160000');
+ const apply=page.getByRole('button',{name:'Apply Contribution Breakdown',exact:true}).first();
+ assert.equal(await apply.isEnabled(),true);
+ await apply.click();
+ await noOverflow('split payroll contribution preview');
+ await page.screenshot({path:path.join(out,`${name}-${width}-contributions.png`)});
+ await navigate('Cash & Investments');
+ const education=page.locator('section').filter({has:page.getByRole('heading',{name:'College / 529 Accounts',exact:true})}).last();
+ await education.locator('.oe-person > summary').first().click();
+ assert.equal(await education.getByLabel('529 Beneficiary',{exact:true}).first().inputValue(),'sample-dependent-a');
+ await education.getByLabel('529 Monthly Contribution',{exact:true}).first().fill('225');
+ await education.getByRole('button',{name:'Update Budget Provision',exact:true}).first().click();
+ await noOverflow('linked 529 account');
+ await navigate('Plan Summary');
+ await page.getByRole('heading',{name:'College / 529 Outlook',exact:true}).first().waitFor();
+ assert.equal(await page.locator('main .education-chart').count(),2);
+ await page.locator('main .education-summary').getByText('Annual Education Ledger',{exact:true}).first().click();
+ await noOverflow('education ledger');
+ await page.screenshot({path:path.join(out,`${name}-${width}-education.png`)});
+};

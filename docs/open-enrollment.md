@@ -1,3 +1,5 @@
+Latest feedback: [employer-only sharing, ranking, household-derived tax rates and household/529 changes](household-enrollment-round.md) extend this original contract.
+
 # Open Enrollment: Supported Comparison Contract
 
 Implemented September 8, 2026. This is a separate local comparison, available through **Open Enrollment**, with **Health Plans** and **Term Life** views. It does not add widgets to Plan Summary or automatically change retirement projections. All numeric fields start blank; the existing, explicitly loaded fictional sample exercises three health options and four term quotes. No personal screenshots or their contents are used as fixtures.

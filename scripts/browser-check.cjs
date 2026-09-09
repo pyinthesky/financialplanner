@@ -272,10 +272,12 @@ const server = http.createServer((req, res) => {
           for(const title of ['Household & Economic Assumptions','Current Budget & Cash Flow','Retirement Budget & Cash Flow','Cash & Investments','Pensions & Social Security','Housing & Debt Payoff','Healthcare & Long-Term Care','Timed Expenses','Tax, Withdrawal & Reserve Policy'])assert.ok(await report.getByRole('heading',{name:title,exact:true}).isVisible(),`Printed report includes ${title}`);
           for(const stage of ['Current','Retirement'])assert.ok(await report.getByRole('img',{name:`${stage} Cash Flow Sankey`,exact:true}).isVisible());
           assert.ok(await report.locator('.report-flow-svg path').evaluateAll(paths=>paths.some(p=>p.getBBox().width>0&&p.getBBox().height>0)),'Printable cash flows have populated geometry');
+          assert.ok(await report.locator('.education-chart rect').evaluateAll(rs=>rs.some(r=>r.getBBox().width>0&&r.getBBox().height>0)),'Education print chart has populated geometry');
           if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-complete-report.pdf'),format:'Letter',printBackground:true});
           await page.emulateMedia({media:'screen'});
         }
         await require('./enrollment-browser.cjs')({page,navigate,noOverflow,name,width,out});
+        await require('./household-browser.cjs')({page,navigate,noOverflow,name,width,out});
         await navigate('Loans & Debts');
         const refinance=page.locator('section').filter({has:page.getByRole('heading',{name:'Refinance Comparison',exact:true})}).last();
         await refinance.locator('summary').filter({hasText:/^Mortgage(?:\s|$)/}).first().click();

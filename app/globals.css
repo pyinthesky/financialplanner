@@ -824,3 +824,19 @@ button, input, select { font: inherit; }
 @keyframes planner-overlay-enter { from {opacity:0;} to {opacity:1;} }
 @keyframes planner-overlay-exit { from {opacity:1;} to {opacity:0;} }
 @media(prefers-reduced-motion:reduce) { .planner-dialog-content[data-state],.planner-dialog-overlay[data-state] { animation-duration:1ms; } }
+
+/* Each cost row is deliberately vertical, including inside shared panel styles. */
+.oe-cost-bars > div:not(.oe-legend) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; }
+.oe-cost-bars > div > svg, .oe-cost-bars > div > small { display: block; width: 100%; min-width: 0; }
+.oe-best { display: inline-flex; gap: 6px; align-items: center; font-size: .78rem; color: #866000; }
+.oe-best svg { flex-shrink: 0; }
+.oe-sharing { display: grid; gap: 12px; margin: 12px 0; }
+.oe-sharing button { white-space: normal; height: auto; min-height: 44px; }
+.oe-contribution { margin: 12px 0; }
+.oe-contribution-preview { padding: 12px; background: var(--secondary); border-radius: 8px; }
+
+.education-chart { display: block; width: 100%; max-width: 100%; height: auto; }
+.education-summary .oe-result-grid > div { display: grid; gap: 4px; }
+
+.household-adult { display: grid; gap: 12px; min-width: 0; border: 1px solid #dce4ee; padding: 12px; border-radius: 12px; }
+.household-adult legend { font-weight: 650; padding: 0 4px; }

@@ -58,6 +58,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
   if (overrides.retirementMonthYou || overrides.retirementMonthPartner) budget.timeline = { startYear: budget.timeline?.startYear ?? null, retirementMonthYou: overrides.retirementMonthYou ?? budget.timeline?.retirementMonthYou ?? '', retirementMonthPartner: overrides.retirementMonthPartner ?? budget.timeline?.retirementMonthPartner ?? '' };
   const issues = new Set<string>(rentalIssues(data));
   const rental=rentalTotals(data);
+  for(const pay of budget.pay) for(const allocation of pay.payroll?.allocations??[]) if(!data.accounts.some(a=>a.id===allocation.accountId&&a.kind===allocation.kind&&a.owner===pay.owner)) issues.add('Review payroll savings: account ownership or tax treatment no longer matches the saved allocation.');
   if(budget.lines.some(l=>budgetAllocation(l).overallocated||budgetAllocation(l,true).overallocated))issues.add('A bill breakdown exceeds its current or retirement envelope. Reconcile its total before comparing scenarios.');
   const empty = (): MonthlyResult => ({ months: [], years: [], issues: [...issues], supported: false, firstShortfall: null, legacyTarget: null, legacyGap: null });
   const start = budget.timeline?.startYear;
@@ -177,7 +178,7 @@ export function projectMonthly(data: PlannerData, overrides: ScenarioOverrides =
       for(const p of b.payByOwner)incomeByOwner[p.owner].pay+=p.amount;
       const age = data.household.currentAge + y;
       const monthIndex = y * 12 + m;
-      wages += b.taxableWages; withholding += b.withholding;
+      wages += b.taxableWages + b.employerTaxable; withholding += b.withholding;
       cash += b.takeHome + rental.rent;
       let mortgagePayoff=0, payoffDraws=0, releasedPaymentInvested=0,homeProceeds=0;
       let pension = 0, social = 0;

@@ -1,3 +1,9 @@
+# Latest Handoff — September 9, 2026
+
+Implemented the current enrollment/household feedback. Read [the new contract](household-enrollment-round.md) and the README latest delivery before older handoffs below. Employer sharing is an allowlist, never raw-plan redaction. Payroll election previews apply per-paycheck snapshots; monthly allocation sums and employer Roth tax are reconciled. Education is a separate beneficiary-level projection; explicit budget provisions affect retirement cash, while education-only edits do not stale saved household scenarios. Keep new fields blank, keep raw plan compatibility, and retain source/eligibility boundaries. Timed feature builds remain disabled.
+
+Local checks: 200 tests, TypeScript, production build. Release workflow adds populated sharing, contribution, dependent/529 and print checks in Chromium/WebKit at six widths. Verify the exact published commit before reporting deployment; do not infer success from this note. Repository history in this workspace remains synthetic; publish against current remote main as described below.
+
 # Current Priority Handoff — September 8, 2026
 
 README Delivery Roadmap is authoritative. The user authorized Priorities 1–5, with refinance before Real Estate. Implemented Outlook/month navigation, explanatory debt charts, local refinance comparisons and public snapshot refresh, and bounded existing-rental/pre-tax-property tools. Nine focused tests cover funding status, common-horizon refinancing, freshness/cohort gates, rental cash/debt/tax conservation and sale/investment comparisons. Required Pages browser/PDF gates verify the release. No private screenshots or personal amounts are used. Timed feature builds remain disabled; automatic approval review rejected scheduled main writes for public rate refresh. No rate schedule was added; the manual validated refresh script is available. No delegated agents are authorized.

@@ -1,3 +1,4 @@
+import { normalizeDependents, normalizeEducation, type Dependent, type Education } from './education.ts';
 import { normalizeEnrollment, type Enrollment } from './enrollment.ts';
 import { normalizeRealEstate, type RealEstate } from './real-estate.ts';
 import { normalizeRefinancing, type RefinanceCase } from './refinance.ts';
@@ -71,6 +72,7 @@ export interface RecurringCost {
 }
 
 export interface PlannerData {
+  education?: Education;
   enrollment?: Enrollment;
   realEstate?: RealEstate;
   refinancing?: RefinanceCase[];
@@ -80,6 +82,7 @@ export interface PlannerData {
   laboratory?: Laboratory;
   inflationReference?: InflationReceipt;
   household: {
+    dependents?: Dependent[];
     maritalStatus: "single" | "married";
     filingStatus: FilingStatus;
     marriedFilingSeparatelyLivedApart: boolean;
@@ -1179,6 +1182,7 @@ export function normalizePlan(input: unknown): PlannerData {
   return {
     ...candidate,
     schemaVersion: 2,
+    education: normalizeEducation(candidate.education),
     enrollment: normalizeEnrollment(candidate.enrollment),
     realEstate: normalizeRealEstate(candidate.realEstate),
     refinancing: normalizeRefinancing(candidate.refinancing),
@@ -1193,6 +1197,7 @@ export function normalizePlan(input: unknown): PlannerData {
     })),
     household: {
       ...candidate.household,
+      dependents: candidate.household.dependents?.length ? normalizeDependents(candidate.household.dependents) : undefined,
       maritalStatus,
       filingStatus,
       marriedFilingSeparatelyLivedApart:

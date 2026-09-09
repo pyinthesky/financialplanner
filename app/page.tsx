@@ -1,4 +1,7 @@
 "use client";
+import { HouseholdMembers } from '@/components/household-members';
+import { EducationAccounts, EducationSummary } from '@/components/education';
+import { withEnrollmentTax } from '@/lib/enrollment-tax';
 
 import { OpenEnrollment, EnrollmentPrint } from '@/components/open-enrollment';
 import { EMPTY_ENROLLMENT } from '@/lib/enrollment';
@@ -205,7 +208,7 @@ function PlannerNavigation({ activeSection, onSelect, opportunities }: { opportu
 }
 
 function PrintReport({ data, projection, successRate, debtMonths }: { data: PlannerData; projection: ReturnType<typeof projectPlan>; successRate: number; debtMonths: number }) {
-  if (data.laboratory?.settings.enabled || data.realEstate?.properties.length) return <article className="print-report"><header className="report-header"><h1>Retirement Plan Summary</h1><p>Monthly Engine</p></header><Outlook plan={data} print/><MonthlyPrintReport plan={data} result={projectMonthly(data)}/><PrintPlanDetails plan={data}/><PropertyReport plan={data}/><footer>Local-only educational planning estimate. Values are nominal and depend on entered assumptions. Not tax, investment, legal or medical advice.</footer></article>;
+  if (data.laboratory?.settings.enabled || data.realEstate?.properties.length || data.budget.pay.some(p=>p.payroll?.allocations)) return <article className="print-report"><header className="report-header"><h1>Retirement Plan Summary</h1><p>Monthly Engine</p></header><Outlook plan={data} print/><MonthlyPrintReport plan={data} result={projectMonthly(data)}/><EducationSummary plan={data}/><PrintPlanDetails plan={data}/><PropertyReport plan={data}/><footer>Local-only educational planning estimate. Values are nominal and depend on entered assumptions. Not tax, investment, legal or medical advice.</footer></article>;
   const retirement = projection.find((row) => row.age === data.household.retirementAge) ?? projection[0];
   const last = projection.at(-1)!;
   const printChart = buildPrintPortfolioChart(projection);
@@ -308,7 +311,7 @@ function PrintReport({ data, projection, successRate, debtMonths }: { data: Plan
           </ul>
         </section>
       </div>
-      <PrintPlanDetails plan={data}/><PropertyReport plan={data}/>
+      <EducationSummary plan={data}/><PrintPlanDetails plan={data}/><PropertyReport plan={data}/>
       <footer>This is an educational estimate, not tax, investment, legal, or medical advice. Values are nominal and depend on the assumptions entered.</footer>
     </article>
   );
@@ -686,7 +689,7 @@ export default function HomePage() {
     <>
       <SectionHeading title="Household & Assumptions" description="Set the timeline and the few assumptions that drive most of the plan." />
       <div className="two-column">
-        <Panel title="Planning Household" eyebrow="TIMELINE">
+        <Panel title="Planning Household" eyebrow="PEOPLE & TIMING">
           <div className="form-grid">
             <SelectField
               label="Household"
@@ -697,12 +700,16 @@ export default function HomePage() {
                 { value: "single", label: "Single" },
               ]}
             />
+            <fieldset className="household-adult"><legend>You</legend>
             <Field label="Your current age" value={plan.household.currentAge} onChange={(value) => setHousehold("currentAge", value)} suffix="years old" max={99} />
             <Field label="Your birth year" value={plan.household.birthYear} onChange={(value) => setHousehold("birthYear", value)} suffix="YYYY" min={1900} max={new Date().getFullYear()} help="Optional. Used locally to determine when RMDs begin; 1959 requires review." />
-            {plan.household.maritalStatus === "married" && <Field label="Partner current age" value={plan.household.partnerAge} onChange={(value) => setHousehold("partnerAge", value)} suffix="years old" max={99} />}
-            {plan.household.maritalStatus === "married" && <Field label="Partner birth year" value={plan.household.partnerBirthYear} onChange={(value) => setHousehold("partnerBirthYear", value)} suffix="YYYY" min={1900} max={new Date().getFullYear()} help="Optional. Used only for the partner's RMD schedule." />}
             <Field label="Your retirement age" value={plan.household.retirementAge} onChange={(value) => setHousehold("retirementAge", value)} suffix="years old" max={99} />
-            {plan.household.maritalStatus === "married" && <Field label="Partner retirement age" value={plan.household.partnerRetirementAge} onChange={(value) => setHousehold("partnerRetirementAge", value)} suffix="years old" max={99} />}
+            </fieldset>
+            {plan.household.maritalStatus === "married" && <fieldset className="household-adult"><legend>Partner</legend>
+            <Field label="Partner current age" value={plan.household.partnerAge} onChange={(value) => setHousehold("partnerAge", value)} suffix="years old" max={99} />
+            <Field label="Partner birth year" value={plan.household.partnerBirthYear} onChange={(value) => setHousehold("partnerBirthYear", value)} suffix="YYYY" min={1900} max={new Date().getFullYear()} help="Optional. Used only for the partner's RMD schedule." />
+            <Field label="Partner retirement age" value={plan.household.partnerRetirementAge} onChange={(value) => setHousehold("partnerRetirementAge", value)} suffix="years old" max={99} />
+            </fieldset>}
             <Field label="Plan through age" value={plan.household.planToAge} onChange={(value) => setHousehold("planToAge", value)} suffix="years old" min={plan.household.currentAge + 1} max={120} />
             <div className="field-stack">
               <Label htmlFor="zip-code">ZIP Code (Optional)</Label>
@@ -727,8 +734,8 @@ export default function HomePage() {
           </div>
         </Panel>
       </div>
-      <details className="panel budget-flow"><summary>Monthly Timeline & Retirement Dates</summary><p className="field-help">Opening balances are as of January 1. Retirement months stop pay and change assigned bills.</p><div className="budget-fields"><label className="budget-field">Opening-Balance Year<Input aria-label="Opening-Balance Year" type="number" min="2026" max="2100" value={plan.budget.timeline?.startYear??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,startYear:e.target.value===''?null:+e.target.value}}}))}/></label>{(['you',...(plan.household.maritalStatus==='married'?['partner']:[])] as const).map(owner=><label className="budget-field" key={owner}>{owner==='you'?'Your Retirement Month':'Partner Retirement Month'}<Input aria-label={owner==='you'?'Your Retirement Month':'Partner Retirement Month'} type="month" value={plan.budget.timeline?.[owner==='you'?'retirementMonthYou':'retirementMonthPartner']??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{startYear:null,retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,[owner==='you'?'retirementMonthYou':'retirementMonthPartner']:e.target.value}}}))}/></label>)}</div></details>
-      <PayrollEditor budget={plan.budget} accounts={plan.accounts} married={plan.household.maritalStatus==='married'} onChange={budget=>setPlan(p=>({...p,budget}))}/>
+      <HouseholdMembers plan={plan} onChange={setPlan}/><details className="panel budget-flow"><summary>Monthly Timeline & Retirement Dates</summary><p className="field-help">Opening balances are as of January 1. Retirement months stop pay and change assigned bills.</p><div className="budget-fields"><label className="budget-field">Opening-Balance Year<Input aria-label="Opening-Balance Year" type="number" min="2026" max="2100" value={plan.budget.timeline?.startYear??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,startYear:e.target.value===''?null:+e.target.value}}}))}/></label>{(['you',...(plan.household.maritalStatus==='married'?['partner']:[])] as const).map(owner=><label className="budget-field" key={owner}>{owner==='you'?'Your Retirement Month':'Partner Retirement Month'}<Input aria-label={owner==='you'?'Your Retirement Month':'Partner Retirement Month'} type="month" value={plan.budget.timeline?.[owner==='you'?'retirementMonthYou':'retirementMonthPartner']??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{startYear:null,retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,[owner==='you'?'retirementMonthYou':'retirementMonthPartner']:e.target.value}}}))}/></label>)}</div></details>
+      <PayrollEditor birthYear={plan.household.birthYear} partnerBirthYear={plan.household.partnerBirthYear} budget={plan.budget} accounts={plan.accounts} married={plan.household.maritalStatus==='married'} onChange={budget=>setPlan(p=>({...p,budget}))}/>
     </>
   );
 
@@ -898,9 +905,10 @@ export default function HomePage() {
         </div>
       </Panel>
       <div className="summary-strip">
-        <span>Total invested assets</span>
+        <span>Total retirement and liquid assets</span>
         <strong>{currency.format(totalPortfolio(plan))}</strong>
       </div>
+      <EducationAccounts plan={plan} onChange={setPlan}/>
       {plan.accounts.some((account) => account.kind === "traditional" && account.owner === "joint") && (
         <p className="model-note">
           <Calculator /> Tax-deferred accounts need an individual owner for RMD calculations. Joint tax-deferred balances remain in the portfolio but are excluded from the RMD estimate until assigned to you or your partner.
@@ -2316,7 +2324,7 @@ export default function HomePage() {
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
-    : activeSection === "enrollment" ? <OpenEnrollment plan={plan} onChange={setPlan}/> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected in Scenario Laboratory.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    : activeSection === "enrollment" ? <OpenEnrollment plan={plan} onChange={setPlan}/> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>

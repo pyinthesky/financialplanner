@@ -1,3 +1,4 @@
+import { normalizeElection, type ContributionElection, type PayrollAllocation } from './payroll-contributions.ts';
 /** Canonical budget facts. Amounts are never inferred from blank fields. */
 import type { BudgetReferenceReceipt } from './budget-references.ts';
 export const FREQUENCIES = {
@@ -37,6 +38,7 @@ export interface BudgetPay {
   nextPayDate: string;
   /** All values are per paycheck; withholding is income tax only. */
   payroll?: {
+    allocations?: PayrollAllocation[]; employerTaxable?: number; election?: ContributionElection;
     gross: number | null;
     taxableWages: number | null;
     incomeTaxWithheld: number | null;
@@ -156,6 +158,10 @@ export function normalizeBudget(input: unknown): BudgetData {
     identity(p);
     if (!money(p.amount) || !['you', 'partner'].includes(p.owner) || !date(p.nextPayDate)) throw new Error('Invalid pay entry.');
     if (p.payroll && (!['gross', 'taxableWages', 'incomeTaxWithheld', 'otherDeductions', 'employeeSavings', 'employerSavings'].every(key => money(p.payroll![key as keyof typeof p.payroll])) || typeof p.payroll.accountId !== 'string')) throw new Error('Invalid payroll breakdown.');
+    const q=p.payroll;
+    if(q?.allocations!==undefined && (!Array.isArray(q.allocations)||q.allocations.length>2||q.allocations.some(a=>!a||!['traditional','roth'].includes(a.kind)||typeof a.accountId!=='string'||typeof a.employee!=='number'||typeof a.employer!=='number'||!money(a.employee)||!money(a.employer))))throw Error('Invalid payroll allocation.');
+    if(q?.employerTaxable!==undefined&&(typeof q.employerTaxable!=='number'||!money(q.employerTaxable)))throw Error('Invalid employer taxable income.');
+
   }
   for (const l of b.lines) {
     identity(l);
@@ -183,5 +189,7 @@ export function normalizeBudget(input: unknown): BudgetData {
     if (!o.id || overrideIds.has(o.id) || !b.lines.some(l => l.id === o.lineId) || !(o.fromMonth === '' || month(o.fromMonth)) || (o.throughMonth !== '' && (!month(o.throughMonth) || o.throughMonth < o.fromMonth)) || !money(o.amount)) throw new Error('Invalid dated budget edit.');
     overrideIds.add(o.id);
   }
-  return structuredClone(b);
+  const out=structuredClone(b);
+  for(const p of out.pay)if(p.payroll?.election)p.payroll.election=normalizeElection(p.payroll.election);
+  return out;
 }

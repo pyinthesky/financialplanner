@@ -30,3 +30,7 @@ inflation is `(313.689 / 188.9)^(1/20) - 1`, using BLS annual-average CPI-U for 
 ## Open Enrollment — September 8, 2026
 
 See [the enrollment calculation contract](open-enrollment.md#effective-dated-sources) for the 2026 HSA reference, IRS Publication 969, HHS individual-in-family cost limits, CMS EOB guidance, user-entered plan rules and explicit limitations. Term pricing uses entered quotes only; no public rate dataset has been established.
+
+## Household Contributions and Education
+
+[September 9, 2026 implementation and source register](household-enrollment-round.md) covers 2026 elective-deferral/catch-up limits, Roth employer income, the narrow federal HSA estimate and qualified postsecondary 529 projections.

@@ -13,6 +13,8 @@ export function baselineSnapshot(plan: PlannerData): string {
   delete copy.laboratory.simulation;
   delete copy.refinancing;
   delete copy.enrollment;
+  delete copy.education;
+  delete copy.household.dependents;
   if(copy.realEstate){delete copy.realEstate.trial;if(!copy.realEstate.properties.length)delete copy.realEstate;}
   return JSON.stringify(sorted(normalizePlan(copy)));
 }

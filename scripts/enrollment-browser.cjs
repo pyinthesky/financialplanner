@@ -1,6 +1,7 @@
 /* Public fictional sample only; shared release checks for Chromium and WebKit. */
 const assert=require('node:assert/strict');
 const path=require('node:path');
+const fs=require('node:fs');
 module.exports=async function checkEnrollment({page,navigate,noOverflow,name,width,out}){
   await navigate('Open Enrollment');
   await page.getByRole('heading',{name:'Compare the Complete Picture',exact:true}).waitFor();
@@ -22,6 +23,11 @@ module.exports=async function checkEnrollment({page,navigate,noOverflow,name,wid
   await page.getByLabel('Medical-Use Scenario',{exact:true}).selectOption('2');
   await page.getByText('How the Comparison Changes with Medical Use',{exact:true}).click();
   await noOverflow('enrollment charts');
+  assert.ok(await page.locator('main .oe-best').count()>0,'A complete comparison identifies lowest modeled cost');
+  const barRow=page.locator('main .oe-cost-bars > div').first();
+  const barBox=await barRow.locator('svg').boundingBox(),captionBox=await barRow.locator('small').boundingBox();
+  assert.ok(captionBox.y>=barBox.y+barBox.height-1,'Cost caption sits below its bar');
+  assert.equal(await page.getByText(/Before HSA Benefits/).count(),0);
   await page.getByText('Monthly Cash Ledger',{exact:true}).click();
   await noOverflow('enrollment cash ledger');
   await page.getByText('Monthly Cash Ledger',{exact:true}).click();
@@ -36,6 +42,19 @@ module.exports=async function checkEnrollment({page,navigate,noOverflow,name,wid
     if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-enrollment-report.pdf'),format:'Letter',printBackground:true});
     await page.emulateMedia({media:'screen'});
   }
+  await page.getByRole('button',{name:'Share Employer Options',exact:true}).click();
+  await noOverflow('employer export review');
+  const downloadPromise=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download Terms Only',exact:true}).click();
+  const download=await downloadPromise,filePath=await download.path(),pkg=JSON.parse(fs.readFileSync(filePath,'utf8'));
+  assert.equal(pkg.options.length,3);assert.ok(pkg.options.every(p=>!('label' in p)&&!('ownHsa' in p)&&!('rules' in p)&&!('taxRate' in p)));
+  await page.getByLabel('Employer Options File',{exact:true}).setInputFiles({name:'fictional-employer-options.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(pkg))});
+  await page.getByRole('region',{name:'Employer Import Review',exact:true}).waitFor();
+  await noOverflow('employer import review');
+  assert.equal(await page.locator('main .oe-result').count(),3,'Pending import does not overwrite current comparison');
+  await page.getByRole('button',{name:'Replace Health Options',exact:true}).click();
+  assert.equal(await page.locator('main .oe-person').count(),2,'Recipient people survive terms import');
+  assert.equal(await page.locator('main .oe-result').count(),0,'New personal coverage must be confirmed');
   await page.getByRole('button',{name:'Term Life',exact:true}).click();
   await page.getByRole('heading',{name:'Portable Term-Life Comparison',exact:true}).waitFor();
   await noOverflow('term-only quotes');

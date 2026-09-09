@@ -11,13 +11,13 @@ Start with blank inputs or explicitly load the fictional sample plan. Build a cu
 | Area | Supported experience |
 | --- | --- |
 | Data & Privacy | Session-only planning, optional encrypted local vault, raw JSON export/import, fictional sample loading and confirmed plan reset |
-| Household | Individual/partner timelines, payroll details, optional local ZIP and state selection, explicit Apply/Undo for dated public references |
-| Cash & Investments | Account balances, tax treatment, ownership, aggregate taxable basis and supported account-access assumptions |
+| Household | Anonymous self/partner/dependents, college goals, split traditional/Roth payroll contribution builder, optional local ZIP and state selection, explicit Apply/Undo for dated public references |
+| Cash & Investments | Retirement account balances, tax treatment, ownership, taxable basis and separate beneficiary-linked 529 accounts |
 | Pensions & Social Security | Entered benefit amounts, ages, COLAs and withholding; automatic benefit optimization remains planned |
 | Loans & Debts | Loan entry, cascade strategy and local fee/term-aware refinance comparisons with dated public mortgage indicators |
 | Real Estate | Primary-home carrying costs and escrow reconciliation; existing rental records linked to loans, budgets and monthly cash flow; isolated pre-tax property comparisons |
 | Current and Retirement Budgets | Compact expandable categories, editable bill names, timing controls, retirement changes and shared timed costs; linked pay, benefits, healthcare, housing and scheduled loan payments |
-| Open Enrollment | Compact per-person health/Rx comparison, individual/family limits, HSA economics, bill timing, expected-use PDF and term-only manual quotes |
+| Open Enrollment | Per-person health/Rx and family limits, HSA economics, bill timing, lowest-cost marker, employer-only options sharing, expected-use PDF and term-only manual quotes |
 | Taxes & Withdrawals | Dated federal worksheets, owner-specific RMD/QCD and distribution checks, conversion comparisons, LTCG/NIIT and an entered state-tax estimate, subject to the boundaries below |
 | Scenario Laboratory | Saved baseline snapshots, explicit overrides, compare/duplicate/reset/rebase, isolated debt-strategy experiments, funded mortgage payoff, supported home-sale/downsize comparisons, cash coverage and hypothetical stresses |
 | Plan Summary | Current/retirement Sankeys and funding details, input-aware Outlook, compact month picker, total/per-loan debt charts with principal/interest and cascade details and annual or monthly projection results |
@@ -63,6 +63,14 @@ The shared entry journey is **Data & Privacy → Household → Cash & Investment
 | 3 | Explainable debt visualization | Complete | Total/per-loan balances, principal/interest payment bars, payoff markers and visible minimum-payment transfers use the actual monthly ledger |
 | 4 | Refinancing opportunity indicators | Supported with Limits | Fresh, user-confirmed comparable mortgage references; local badges/snooze and fee/term comparison; no rate qualification claims |
 | 5 | Real Estate | Supported with Limits | Existing rentals in the monthly engine; linked mortgages; isolated pre-tax buy/invest and keep/sell comparisons; unsupported rental tax and transaction timing remain excluded |
+
+### Latest Feedback Delivery — September 9, 2026
+
+- **Enrollment:** share/import only employer health-option terms with review and numbered labels; private care, Rx, household and HSA/tax inputs never enter that file. Gold stars identify complete lowest-cost estimates, including ties. Cost bars sit above their captions and say “Premiums + Care.” Blank HSA overrides can use a supported 2026 federal wage-income estimate; unsupported cases stay blank and manual rates win.
+- **Household and payroll:** anonymous dependents and college goals; optional covered-person links; fixed/percentage/2026-maximum employee contributions with traditional/Roth split, age catch-up and employer treatment. Preview and apply explicitly; owner-matched transfers and Roth employer taxable income feed monthly projections. Dates, gross pay and withholding must reconcile; future contribution limits are not invented.
+- **College / 529:** beneficiary-linked education accounts in Cash & Investments and a separate Plan Summary/PDF outlook with growth, qualified costs and funding gaps. Multiple accounts fund one beneficiary goal. Explicit budget provisions include planned saving until college. Education assets stay outside retirement withdrawals; projected deposits assume funding and college shortfalls are not automatically charged to the retirement budget.
+
+[Implementation, boundaries, sources and acceptance](docs/household-enrollment-round.md). The fictional sample exercises dependents, 529 goals/provisions and split payroll. Local validation: 200 tests plus TypeScript and production build. Required Chromium/WebKit checks cover six widths, sharing, expanded forms and print geometry; deployment evidence is recorded in the release response. Timed builds remain disabled.
 
 ### Current Priority Delivery
 
@@ -138,7 +146,7 @@ Use a restrained notification count on Loans & Debts and a marker on each releva
 | Open Enrollment Planner | Supported with Limits | Standalone per-person medical/Rx, family accumulators, annual economics, HSA funding and monthly cash timing; exact scope below |
 | Portable term-life comparison | Supported with Limits | Local employer/individual 10/15/30-year quote comparison and known-price horizons; public rate dataset remains planned |
 | Education and guidance | Planned | Neutral will/trust/provider education; fiduciary/RIA/Form ADV and official SEC/state registration checks; sourced fee guidance; appropriate diversified-index alternatives; evidence-grounded health/longevity prompts |
-| Trust and accessibility (Batch 6) | Planned | Expanded audit trail, calculation explanations, accessibility, performance and downloadable ledgers; improve household/owner entry and progressively reveal relevant questions |
+| Trust and accessibility (Batch 6) | Planned | Expanded audit trail, explanations, accessibility, performance and downloadable ledgers; continue compact household entry and progressively reveal relevant questions |
 | Optional AI or cloud connections | Planned, deferred | Only after core tax, benefits, health/state and scenario dependencies are complete; separate explicit design/authorization, no project storage of credentials or financial data |
 
 The goal is to improve on CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate and typical bank tools through connected reasoning, clear assumptions and privacy. Benchmark public workflows for missing questions, fragmented results, opaque estimates and unnecessary data collection. Budget usability and helpful sourced shortcuts are core requirements, not end-stage polish.
@@ -150,9 +158,9 @@ Available in its own **Open Enrollment** tab, separate from Plan Summary. Compac
 - **Per-person care:** annual general medical allowed charges, plus itemized visits, preventive services and prescriptions. Past out-of-pocket amounts are distinguished from insurer-negotiated prices and cannot silently drive deductible calculations. The same people and utilization are compared across options; itemized visits and prescriptions can override their allowed price per option.
 - **Family rules:** embedded or aggregate deductibles, separate individual/family OOP limits, and a visible claim ledger. One high-cost person can exhaust their individual OOP limit before the family deductible is met. Copays and coinsurance accumulate only according to the entered rule.
 - **Prescriptions:** explicit covered/excluded/unknown status, shared/separate/exempt deductible treatment, per-fill copay or coinsurance, and explicit combined-OOP credit. Optional Rx sublimits sit within the overall limits. Missing rules block complete comparisons. Pharmacy payments can be immediate even when medical bills arrive later.
-- **Economics and charts:** annual cost components, lower/expected/higher/stress medical-use comparisons, per-person OOP progress, cash timing and expandable ledgers. Employer HSA funds and entered tax savings are separated from personal contributions and retained assets. No option is presumed best. SVG-based PDF comparisons render independently of hidden screen charts.
+- **Economics and charts:** annual cost components, lower/expected/higher/stress medical-use comparisons, per-person OOP progress, cash timing and expandable ledgers. Employer HSA funds and entered tax savings are separated from personal contributions and retained assets. A gold star marks the lowest complete modeled cost, with ties; no plan is presumed best before calculation. SVG-based PDF comparisons render independently of hidden screen charts.
 - **Timing:** service liability, EOB processing, payment due and HSA reimbursements are distinct. Service-year accumulators remain intact when bills cross year-end. Monthly/upfront employer funding and reimbursement delays expose the cash needed before HSA funds are available. An EOB is not a bill; the model never advises ignoring actual payment terms.
-- **HSA scope:** one modeled owner, user-confirmed eligible expenses and contribution allowance, explicit combined tax-rate assumption, and a dated January-2026 base-limit shortcut. Existing HSA balances can fund qualified expenses without new contributions. Full eligibility, catch-up, state/payroll rules and non-calendar contribution allocation are not inferred.
+- **HSA scope:** one modeled owner, user-confirmed eligible expenses and contribution allowance, explicit tax-rate override or a supported 2026 federal payroll-derived estimate, and a dated January-2026 base-limit shortcut. Existing HSA balances can fund qualified expenses without new contributions. Full eligibility, catch-up, state/payroll rules and non-calendar contribution allocation are not inferred.
 
 See [implementation, formulas, sources and acceptance contract](docs/open-enrollment.md). The sample now includes three complete fictional health options and per-person medical, high-cost Rx and preventive care. Calculation/regression coverage and populated Chromium/WebKit journeys are required before deployment.
 
