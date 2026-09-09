@@ -41,3 +41,5 @@ Reviewed September 9, 2026:
 ## Acceptance
 
 New tests cover strict employer export fields, malicious/invalid imports, recipient-data preservation, complete-only ranking/ties, HSA bracket derivation/overrides, deferral modes and limits, catch-up ages and wage threshold boundaries, account ownership, actual pay counts, monthly conservation/taxation, anonymous blank onboarding, 529 normalization, beneficiary pooling, negative returns, gaps and idempotent dated budget provisions. The expanded Chromium/WebKit journeys exercise actual option-file download/import, pending import safety, bar/caption placement, contribution controls, dependent goals, linked 529 editing, Summary charts and print geometry at six viewport widths. CI deployment remains gated on both engines.
+
+Release-gate follow-up: the new Cash & Investments journey exposed existing account-table delete buttons outside a 1280px viewport. At 1101–1500px, that eight-column entry table now becomes compact three-column labeled account cards. The viewport gate remains unchanged and checks controls even inside clipped ancestors.

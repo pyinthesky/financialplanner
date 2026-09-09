@@ -840,3 +840,26 @@ button, input, select { font: inherit; }
 
 .household-adult { display: grid; gap: 12px; min-width: 0; border: 1px solid #dce4ee; padding: 12px; border-radius: 12px; }
 .household-adult legend { font-weight: 650; padding: 0 4px; }
+
+/* Eight account-entry columns do not fit beside the sidebar at small desktop widths. */
+@media (min-width: 1101px) and (max-width: 1500px) {
+  .table-wrap.accounts-table { overflow: visible; }
+  .accounts-table table, .accounts-table tbody { display: block; width: 100%; min-width: 0; }
+  .accounts-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .accounts-table tbody { display: grid; gap: 12px; }
+  .accounts-table tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 16px; width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: #fbfcfe; }
+  .accounts-table td { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; width: 100%; min-width: 0; border: 0; padding: 4px 0; white-space: normal; }
+  .accounts-table td::before { color: #718096; font-size: .72rem; font-weight: 700; }
+  .accounts-table td:nth-child(1)::before { content: "Account"; }
+  .accounts-table td:nth-child(2)::before { content: "Tax Treatment"; }
+  .accounts-table td:nth-child(3)::before { content: "Owner"; }
+  .accounts-table td:nth-child(4)::before { content: "Balance"; }
+  .accounts-table td:nth-child(5)::before { content: "Adjusted Cost Basis"; }
+  .accounts-table td:nth-child(6)::before { content: "Annual Contribution"; }
+  .accounts-table td:nth-child(7)::before { content: "QCD-Eligible IRA"; }
+  .accounts-table td:last-child { display: flex; justify-content: flex-end; align-items: flex-end; grid-column: 3; }
+  .accounts-table input, .accounts-table select, .accounts-table .input-affix { width: 100%; min-width: 0; max-width: 100%; }
+  .accounts-table [data-slot="native-select-wrapper"] { width: 100%; min-width: 0; max-width: 100%; }
+  .accounts-table td[colspan] { grid-column: 1 / -1; display: block; }
+  .accounts-table td[colspan]::before { content: none; }
+}
