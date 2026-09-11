@@ -157,6 +157,15 @@ Use a restrained notification count on Loans & Debts and a marker on each releva
 
 The goal is to improve on CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate and typical bank tools through connected reasoning, clear assumptions and privacy. Benchmark public workflows for missing questions, fragmented results, opaque estimates and unnecessary data collection. Budget usability and helpful sourced shortcuts are core requirements, not end-stage polish.
 
+### Federal Health Options and Employer Incentives — Planned
+
+Research verified September 11, 2026: OPM publishes 2026 FEHB Plan Key, Rates, Plan Benefits and Service Area workbooks. A yearly November 1 refresh is scheduled, starting in 2026, to retrieve next-year information and prepare a reviewed update. [Source inventory, compact UX and calculation contract](docs/federal-health-options.md).
+
+- Add an unchecked **Include Federal Employee Options** checkbox beside Add Health Option. Filter by confirmed program/employee eligibility, location, benefit year and covered members. Show up to three lowest modeled-cost eligible FEHB options alongside existing private employer options, with unresolved candidates clearly separated.
+- Add optional **2a. Employer Incentives** for waiver stipends and spousal surcharges, tied to whose employer coverage is declined. Count confirmed after-tax income once per eligible coverage arrangement, with payment timing; it never changes deductibles/OOP limits or silently enters the household budget.
+- Extend service-specific benefits, Rx caps/formulary confirmation, HSA versus HRA treatment and independent family accumulators before ranking the catalog. Current manual four-option comparisons cannot safely absorb all OPM rules through a single medical coinsurance assumption. Compare split spouse/dependent enrollments without sharing family accumulators across plans.
+- Preserve blank onboarding and all-local calculations. Include FEHB retirement-continuation eligibility in the decision context; a cheaper one-year private option is not automatically a suitable FEHB replacement. Catalog ingestion, checkbox/ranking and incentive UI remain unimplemented until this contract's acceptance checks pass.
+
 ### Open Enrollment Planner — Supported with Limits
 
 Available in its own **Open Enrollment** tab, separate from Plan Summary. Compact expandable person rows feed up to four health-option cards; advanced prescription, network and HSA fields are disclosed when needed. All numeric inputs remain blank until entered or the fictional sample is explicitly loaded.
