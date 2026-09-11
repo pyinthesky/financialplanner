@@ -16,6 +16,10 @@ module.exports=async function checkEnrollment({page,navigate,noOverflow,name,wid
   await firstOption.locator('.oe-care > summary').first().click();
   await firstOption.getByLabel('Counts Toward Combined OOP Max?',{exact:true}).first().selectOption('unknown');
   assert.equal(await page.locator('main .oe-result').count(),0,'Unknown Rx rules suppress comparison');
+  const missingRx=firstOption.getByLabel('Counts Toward Combined OOP Max?',{exact:true}).first();
+  assert.equal(await missingRx.getAttribute('aria-invalid'),'true');
+  assert.ok(await page.getByText('Can’t compare until missing information is entered.',{exact:true}).isVisible());
+  assert.equal(await page.locator('main .oe-issues').count(),0,'No duplicate warning wall');
   await firstOption.getByLabel('Counts Toward Combined OOP Max?',{exact:true}).first().selectOption('yes');
   assert.equal(await page.locator('main .oe-result').count(),3);
   await noOverflow('expanded enrollment option');
@@ -42,20 +46,31 @@ module.exports=async function checkEnrollment({page,navigate,noOverflow,name,wid
     if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-enrollment-report.pdf'),format:'Letter',printBackground:true});
     await page.emulateMedia({media:'screen'});
   }
+  // Native month widgets are not required, including on Mobile Safari.
+  await page.getByLabel('Plan Year',{exact:true}).selectOption('');
+  assert.equal(await page.getByLabel('Plan Year',{exact:true}).getAttribute('aria-invalid'),'true');
+  await page.getByLabel('Start Month',{exact:true}).selectOption('02');
+  await page.getByLabel('Plan Year',{exact:true}).selectOption('2026');
+  assert.equal(await page.getByLabel('Start Month',{exact:true}).inputValue(),'02');
+  await page.getByLabel('Start Month',{exact:true}).selectOption('01');
+  assert.equal(await page.locator('main .oe-result').count(),3);
+  assert.equal(await page.getByRole('checkbox',{name:/I (?:verified|confirmed)/}).count(),0,'No certification checklist');
   // Federal directory and incentive flow use only public source values and fictional care.
   assert.equal(await page.locator('meta[name="google-site-verification"]').getAttribute('content'),'0c6rIGtsi0vIXaNJcUnNhDZHn7Hlev-DG2C3p_K-8GA');
   await page.getByRole('checkbox',{name:'Include Federal Employee Options',exact:true}).check();
   await page.getByLabel('Federal Employee',{exact:true}).selectOption('you');
   await page.getByLabel('Federal Home or Work ZIP',{exact:true}).fill('00000');
   assert.equal(await page.getByLabel('Federal Home or Work ZIP',{exact:true}).inputValue(),'00000','Partial ZIP entry survives controlled edits');
-  await page.getByRole('checkbox',{name:/I confirmed standard active, non-postal/}).check();
+  await page.getByLabel('Employee Rate Category',{exact:true}).selectOption('active');
   await page.getByText('Browse Federal Options and Published Benefits',{exact:true}).click();
   await page.getByLabel('Search Federal Options',{exact:true}).fill('GEHA');
   await page.getByText('GEHA · HDHP',{exact:true}).click();
-  await page.getByRole('button',{name:'Review 342',exact:true}).click();
+  await page.getByRole('button',{name:'Add 342',exact:true}).click();
   const review=page.locator('main .fehb-review').first();
-  await review.locator(':scope > summary').click();
+  assert.equal(await review.getAttribute('open'),'','Missing federal fields automatically expand their option');
   assert.equal(await review.getByLabel('Per-Person OOP Max',{exact:true}).inputValue(),'','Self-only maximum is never copied into family coverage');
+  assert.equal(await review.getByLabel('Per-Person OOP Max',{exact:true}).getAttribute('aria-invalid'),'true');
+  assert.ok(await review.getByLabel('Per-Person OOP Max',{exact:true}).isVisible());
   assert.equal(await page.locator('main .oe-result').count(),3,'Unreviewed federal rules do not displace completed private comparisons');
   await noOverflow('federal benefit review');
   await review.getByRole('button',{name:'Remove Option 1',exact:true}).click();
@@ -74,8 +89,7 @@ module.exports=async function checkEnrollment({page,navigate,noOverflow,name,wid
   await page.getByLabel('Full-Year Waiver Payment',{exact:true}).fill('1200');
   await page.getByLabel('First Eligible Plan Month',{exact:true}).fill('1');
   await page.getByLabel('Last Eligible Plan Month',{exact:true}).fill('12');
-  await page.getByRole('checkbox',{name:/I confirmed full waiver eligibility/}).check();
-  assert.equal(await price(),beforeWaiver-1200,'A confirmed waiver changes the displayed household cost');
+  assert.equal(await price(),beforeWaiver-1200,'An entered waiver changes the displayed household cost');
   await noOverflow('employer waiver incentives');
   await page.getByRole('button',{name:'Remove Incentive',exact:true}).click();
   await page.getByRole('button',{name:'Share Employer Options',exact:true}).click();

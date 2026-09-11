@@ -897,3 +897,15 @@ button, input, select { font: inherit; }
 .oe-page .budget-check input { flex: 0 0 auto; margin-top: 3px; }
 .oe-page select { max-width: 100%; min-width: 0; }
 @media (max-width: 600px) { .fehb-tier > span { flex-basis: 100%; } .fehb-panel .oe-actions { align-items: flex-start; } }
+
+/* Enrollment errors belong to their input, including inside collapsed sections. */
+.oe-input-field { min-width: 0; }
+.oe-input-field .budget-field { width: 100%; }
+.oe-input-error input, .oe-input-error select, .oe-input-error button { border-color: #bc3549; }
+.oe-input-error .input-affix { border-color: #bc3549; }
+.oe-field-error { display: block; color: #a72338; margin-top: 5px; line-height: 1.45; }
+.oe-plan-start { min-width: 0; border: 0; padding: 0; margin: 0; }
+.oe-plan-start legend { font-weight: 650; margin-bottom: 12px; }
+.oe-incomplete { padding: 12px 0; }
+.oe-incomplete p { margin: 0 0 8px; }
+@media (max-width: 600px) { .oe-plan-start .oe-fields { grid-template-columns: minmax(0,1fr) minmax(0,1fr); } }

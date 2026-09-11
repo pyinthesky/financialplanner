@@ -13,7 +13,6 @@ export function employerAdjustments(e:Enrollment,options:HealthOption[]) {
     if(!w.employer||seen.has(w.employer)){issues.push('Each waiver must belong to a different employee.');continue;}seen.add(w.employer);
     if(employers.has(w.employer))continue;
     if(employers.has('')||!options.length)continue;
-    if(!w.confirmed){issues.push('Confirm the waiver requirements for enrollment in the other employer’s coverage.');continue;}
     if(w.basis==='gross'&&w.taxRate===null){issues.push('Enter the applicable tax estimate or a confirmed take-home waiver amount.');continue;}
     if(w.firstMonth===null||w.lastMonth===null||w.firstMonth>w.lastMonth){issues.push('Enter a valid first and last eligible waiver month (1–12).');continue;}
     if(w.payment==='annual'&&(w.payoutMonth===null||w.payoutMonth<w.lastMonth)){issues.push('Choose an annual payout month on or after the last eligible month.');continue;}
@@ -25,8 +24,7 @@ export function employerAdjustments(e:Enrollment,options:HealthOption[]) {
   }
   for(const p of options){
     if((p.spouseSurcharge??0)>0){
-      if(!p.surchargeConfirmed)issues.push('Confirm the spousal surcharge applies to this option’s covered group.');
-      else for(let i=0;i<12;i++)surcharges[i]+=(p.spouseSurcharge??0)/12;
+      for(let i=0;i<12;i++)surcharges[i]+=(p.spouseSurcharge??0)/12;
     }
   }
   return {issues,months,surcharges,waiverIncome:months.reduce((a,b)=>a+b,0),surcharge:surcharges.reduce((a,b)=>a+b,0)};

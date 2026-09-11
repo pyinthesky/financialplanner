@@ -1,3 +1,4 @@
+import { healthInputErrors } from './enrollment-validation.ts';
 import { employerAdjustments, type Waiver, type Arrangement } from './enrollment-incentives.ts';
 /** Local, user-entered benefit comparison. See docs/open-enrollment.md for boundaries. */
 export type Money = number | null;
@@ -54,39 +55,14 @@ const sum = (values: number[]) => values.reduce((a,b)=>a+b,0);
 const monthKey=(start:string,offset:number)=>{const [y,m]=start.split('-').map(Number);return `${y+Math.floor((m-1+offset)/12)}-${String((m-1+offset)%12+1).padStart(2,'0')}`;};
 /** One complete benefit year; allowances accrue by service month, never bill month. */
 function compareBaseHealth(e: Enrollment, p: HealthOption, medicalScale = 1): EnrollmentResult {
-  const issues: string[] = [], n=e.people.length, family=n>1;
-  if(p.hraAnnual!=null){if(p.hsa)issues.push('This comparison cannot combine an HSA and HRA in one option.');if(!p.hraConfirmed)issues.push('Confirm the HRA reimburses the modeled covered medical/Rx costs with its full allowance available at plan-year start.');}
-  const need=(v:Money,label:string)=>{if(v===null)issues.push(label);};
-  if(!e.startMonth)issues.push('Choose a plan-year start month.');if(!n)issues.push('Add the people covered by every compared option.');
-  need(p.premium,'Enter the employee premium per pay period.');need(p.payPeriods,'Enter annual pay periods.');if(e.people.some(person=>(person.annualMedical??0)>0))need(p.coinsurance,'Enter the member medical coinsurance percentage.');need(p.individualMax,'Enter the per-person out-of-pocket limit.');
-  if(family){need(p.familyMax,'Enter the family out-of-pocket limit.');need(p.familyDeductible,'Enter the family deductible.');}
-  if(!family||p.deductibleMode==='embedded')need(p.individualDeductible,'Enter the per-person deductible.');
-  if(family&&p.individualMax!==null&&p.familyMax!==null&&p.individualMax>p.familyMax)issues.push('The per-person limit cannot exceed the family limit.');
-  if(family&&p.deductibleMode==='embedded'&&p.individualDeductible!==null&&p.familyDeductible!==null&&p.individualDeductible>p.familyDeductible)issues.push('The embedded deductible cannot exceed the family deductible.');
-  need(e.processingMonths,'Enter months from service to EOB (zero is valid).');need(e.dueMonths,'Enter months from EOB to payment due (zero is valid).');
-  if(p.hsa){if(((p.ownHsa??0)+(p.employerHsa??0)>0)&&!p.eligibilityConfirmed)issues.push('Confirm personal HSA contribution eligibility and the allowable contribution total.');if(!e.qualifiedConfirmed)issues.push('Confirm the modeled costs qualify for this HSA owner’s reimbursements.');
-    for(const [key,label] of [['contributionLimit','Allowable HSA contributions'],['employerHsa','Employer HSA contribution'],['ownHsa','Your HSA contribution'],['openingHsa','Opening HSA balance'],['taxRate','HSA tax-saving rate']] as const)need(p[key],`Enter ${label.toLowerCase()} (zero is valid).`);
-    need(e.reimbursementMonths,'Enter the HSA reimbursement delay.');if((p.employerHsa??0)+(p.ownHsa??0)>(p.contributionLimit??Infinity))issues.push('Employer and personal HSA contributions exceed the entered allowance.');
-  }
+  const issues = Object.values(healthInputErrors(e,p)), n=e.people.length, family=n>1;
   type Event={person:number;label:string;month:number;allowed:number;kind:CareKind;rule:Rule;payAtService?:boolean;hsaExcluded?:boolean};
   const events:Event[]=[];
   e.people.forEach((person,i)=>{
-    if(p.hsa&&(!person.hsaEligible||person.hsaEligible==='unknown'))issues.push(`Person ${i+1}: confirm eligibility for this HSA owner's reimbursements.`);
-    need(person.annualMedical,`Person ${i+1}: enter annual medical allowed charges, excluding the itemized care below.`);
-    if(person.basis==='priorOop')issues.push(`Person ${i+1}: prior out-of-pocket spending is not an allowed-charge estimate. Use insurer-negotiated charges before plan payments.`);
-    if(person.timing==='once')need(person.month,`Person ${i+1}: choose the medical service month.`);
     const annual=(person.annualMedical??0)*medicalScale;
     for(let j=0;j<(person.timing==='spread'?12:1);j++)events.push({person:i,label:'General Medical',month:person.timing==='spread'?j:(person.month??1)-1,allowed:annual/(person.timing==='spread'?12:1),kind:'medical',rule:{coverage:'covered',deductible:'shared',payment:'coinsurance',amount:p.coinsurance,countsOop:'yes'}});
-    person.care.forEach((c,j)=>{const label=c.label||`${c.kind==='prescription'?'Prescription':'Care'} ${j+1}`;need(c.allowed,`Person ${i+1}, ${label}: enter the allowed charge per visit/fill.`);need(c.count,`Person ${i+1}, ${label}: enter visits/fills per year.`);if(c.timing==='once')need(c.month,`Person ${i+1}, ${label}: choose a service month.`);
+    person.care.forEach((c,j)=>{const label=c.label||`${c.kind==='prescription'?'Prescription':'Care'} ${j+1}`;
       const rule=c.kind==='noncovered'?{...EMPTY_RULE,coverage:'excluded' as const}:p.rules[c.id]??EMPTY_RULE;
-      if(rule.coverage==='unknown')issues.push(`Person ${i+1}, ${label}: confirm coverage for this option.`);
-      if(rule.coverage==='covered'){
-        if(rule.deductible==='separate'&&c.kind!=='prescription')issues.push(`${label}: separate deductibles are supported only for prescriptions.`);
-        if(c.kind!=='preventive'&&rule.countsOop==='unknown')issues.push(`Person ${i+1}, ${label}: confirm whether member payments count toward the combined out-of-pocket limit.`);
-        if(rule.minimum!=null&&rule.maximum!=null&&rule.minimum>rule.maximum)issues.push(`${label}: the minimum charge exceeds the maximum charge.`);
-        if(c.kind!=='preventive')need(rule.amount,`${label}: enter the copay or coinsurance for this option.`);
-        if(rule.deductible==='separate'){need(p.rxIndividualDeductible,'Enter the separate per-person prescription deductible.');if(family)need(p.rxFamilyDeductible,'Enter the separate family prescription deductible.');}
-      }
       for(let k=0;k<(c.count??0);k++)events.push({person:i,label,month:c.timing==='once'?(c.month??1)-1:Math.floor(k*12/(c.count||1)),allowed:(rule.allowedOverride??c.allowed??0)*(c.kind==='medical'?medicalScale:1),kind:c.kind,rule,payAtService:c.payAtService??c.kind==='prescription',hsaExcluded:c.hsaExcluded});
     });
   });
@@ -121,11 +97,11 @@ function compareBaseHealth(e: Enrollment, p: HealthOption, medicalScale = 1): En
   const maxDelay=(e.processingMonths??0)+(e.dueMonths??0)+(p.hsa?e.reimbursementMonths??0:0);
   const timeline:CashMonth[]=Array.from({length:12+maxDelay},(_,i)=>({month:e.startMonth?monthKey(e.startMonth,i):`Month ${i+1}`,incurred:0,eob:0,bills:0,premium:i<12?premiums/12:0,ownContribution:i<12?own/12:0,employerContribution:i<12?(p.employerTiming==='upfront'?(i===0?employerFunds:0):employerFunds/12):0,reimbursement:0,outsideCash:0,hsaBalance:0,bridge:0}));
   const pending:number[]=Array(timeline.length).fill(0),eligibleBills:number[]=Array(timeline.length).fill(0);
-  claims.forEach(c=>{const bill=c.month+(c.payAtService?0:(e.processingMonths??0)+(e.dueMonths??0));timeline[c.month].incurred+=c.member;timeline[c.month+(e.processingMonths??0)].eob+=c.member;timeline[bill].bills+=c.member;if(p.hsa&&e.qualifiedConfirmed&&e.people[c.person].hsaEligible==='yes'&&!c.hsaExcluded){pending[bill+(e.reimbursementMonths??0)]+=c.member;eligibleBills[bill]+=c.member;}});
+  claims.forEach(c=>{const bill=c.month+(c.payAtService?0:(e.processingMonths??0)+(e.dueMonths??0));timeline[c.month].incurred+=c.member;timeline[c.month+(e.processingMonths??0)].eob+=c.member;timeline[bill].bills+=c.member;if(p.hsa&&e.people[c.person].hsaEligible==='yes'&&!c.hsaExcluded){pending[bill+(e.reimbursementMonths??0)]+=c.member;eligibleBills[bill]+=c.member;}});
   let balance=p.hsa?p.openingHsa??0:0,owed=0,bridge=0,peakBridge=0;
   timeline.forEach((m,i)=>{balance+=m.ownContribution+m.employerContribution;owed+=pending[i];const reimbursed=Math.min(balance,owed);balance-=reimbursed;owed-=reimbursed;m.reimbursement=reimbursed;m.hsaBalance=balance;m.outsideCash=m.premium+m.ownContribution+m.bills-reimbursed;bridge+=eligibleBills[i]-reimbursed;m.bridge=bridge;peakBridge=Math.max(peakBridge,bridge);});
   let hraReimbursement=0;
-  if(!p.hsa&&p.hraAnnual!=null&&p.hraConfirmed){let remaining=p.hraAnnual;const eligible=Array(timeline.length).fill(0);claims.filter(c=>c.covered>0).forEach(c=>{eligible[c.month+(c.payAtService?0:(e.processingMonths??0)+(e.dueMonths??0))]+=c.covered;});timeline.forEach((m,i)=>{const paid=Math.min(remaining,eligible[i]);remaining-=paid;hraReimbursement+=paid;m.hraReimbursement=paid;m.outsideCash-=paid;});}
+  if(!p.hsa&&p.hraAnnual!=null){let remaining=p.hraAnnual;const eligible=Array(timeline.length).fill(0);claims.filter(c=>c.covered>0).forEach(c=>{eligible[c.month+(c.payAtService?0:(e.processingMonths??0)+(e.dueMonths??0))]+=c.covered;});timeline.forEach((m,i)=>{const paid=Math.min(remaining,eligible[i]);remaining-=paid;hraReimbursement+=paid;m.hraReimbursement=paid;m.outsideCash-=paid;});}
   return {hraReimbursement,issues:[...new Set(issues)],claims,premiums,medical,prescriptions,excluded,total,netCost:total-employerFunds-taxSavings-premiumTaxSavings-hraReimbursement,taxSavings,premiumTaxSavings,employerFunds,maximumCovered:premiums+Math.min((p.individualMax??0)*n,family?p.familyMax??0:p.individualMax??0),people,timeline,endingHsa:balance,unreimbursed:owed,peakBridge};
 }
 /** Single employer option, with waiver income shown separately from insurance costs. */
@@ -136,7 +112,6 @@ export function compareHealth(e:Enrollment,p:HealthOption,medicalScale=1):Enroll
 /** A person belongs to exactly one primary plan; family accumulators never cross groups. */
 export function compareArrangement(e:Enrollment,a:Arrangement,options:HealthOption[]) {
   const issues:string[]=[],seen=new Set<string>(),selected:HealthOption[]=[];
-  if(!a.confirmed)issues.push('Confirm premiums, coverage tiers and HSA eligibility for the selected groups.');
   const groups=a.groups.map(g=>{
     const option=options.find(p=>p.id===g.optionId);
     if(!option){issues.push('Choose an available option for every coverage group.');return null;}
@@ -148,7 +123,7 @@ export function compareArrangement(e:Enrollment,a:Arrangement,options:HealthOpti
     const subset={...e,waivers:[],people:e.people.filter(p=>g.personIds.includes(p.id))};
     const result=compareBaseHealth(subset,option);
     issues.push(...result.issues.map(x=>(option.label||'Option')+': '+x));
-    if(option.federalReference){const n=subset.people.length,tier=option.federalReference.tier;if(tier==='self'&&n!==1||tier==='plusOne'&&n!==2||tier==='family'&&n<2)issues.push('Federal enrollment tier does not match its covered group.');if(!option.federalReference.reviewed)issues.push('Review federal plan benefits before comparing.');}
+    if(option.federalReference){const n=subset.people.length,tier=option.federalReference.tier;if(tier==='self'&&n!==1||tier==='plusOne'&&n!==2||tier==='family'&&n<2)issues.push('Federal enrollment tier does not match its covered group.');}
     return {option,result,people:subset.people};
   }).filter((g):g is NonNullable<typeof g>=>g!==null);
   if(seen.size!==e.people.length)issues.push('Assign every covered person once.');

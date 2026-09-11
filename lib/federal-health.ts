@@ -55,7 +55,6 @@ export function federalReviewIssues(e:Enrollment,o:HealthOption,people=e.people)
   if(p?.account==='Health Savings Account'&&!o.hsa&&o.hraAnnual==null)issues.push('Confirm HSA funding or enter a verified HRA alternative for this HDHP.');
   if(o.employer!==f?.employee)issues.push('Review the employee assigned to this federal option.');
   if(p&&!tiersForPeople(p,people.length).some(t=>t.tier===ref.tier))issues.push('The enrollment tier does not cover this group size.');
-  if(!ref.reviewed||ref.careSignature!==careSignature({...e,people}))issues.push('Review benefits, family limits, providers and prescriptions for these people and care inputs.');
   return issues;
 }
 export function federalCandidates(e:Enrollment,scale=1){

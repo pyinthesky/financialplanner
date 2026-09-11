@@ -29,15 +29,15 @@ test('explicit federal selection copies published tier amounts without inventing
  close(p.premium,t.biweekly);assert.equal(p.payPeriods,26);assert.equal(p.individualMax,null);assert.equal(p.individualDeductible,null);assert.equal(p.familyMax,t.maximum);assert.equal(p.federalReference.reviewed,false);assert.equal(p.coinsurance,null);
  const self=federalDraft(plan,plan.tiers.find(t=>t.tier==='self'),'you');assert.notEqual(self.individualMax,null);
 });
-test('federal ranking excludes stale, ineligible, wrong-year, wrong-group and unreviewed plans',()=>{
+test('federal ranking excludes stale, ineligible, wrong-year, wrong-group plans without certification gates',()=>{
  const {e}=fixture();e.federal={...blankFederal(),enabled:true,employee:'you',eligible:true};const plan=FEHB.plans.find(p=>p.id==='10-standard-option');const p={...federalDraft(plan,plan.tiers.find(t=>t.tier==='family'),'you'),coinsurance:20,individualDeductible:350,individualMax:6000};e.federal.options=[p];
- assert.ok(federalReviewIssues(e,p).length);assert.equal(comparisonEnrollment(e).options.length,1);
+ assert.deepEqual(federalReviewIssues(e,p),[]);assert.equal(comparisonEnrollment(e).options.length,2);
  p.federalReference.reviewed=true;p.federalReference.careSignature=careSignature(e);assert.deepEqual(federalReviewIssues(e,p),[]);assert.equal(comparisonEnrollment(e).options.length,2);
  const normalized=normalizeEnrollment(JSON.parse(JSON.stringify(e)));assert.equal(normalized.federal.options.length,1);assert.deepEqual(federalReviewIssues(normalized,normalized.federal.options[0]),[]);
  assert.ok(federalReviewIssues({...e,startMonth:'2027-01'},p).length);assert.ok(federalReviewIssues({...e,people:[e.people[0]]},p).length);
  assert.ok(federalReviewIssues({...e,federal:{...e.federal,eligible:false}},p).length);
  assert.ok(federalReviewIssues(e,{...p,federalReference:{...p.federalReference,version:'old'}}).length);
- e.people[0].annualMedical++;assert.ok(federalReviewIssues(e,p).some(s=>s.includes('Review benefits')));
+ e.people[0].annualMedical++;assert.deepEqual(federalReviewIssues(e,p),[]);
 });
 test('top-three rank uses total modeled cost, preserves every private option and re-ranks on medical stress',()=>{
  const {e,p}=fixture();e.options=Array.from({length:4},(_,i)=>({...p,id:`private-${i}`}));e.federal={...blankFederal(),enabled:true,employee:'you',eligible:true};
@@ -58,19 +58,19 @@ test('gross waiver needs a combined tax estimate; proration and payment timing s
  e.waivers[0].payment='quarterly';const a=employerAdjustments(e,[p]);close(a.months[2],150);close(a.months[5],450);close(a.months[8],300);
  e.waivers[0].payment='annual';e.waivers[0].payoutMonth=5;assert.ok(employerAdjustments(e,[p]).issues.length);
 });
-test('unconfirmed waiver and surcharge cannot win; surcharge does not consume OOP maximum',()=>{
- const {e,p}=fixture();e.waivers=[{...waiver(),confirmed:false}];assert.ok(compareHealth(e,p).issues.length);e.waivers=[];
- const r=compareHealth(e,{...p,spouseSurcharge:600,surchargeConfirmed:true});close(r.surcharge,600);close(r.netCost,compareHealth(e,p).netCost+600);close(r.people[0].oop,compareHealth(e,p).people[0].oop);assert.ok(compareHealth(e,{...p,spouseSurcharge:600}).issues.length);
+test('entered waiver and surcharge apply directly; surcharge does not consume OOP maximum',()=>{
+ const {e,p}=fixture();e.waivers=[{...waiver(),confirmed:false}];assert.deepEqual(compareHealth(e,p).issues,[]);close(compareHealth(e,p).waiverIncome,2400);e.waivers=[];
+ const r=compareHealth(e,{...p,spouseSurcharge:600,surchargeConfirmed:true});close(r.surcharge,600);close(r.netCost,compareHealth(e,p).netCost+600);close(r.people[0].oop,compareHealth(e,p).people[0].oop);assert.deepEqual(compareHealth(e,{...p,spouseSurcharge:600}).issues,[]);
 });
 test('split household groups have independent deductibles and suppress both full waivers',()=>{
  const {e,p}=fixture();const a={...p,id:'a',employer:'you'},b={...p,id:'b',employer:'partner'};e.waivers=[waiver(),{...waiver(),employer:'partner'}];const arrangement={id:'split',label:'',confirmed:true,groups:[{optionId:'a',personIds:['p1']},{optionId:'b',personIds:['p2']}]};const r=compareArrangement(e,arrangement,[a,b]);assert.deepEqual(r.issues,[]);close(r.waiverIncome,0);close(r.groups[0].result.medical,600);close(r.groups[1].result.medical,600);close(r.netCost,3600);
  assert.ok(compareArrangement(e,{...arrangement,groups:[{optionId:'a',personIds:['p1']},{optionId:'b',personIds:['p1']}]},[a,b]).issues.length);
  assert.ok(compareArrangement(e,{...arrangement,groups:[{optionId:'missing',personIds:['p1']},{optionId:'b',personIds:['p2']}]},[a,b]).issues.length);
- assert.ok(compareArrangement(e,{...arrangement,confirmed:false},[a,b]).issues.length);
+ assert.deepEqual(compareArrangement(e,{...arrangement,confirmed:false},[a,b]).issues,[]);
 });
 test('HRA benefit is capped at actual covered reimbursements and never creates retained HSA assets',()=>{
  const {e,p}=fixture();const r=compareHealth(e,{...p,hraAnnual:5000,hraConfirmed:true});close(r.hraReimbursement,1200);close(r.netCost,r.premiums);close(r.endingHsa,0);close(r.employerFunds,0);
- const capped=compareHealth(e,{...p,hraAnnual:500,hraConfirmed:true});close(capped.hraReimbursement,500);assert.ok(compareHealth(e,{...p,hraAnnual:500}).issues.length);
+ const capped=compareHealth(e,{...p,hraAnnual:500,hraConfirmed:true});close(capped.hraReimbursement,500);assert.deepEqual(compareHealth(e,{...p,hraAnnual:500}).issues,[]);close(compareHealth(e,{...p,hraAnnual:500}).hraReimbursement,500);
 });
 test('per-fill min/max cost sharing applies after deductible and cannot exceed allowed charges or OOP cap',()=>{
  const {e,p}=fixture();e.people=[{...newPerson('p1'),annualMedical:0,care:[{id:'rx',kind:'prescription',label:'',allowed:1000,count:1,timing:'once',month:1}]}];p.rules.rx={coverage:'covered',deductible:'shared',payment:'coinsurance',amount:50,countsOop:'yes',maximum:100};const r=compareHealth(e,p);close(r.prescriptions,600);
