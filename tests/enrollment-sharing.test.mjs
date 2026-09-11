@@ -32,3 +32,5 @@ test('HSA default uses wages after pretax savings, handles bracket crossings and
 test('HSA auto rate remains unknown for blank, net-only, wrong-year or complex household income',()=>{
  assert.equal(enrollmentFederalRate(DEFAULT_PLAN),null);for(const change of [p=>p.budget.pay[0].amount=4000,p=>p.enrollment.startMonth='2027-01',p=>p.budget.timeline.retirementMonthYou='2026-07',p=>p.household.currentAge=66,p=>p.income=[{annualAmount:1}],p=>p.rothConversionPlanning.annualConversionYou=1]){const p=wagePlan();change(p);assert.equal(enrollmentFederalRate(p),null);}
 });
+
+test('conditional waiver income disables a household-only HSA tax estimate',()=>{const p=wagePlan();p.enrollment.waivers=[{employer:'partner',amount:1200,basis:'net',taxRate:null,firstMonth:1,lastMonth:12,payment:'monthly',payoutMonth:null,confirmed:true}];assert.equal(enrollmentFederalRate(p),null);assert.equal(withEnrollmentTax(p,p.enrollment).options[0].taxRate,null);p.enrollment.options[0].taxRate=15;assert.equal(withEnrollmentTax(p,p.enrollment).options[0].taxRate,15);});

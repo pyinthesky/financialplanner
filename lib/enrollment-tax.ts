@@ -5,6 +5,9 @@ import { payrollAnnualIncome } from './payroll-contributions.ts';
 import type { Enrollment, HealthOption } from './enrollment.ts';
 export function enrollmentFederalRate(plan:PlannerData):number|null{
   const h=plan.household,e=plan.enrollment;
+  // An opt-out payment can alter taxable wages differently for each coverage choice.
+  // A confirmed take-home amount does not establish its taxable gross.
+  if(e?.waivers?.some(w=>(w.amount??0)>0))return null;
   if(e?.startMonth!=='2026-01'||!h.currentAge||h.currentAge>=65||h.maritalStatus==='married'&&(!h.partnerAge||h.partnerAge>=65)||!['single','marriedJoint'].includes(h.filingStatus))return null;
   if(h.filingStatus==='marriedJoint'&&h.maritalStatus!=='married'||h.filingStatus==='single'&&h.maritalStatus!=='single')return null;
   if(plan.budget.timeline?.startYear!==2026)return null;
