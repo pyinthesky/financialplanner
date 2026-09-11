@@ -10,8 +10,9 @@ export function serviceLabel(key:string,r?:PublishedRule){return r?.label??MEDIC
 export function applyPublishedBenefits(o:HealthOption):HealthOption {
   const ref=o.federalReference,m=publishedBenefits(o);if(!ref||!m||ref.version!==FEHB_BENEFITS.catalogVersion)return o;
   const family=ref.tier!=='self';const fields={...m.fields};
+  const rules=Object.fromEntries(Object.entries(o.rules).map(([id,r])=>[id,!ref.benefitVersion&&r.coverage!=='unknown'?{...r,manual:true}:r]));
   if(!family){delete fields.individualMax;delete fields.individualDeductible;delete fields.deductibleMode;}
-  return {...o,...fields,...(family?{deductibleMode:fields.deductibleMode??'unknown',familyDeductible:m.tierDeductibles[ref.tier],individualDeductible:fields.deductibleMode==='aggregate'?null:fields.individualDeductible??null,individualMax:fields.individualMax??null}:{individualDeductible:m.tierDeductibles.self}),federalReference:{...ref,benefitVersion:FEHB_BENEFITS.version}};
+  return {...o,...fields,rules,...(family?{deductibleMode:fields.deductibleMode??'unknown',familyDeductible:m.tierDeductibles[ref.tier],individualDeductible:fields.deductibleMode==='aggregate'?null:fields.individualDeductible??null,individualMax:fields.individualMax??null}:{individualDeductible:m.tierDeductibles.self}),federalReference:{...ref,benefitVersion:FEHB_BENEFITS.version}};
 }
 /** Personal care categories are local. A formulary tier is chosen for each plan, not inferred from a drug name. */
 export function publishedCareRule(o:HealthOption,c:Care):Rule {

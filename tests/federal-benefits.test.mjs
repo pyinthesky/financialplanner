@@ -49,3 +49,10 @@ test('a shared medical category remains linked after saved hydration, unless exp
  e=normalizeEnrollment(JSON.parse(JSON.stringify(e)));e.people[0].care[0].service='specialist';e=withFederalBenefits(e);assert.equal(e.federal.options[0].rules.office.amount,50);
  e.federal.options[0].rules.office.service='primary';assert.equal(withFederalBenefits(e).federal.options[0].rules.office.amount,35);
 });
+
+test('applying published benefits to a legacy option preserves its already-entered service rules',()=>{
+ const o=option('34-hdhp');delete o.federalReference.benefitVersion;
+ o.rules.office={coverage:'covered',countsOop:'yes',payment:'copay',amount:23,deductible:'exempt'};
+ const next=applyPublishedBenefits(o);assert.equal(next.rules.office.manual,true);assert.equal(publishedCareRule(next,care('office','primary',200)).amount,23);
+ assert.equal(publishedCareRule(next,care('new','primary',200)).amount,5);
+});
