@@ -88,6 +88,8 @@ def map_plan(plan,terms,brochure):
         if not rule:unresolved[key]='Published benefit needs detailed mapping.';continue
         if rule.get('coverage')=='excluded':rules[key]=rule;continue
         rule.update(coverage='covered',countsOop='yes')
+        if key.startswith('rx') and facts.get('rxIndividualDeductible',0)>0 and rule['amount']>0:
+            unresolved[key]='Separate prescription deductible needs plan-specific mapping.';continue
         # OPM rows describe covered in-network care; exclusions are separate care inputs.
         if rule['amount']==0 and not re.search(r'deductible applies|after.*deductible',extra,re.I):rule['deductible']='exempt'
         elif (zero and (not key.startswith('rx') or facts.get('rxIndividualDeductible')==0)) or re.search(r'no deductible|\$0 (?:calendar year )?deductible|deductible (?:does not apply|waived)',extra,re.I):rule['deductible']='exempt'

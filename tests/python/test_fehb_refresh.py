@@ -2,7 +2,7 @@
 import sys, unittest, copy, json
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts'))
-from fehb_mapping import number,scalar,family_facts,compile_catalog,line_ref,validate_mapping
+from fehb_mapping import number,scalar,family_facts,compile_catalog,line_ref,validate_mapping,map_plan
 from fehb_sources import BrochureText,brochure_number,brochure_url
 class MappingTests(unittest.TestCase):
  def setUp(self):
@@ -36,6 +36,9 @@ class MappingTests(unittest.TestCase):
  def test_invalid_cost_rules_rejected(self):
   for r in [{'coverage':'covered','countsOop':'yes','deductible':'shared','payment':'coinsurance','amount':101},{'coverage':'covered','countsOop':'yes','deductible':'exempt','payment':'copay','amount':5,'minimum':20,'maximum':10}]:
    with self.assertRaises(ValueError):validate_mapping({'fields':{},'services':{'test':r}},self.plan)
+ def test_separate_rx_deductible_never_becomes_shared_medical_deductible(self):
+  terms={'Annual Deductible for Prescriptions Only (Self)':'$250','Tier 3':'30% Coinsurance','Tier 3 Additional Details':'$250 Calendar Year Deductible'}
+  m=map_plan(self.plan,terms,{'lines':[]});self.assertNotIn('rx3',m['services']);self.assertIn('rx3',m['unresolvedServices'])
  def test_identifiers_and_html(self):
   self.assertEqual(brochure_number('RI-73 899'),'73-899')
   with self.assertRaises(ValueError):brochure_number('../file')
