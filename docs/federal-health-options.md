@@ -1,6 +1,6 @@
 # Federal Health Options and Employer Incentives
 
-Research and design recorded September 11, 2026. **Status: source discovery and annual refresh scheduled; catalog import, checkbox, household coverage combinations and stipend calculations are planned, not implemented.** Existing manually entered health-option comparisons continue to work. This document is the implementation contract for the extension.
+Research and design recorded September 11, 2026. **Status: implemented with explicit benefit review. The catalog, checkbox, reviewed top-three shortlist, employer incentives and split household comparisons are available. Automatic interpretation of every OPM free-text benefit remains unsupported; unresolved options do not enter the ranking.** Existing manually entered health-option comparisons continue to work. The design below records the implemented boundaries and the remaining automation requirements.
 
 ## Official Source Inventory
 
@@ -41,11 +41,11 @@ Each row should show premium, expected member medical/Rx cost, employer HSA/HRA 
 
 Rank with unrounded calculations and disclose ties at displayed precision. If fewer than three plans are fully modeled, show fewer. If some eligible plans remain unresolved, say “Lowest modeled costs among X reviewed eligible options; Y need review,” and do not present a global best-plan star. A missing prescription rule or unknown limit is never zero. Avoid selecting three by premium and presenting them as lowest total cost.
 
-## Why the Current Calculator Needs an Extension
+## Benefit Review and Automation Boundaries
 
 The current engine applies one general medical coinsurance assumption to an annual medical amount and supports detailed rules for entered care items. OPM has distinct PCP, specialist, facility, surgery, therapy and pharmacy benefits, with conditions in free text. For example, some pharmacy percentages have dollar caps per prescription. Flattening those rules to a single percentage would mis-rank plans.
 
-Before automatic ranking:
+Before an option enters the reviewed ranking (and before any future fully automatic catalog mapping):
 
 1. Add compact service categories to per-person use inputs, with optional visits/procedures and negotiated allowed costs. Preserve a simple annual-total mode as an explicitly limited estimate; unresolved service mix must not produce a definitive catalog-wide winner.
 2. Interpret copays, coinsurance, minimum/maximum charges, deductible exceptions, prior authorization, visit limits, network differences and separate/shared accumulators explicitly. Keep the original benefit text alongside reviewed rules. Unknown or contradictory mappings fail closed for ranking.
@@ -99,7 +99,7 @@ OPM can revise files outside that date (the 2026 service-area file was revised i
 
 Ship validated public reference data with the static site. Calculate location eligibility, medical costs, family accumulators, incentives and ranking entirely in the browser. No household/ZIP/health/employer data is sent to OPM or any other provider. Only generic public source files are fetched by maintenance. Shared employer-option exports continue to use an allowlist and exclude household membership, private care, tax estimates and personally elected incentives. Consider a separate reviewed employer-incentive template later; never add household data to the coworker-share format.
 
-## Delivery Order and Acceptance
+## Delivery and Acceptance
 
 1. Public-source importer and year/version manifest, service-area and rate-tier matching; tests for source changes, duplicate joins, wrong program/year/rate category, ZIP/county ambiguity and missing records.
 2. Employer ownership, independent covered-person groups and Section 2a incentives; tests for waived/enrolled combinations, both/one/no eligible payment, gross/net handling, proration, surcharge conditions and payroll duplication.
@@ -107,4 +107,14 @@ Ship validated public reference data with the static site. Calculate location el
 4. Federal checkbox, top-three reviewed shortlist and pinned private options; tests for input-driven re-ranking, ties, incomplete candidates, reference-version preservation and private-option export isolation.
 5. Mobile/browser/PDF checks, clear source/readiness labels and a wholly fictional FEHB/private-employer example. No private screenshots, memory-derived household values or real user's employers/medical information may become public fixtures.
 
-Source discovery is complete. The feature is not complete until these calculation and UI acceptance conditions are met; a list of premiums alone is not a valid replacement.
+Implemented September 11, 2026:
+
+- Reproducible standard-library importer, exact source hashes, schema/duplicate/ambiguous-rate guards and versioned 2026 catalog. Run `python scripts/import-fehb.py --year 2026 --cache /tmp/opm-research --download` for those reviewed editions. A different year fails closed until its source manifest is reviewed; original workbooks stay outside the repository. Service-area suffix sets are not joined as enrollment codes.
+- Compact directory, geography filters, 12 separate federal review slots, scalar service-price suggestions, source text and links, explicit family/formulary review, top-three full-household shortlist, pin/show-all controls and reference/care invalidation. Only January 2026 comparisons use this catalog. Government contributions are not counted as employee cash benefits.
+- Per-employer gross/net waivers and group-dependent eligibility, proration and payment timing; surcharges; two-group comparisons with independent accumulators and full coverage checks. Shared HSA allowances require explicit confirmation; automatic split-plan contribution allocation and dual coverage are excluded.
+- Per-fill minimum/maximum charges after deductibles; HRA reimbursement capped by actual modeled covered care, with no retained-asset benefit. HRA timing currently requires full allowance at the start of the year and reimbursement when covered bills are paid; other HRA designs remain unresolved.
+- Enrollment PDF and monthly ledgers include the applied incentives. Coworker exports do not include this personal configuration. Search Console verification uses only the supplied meta tag, without analytics. Enrollment/catalog code is loaded when the tab opens.
+
+The source text remains the review aid, not a machine-certified mapping. Automatic category-wide benefit interpretation, insurer-specific negotiated prices, assistance accumulators, prescription formulary verification and special enrollee rate classes remain intentionally outside the supported calculation. The ranking is **lowest cost among reviewed options**, never a claim to have evaluated every eligible plan automatically.
+
+Regression coverage includes source counts/joins, tier and location handling, stale review/import behavior, top-three re-ranking, gross/net and payout calculations, surcharge/OOP separation, HRA limits, per-fill caps, split accumulators and export privacy. The release browser journey exercises the federal checkbox/review and a waiver changing displayed costs on mobile and desktop. No personal source material is used.

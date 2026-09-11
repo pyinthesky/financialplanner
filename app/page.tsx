@@ -3,9 +3,10 @@ import { HouseholdMembers } from '@/components/household-members';
 import { EducationAccounts, EducationSummary } from '@/components/education';
 import { withEnrollmentTax } from '@/lib/enrollment-tax';
 
-import { OpenEnrollment, EnrollmentPrint } from '@/components/open-enrollment';
+const OpenEnrollment = lazy(() => import('@/components/open-enrollment').then(m => ({default:m.OpenEnrollment})));
+const EnrollmentPrint = lazy(() => import('@/components/open-enrollment').then(m => ({default:m.EnrollmentPrint})));
 import { EMPTY_ENROLLMENT } from '@/lib/enrollment';
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, BriefcaseBusiness, Building2, Calculator, ChevronRight, CircleDollarSign, Download, FileUp, HeartPulse, Home, Landmark, Lock, LockKeyhole, Menu, Plus, Printer, ReceiptText, ShieldCheck, Trash2, Unlock, WalletCards } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
 
@@ -2337,7 +2338,7 @@ export default function HomePage() {
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
-    : activeSection === "enrollment" ? <OpenEnrollment plan={plan} onChange={setPlan}/> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan} initialSelected={selectedScenarioId}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    : activeSection === "enrollment" ? <Suspense fallback={<p role="status">Loading Open Enrollment…</p>}><OpenEnrollment plan={plan} onChange={setPlan}/></Suspense> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan} initialSelected={selectedScenarioId}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>
@@ -2436,7 +2437,7 @@ export default function HomePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {activeSection === "enrollment" ? <EnrollmentPrint enrollment={plan.enrollment ?? EMPTY_ENROLLMENT}/> : <PrintReport data={plan} projection={projection} successRate={successRate} debtMonths={payoffMonths} />}
+      {activeSection === "enrollment" ? <Suspense fallback={null}><EnrollmentPrint enrollment={withEnrollmentTax(plan,plan.enrollment ?? EMPTY_ENROLLMENT)}/></Suspense> : <PrintReport data={plan} projection={projection} successRate={successRate} debtMonths={payoffMonths} />}
     </>
   );
 }

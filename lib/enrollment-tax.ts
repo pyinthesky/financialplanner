@@ -2,7 +2,7 @@ import type { PlannerData } from './planner.ts';
 import { calculateFederalIncomeTax } from './federal-tax.ts';
 import { payrollReconciliation, retirementMonths } from './budget-calendar.ts';
 import { payrollAnnualIncome } from './payroll-contributions.ts';
-import type { Enrollment } from './enrollment.ts';
+import type { Enrollment, HealthOption } from './enrollment.ts';
 export function enrollmentFederalRate(plan:PlannerData):number|null{
   const h=plan.household,e=plan.enrollment;
   if(e?.startMonth!=='2026-01'||!h.currentAge||h.currentAge>=65||h.maritalStatus==='married'&&(!h.partnerAge||h.partnerAge>=65)||!['single','marriedJoint'].includes(h.filingStatus))return null;
@@ -24,10 +24,11 @@ export function withEnrollmentTax(plan:PlannerData,e:Enrollment):Enrollment{
   const rate=enrollmentFederalRate({...plan,enrollment:e});
   if(rate===null)return e;
   const income=payrollAnnualIncome(plan)!;
-  return {...e,options:e.options.map(p=>{
+  const apply=(p:HealthOption)=>{
     if(p.taxRate!==null||!p.hsa)return p;
     const contribution=p.ownHsa??0;
     const saving=calculateFederalIncomeTax(income,plan.household.filingStatus).tax-calculateFederalIncomeTax(Math.max(0,income-contribution),plan.household.filingStatus).tax;
-    return {...p,taxRate:contribution>0?saving/contribution*100:rate};
-  })};
+    return {...p,autoTaxEstimate:true,taxRate:contribution>0?saving/contribution*100:rate};
+  };
+  return {...e,options:e.options.map(apply),...(e.federal?{federal:{...e.federal,options:e.federal.options.map(apply)}}:{})};
 }

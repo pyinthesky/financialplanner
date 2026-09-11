@@ -882,3 +882,18 @@ button, input, select { font: inherit; }
 .planner-navigation [data-sidebar="group-label"] { height: 1.6rem; font-size: .72rem; font-weight: 700; letter-spacing: .045em; color: #a9bad2; }
 .planner-navigation [data-sidebar="menu-button"] { height: auto; }
 .planner-navigation [data-sidebar="menu-button"] > span:first-of-type { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }
+
+/* Federal references remain a compact directory; only chosen reviews expand. */
+.fehb-panel, .fehb-review > .oe-detail { display: grid; gap: 14px; min-width: 0; }
+.fehb-candidate, .fehb-review { border: 1px solid var(--border); border-radius: 12px; padding: 12px; min-width: 0; }
+.fehb-candidate > summary, .fehb-review > summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; cursor: pointer; overflow-wrap: anywhere; }
+.fehb-candidate > summary span, .fehb-review > summary span { font-size: .875rem; color: var(--muted-foreground); }
+.fehb-tier { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding: 10px 0; }
+.fehb-terms { max-height: 350px; overflow-y: auto; display: grid; gap: 10px; margin: 0; }
+.fehb-terms dt { font-weight: 600; font-size: .875rem; }
+.fehb-terms dd { margin: 3px 0 0; font-size: .875rem; overflow-wrap: anywhere; white-space: pre-wrap; }
+.fehb-group { display: grid; gap: 10px; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; min-width: 0; }
+.oe-page .budget-check { align-items: flex-start; }
+.oe-page .budget-check input { flex: 0 0 auto; margin-top: 3px; }
+.oe-page select { max-width: 100%; min-width: 0; }
+@media (max-width: 600px) { .fehb-tier > span { flex-basis: 100%; } .fehb-panel .oe-actions { align-items: flex-start; } }

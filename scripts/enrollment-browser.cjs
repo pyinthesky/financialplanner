@@ -42,6 +42,42 @@ module.exports=async function checkEnrollment({page,navigate,noOverflow,name,wid
     if(name==='chromium')await page.pdf({path:path.join(out,'synthetic-enrollment-report.pdf'),format:'Letter',printBackground:true});
     await page.emulateMedia({media:'screen'});
   }
+  // Federal directory and incentive flow use only public source values and fictional care.
+  assert.equal(await page.locator('meta[name="google-site-verification"]').getAttribute('content'),'0c6rIGtsi0vIXaNJcUnNhDZHn7Hlev-DG2C3p_K-8GA');
+  await page.getByRole('checkbox',{name:'Include Federal Employee Options',exact:true}).check();
+  await page.getByLabel('Federal Employee',{exact:true}).selectOption('you');
+  await page.getByLabel('Federal Home or Work ZIP',{exact:true}).fill('00000');
+  assert.equal(await page.getByLabel('Federal Home or Work ZIP',{exact:true}).inputValue(),'00000','Partial ZIP entry survives controlled edits');
+  await page.getByRole('checkbox',{name:/I confirmed standard active, non-postal/}).check();
+  await page.getByText('Browse Federal Options and Published Benefits',{exact:true}).click();
+  await page.getByLabel('Search Federal Options',{exact:true}).fill('GEHA');
+  await page.getByText('GEHA · HDHP',{exact:true}).click();
+  await page.getByRole('button',{name:'Review 342',exact:true}).click();
+  const review=page.locator('main .fehb-review').first();
+  await review.locator(':scope > summary').click();
+  assert.equal(await review.getByLabel('Per-Person OOP Max',{exact:true}).inputValue(),'','Self-only maximum is never copied into family coverage');
+  assert.equal(await page.locator('main .oe-result').count(),3,'Unreviewed federal rules do not displace completed private comparisons');
+  await noOverflow('federal benefit review');
+  await review.getByRole('button',{name:'Remove Option 1',exact:true}).click();
+  await page.getByRole('checkbox',{name:'Include Federal Employee Options',exact:true}).uncheck();
+  const privateOptions=page.locator('main .oe-options > .oe-option');
+  for(let i=0;i<3;i++){
+    const card=privateOptions.nth(i);
+    await card.getByText('Employer & Surcharge',{exact:true}).click();
+    await card.getByLabel('Coverage Employer',{exact:true}).selectOption('partner');
+    await card.getByText('Employer & Surcharge',{exact:true}).click();
+  }
+  const price=async()=>Number((await page.locator('main .oe-result .oe-price').first().textContent()).replace(/[^0-9.-]/g,''));
+  const beforeWaiver=await price();
+  await page.getByText('2a. Employer Incentives',{exact:true}).click();
+  await page.getByRole('button',{name:'Add Your Waiver Payment',exact:true}).click();
+  await page.getByLabel('Full-Year Waiver Payment',{exact:true}).fill('1200');
+  await page.getByLabel('First Eligible Plan Month',{exact:true}).fill('1');
+  await page.getByLabel('Last Eligible Plan Month',{exact:true}).fill('12');
+  await page.getByRole('checkbox',{name:/I confirmed full waiver eligibility/}).check();
+  assert.equal(await price(),beforeWaiver-1200,'A confirmed waiver changes the displayed household cost');
+  await noOverflow('employer waiver incentives');
+  await page.getByRole('button',{name:'Remove Incentive',exact:true}).click();
   await page.getByRole('button',{name:'Share Employer Options',exact:true}).click();
   await noOverflow('employer export review');
   const downloadPromise=page.waitForEvent('download');
