@@ -1,8 +1,9 @@
+import { applyPublishedBenefits, withFederalBenefits, FEHB_BENEFITS } from './federal-benefits.ts';
 import data from '../data/fehb/2026.json' with {type:'json'};
 import { compareHealth, newOption, type Enrollment, type FederalSelection, type HealthOption, type Rule } from './enrollment.ts';
 export type FederalTier = {code:string;tier:string;biweekly:number;deductible:number|null;maximum:number|null;accountContribution:number|null};
 export type FederalPlan = {id:string;name:string;option:string;planCode:string;network:string;kind:string;account:string;brochure:string;links:Record<string,string>;tiers:FederalTier[];nationwide:boolean;regions:[string,boolean,string,string,boolean,string][];terms:Record<string,string>};
-export const FEHB = {...data,plans:data.plans.map(p=>({...p,terms:Object.fromEntries(p.terms.map(([k,v])=>[data.dictionary[k],data.dictionary[v]]))}))} as unknown as {year:number;version:string;retrieved:string;rateType:string;sources:{name:string;url:string;released:string;sha256:string}[];counts:{planNames:number;options:number;enrollmentCodes:number};plans:FederalPlan[]};
+export const FEHB = {...data,plans:data.plans.map(p=>({...p,tiers:p.tiers.map(t=>({...t,deductible:FEHB_BENEFITS.plans[p.id]?.tierDeductibles[t.tier]??t.deductible})),terms:Object.fromEntries(p.terms.map(([k,v])=>[data.dictionary[k],data.dictionary[v]]))}))} as unknown as {year:number;version:string;retrieved:string;rateType:string;sources:{name:string;url:string;released:string;sha256:string}[];counts:{planNames:number;options:number;enrollmentCodes:number};plans:FederalPlan[]};
 export const blankFederal=():FederalSelection=>({enabled:false,employee:'',zip:'',state:'',county:'',eligible:false,options:[]});
 export function federalLocation(plan:FederalPlan,f:FederalSelection):'match'|'unknown'|'outside' {
   if(plan.nationwide)return 'match';
@@ -32,7 +33,7 @@ export function federalDraft(p:FederalPlan,t:FederalTier,employee:FederalSelecti
   else {o.familyDeductible=t.deductible;o.familyMax=t.maximum;}
   o.hsa=p.account==='Health Savings Account';if(o.hsa)o.employerHsa=t.accountContribution;
   if(p.account==='Health Reimbursement Arrangement')o.hraAnnual=t.accountContribution;
-  o.federalReference={id:p.id,version:FEHB.version,tier:t.tier,reviewed:false,careSignature:''};return o;
+  o.federalReference={id:p.id,version:FEHB.version,tier:t.tier,reviewed:false,careSignature:''};return applyPublishedBenefits(o);
 }
 export const SERVICE_CATEGORIES=['Primary Care Office Visit','Specialist Office Visit','Urgent Care','Emergency Care','Diagnostic Tests or Procedures (e.g., Blood Tests, X-rays, Urinalysis, Ultrasounds)','Diagnostic Tests or Procedures (e.g., CT scans, MRIs, PET Scans)','Professional Services (Mental Health and Substance Use Disorder)','Physical Therapy','Occupational Therapy','Speech Therapy','Applied Behavioral Analysis (ABA)','Doctor Costs for Outpatient Surgery','Other Outpatient Surgery Costs','Hospital Inpatient Cost Per Admission','Tier 0','Tier 1','Tier 2','Tier 3','Tier 4','Tier 5','Tier 6'];
 /** Only exact scalar prices are suggested. Coverage, deductible and OOP treatment still require review. */
@@ -48,7 +49,7 @@ export function federalReviewIssues(e:Enrollment,o:HealthOption,people=e.people)
   if(!f?.enabled)issues.push('Federal options are disabled.');
   if(!f?.eligible||!f.employee)issues.push('Confirm standard active non-postal FEHB eligibility and the employee.');
   if(e.startMonth!==`${FEHB.year}-01`)issues.push(`This catalog supports the ${FEHB.year} calendar benefit year only.`);
-  if(!p||ref.version!==FEHB.version)issues.push('This saved federal reference needs a current source review.');
+  if(!p||ref.version!==FEHB.version||(ref.benefitVersion&&ref.benefitVersion!==FEHB_BENEFITS.version))issues.push('This saved federal reference needs a current source review.');
   if(p&&f&&federalLocation(p,f)!=='match')issues.push('Confirm a matching federal service area.');
   if(o.coveredPersonIds&&(new Set(o.coveredPersonIds).size!==people.length||people.some(p=>!o.coveredPersonIds!.includes(p.id))))issues.push('Review the people assigned to this federal enrollment tier.');
   if(p?.account==='Health Reimbursement Arrangement'&&o.hraAnnual==null)issues.push('Enter the confirmed HRA allowance, including explicit zero when applicable.');
@@ -58,6 +59,7 @@ export function federalReviewIssues(e:Enrollment,o:HealthOption,people=e.people)
   return issues;
 }
 export function federalCandidates(e:Enrollment,scale=1){
+  e=withFederalBenefits(e);
   return (e.federal?.enabled?e.federal.options:[]).map(option=>({option,result:compareHealth({...e,people:option.coveredPersonIds?e.people.filter(p=>option.coveredPersonIds!.includes(p.id)):e.people},option,scale),issues:federalReviewIssues(e,option)})).map(c=>({...c,result:{...c.result,issues:[...c.result.issues,...c.issues]}}));
 }
 export function comparisonEnrollment(e:Enrollment,scale=1):Enrollment {

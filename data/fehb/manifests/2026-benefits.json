@@ -1,0 +1,1588 @@
+{
+  "year": 2026,
+  "catalogVersion": "2026-7c8c491d5132",
+  "reviewedAt": "2026-09-11",
+  "brochures": {
+    "71-004": "3131533e1ba57db3e2571e93d6b2159f9e1ebaaa3090a999269abe29cc6d72fc",
+    "71-005": "0d98a5d378d66291ffb7d874938f1645aed8313289b602fb7ee08682f836a506",
+    "71-006": "67d8c9c09eb97b7cbad657d89c0f0b8d8243d14f56bf1e03440e59c08f565e6c",
+    "71-007": "7a5124578db304a3976a39ead92690f207974f756d6c01dce97a4856e9bacd2f",
+    "71-014": "e3d8cb8a690258fbbc4bb60b12944a8072557fcd9a5e68393f8e6685cd122cea",
+    "71-015": "bf095bd429d1b5dd834bb065d86c412eaf36135f59c12888606678da29097d7d",
+    "71-016": "a208f652e1bda33b3dd9dd16482681be6dbc4c30a5927479e396c959e31f83f9",
+    "71-017": "2a8bdc1f0b70071461e88ef40b1676a71d70c61ab030176e883f7046eec9e7b1",
+    "71-018": "06c2a518cf27bd7594b8c2344818593eba9e1692723abf63e4e47abcc5095fc8",
+    "71-028": "3030b29e7f48696006e5a98496c06e52afd991632dea0a6ad53059dbf612895f",
+    "72-001": "c890c1f75c6bc7f238e13600acf93c71ea537966acefb2a0241e1ad248bec8b8",
+    "72-004": "e6ba348c9d75eb4fef22db16cf64236d74694b1ad2056cf8b64ebc8d62283297",
+    "73-003": "e85fc53ec446461052090cc5d74ad6c727f320463190934d578b62577d743695",
+    "73-004": "c9cf1a92a92bc58238e161c1b991e78cbfda984777515073d1c1ddd2faea9361",
+    "73-005": "d6e43a89873c406245d54cc508ce5c06af11aeb94545ec4813a788eb50c18290",
+    "73-009": "fbd24b2a8acd7879004d2590a4ab0e3b81bb5436b1e535b3aa0a24dd719f5c00",
+    "73-010": "2dc153a59647025b52ca25de2b16be7781a70341a25d3b9fb19c06379ca68e71",
+    "73-012": "b8092d2030965db0baea9f8ed7b7acb7359b5b17761f79bdf2d1440de0559993",
+    "73-015": "8832c03f7fe8c8f267314ba14e2ee8a8db72fd3b79628ed4026d33b2572d951f",
+    "73-016": "05f0c4bd2d4eafe2295f56fb0a1c51766afb040e9e938fa3532ba73582fa51e6",
+    "73-017": "70b2658da525760d66212110449ee5cede8878dd980c1fee71f770facea1d252",
+    "73-019": "eeeab2260046e9db57114c52ec14ddd9f50cc0efdb4e1480c0ca6136b1449b35",
+    "73-047": "9e6a48258aec6f1857318255fdf9475ac00e393c992d005aeb0cd598e7b0bdd9",
+    "73-051": "e60ed50a4dce4cc3e8b9f6912da73da977e7dfe3039108f13695f7c6eec3cfee",
+    "73-052": "6d388a2630f3d315aa4bde30f28a8183498fa39317a08673f939d3578f49207d",
+    "73-061": "e59602f2151410c4107c2f8b839fb15c5603574252b3bd5356a94c292c1f5b2f",
+    "73-100": "e7755d5398be258e8be9d8cc2c47e65f1e0f953efbe7d3ba1e07f4793cd57b78",
+    "73-103": "e1d0d7856b8305f46ba0663254049e5a7705ce13dc0b2c798fb0bb94b32d0851",
+    "73-129": "b635f6747070cd4e509aad2f8713c87de98bcd853db33a422c7d18e0d76be749",
+    "73-153": "3438d3d7740a55e5a81279578766ab622c8495672ed3ca979fac50b9fb1a3101",
+    "73-159": "642f16492105dd339ce599b82b4cb1e0d22ad4c5db72832c34952938aee7c8a3",
+    "73-197": "2309e8f2bdcd046f4a79feff7ea0f9303107c923210e1f27f31211909cf75976",
+    "73-321": "d608e10f8f0a76fca778f531f000d288d3a5834e23df31645907d22dfbd572bd",
+    "73-563": "be6998ec6682512d0ad78f8d1d49de2dde3b608a820b3b86d63a76b5daadd216",
+    "73-564": "af261f85119e3fb32718851782fd4be2d1ba1b8046a97abc0a423554f10198ae",
+    "73-718": "4aa3ddd8d3bbda9bf03bcc5d17279b895f0f57d474c2c6f0e07b3ec04d66dd0a",
+    "73-776": "49fd3ee09664ac39f969ce6e275c75d8721e817bbc9af5f3fdb8efbc028f1d4f",
+    "73-797": "654b62cad5fcea9e1cd1cdc81cf34c17a1089d884e508142628ca4af4ac01924",
+    "73-806": "0d17b0a30e72e8e0136e90f1fe7b4975bc3d914f75236c93e4a6342d9602db5e",
+    "73-822": "c474201de3e5efcf0dcec7fb8fc04dc8ea3280396fef17ab03ffeac6a9eb1748",
+    "73-828": "b38478c700b7ff90d1beeeb2f85196fffbc279bc3507c0dc1252618b7e77208d",
+    "73-849": "570656b47cc7a0062e6f3d1bb59c14c4055017fb8dc530a4dd17f6ade67367f4",
+    "73-851": "8e90391451df286d2d49ee2f442acaf7d1f4c5d0cf4f3354450531ef32827367",
+    "73-860": "4c260331754ce3464e4b21d1b3c0848143646a1a5222319bac2120f59bcb7a98",
+    "73-865": "bf356400c17b7dd16bd906bc4698945b47fb4d8422c98f8ee4255c61ec186b4a",
+    "73-874": "34453d136b3f5139ff73f05046eb1607a2792f1644b1c6869217f9e1b0d20f35",
+    "73-877": "42679373198d8e1f17f193dce54ecfcca1d9b2567ee7c9d263ed5eb06b97733c",
+    "73-879": "714dbbf31f624d0d99164ccc7a34401d5cbf01af39f85261ca1a4e94cea3e595",
+    "73-881": "4210c92129cd2b0d23d1929999a9ad8658e9773a967649b8a4a4b2b89cdff49b",
+    "73-889": "c1f84799e96e7c534e666cd5cf45cd2a263d64d6bc907f2f2bfc8e600607b2c3",
+    "73-890": "36951507422f955ef835b5b283f792dbf9546c4875e25bf0c5ca56218746f7e6",
+    "73-891": "93cf3c158c2d2bca8ff6864fa6ecfde5fec43d64b8a8c869870c890e3f13d510",
+    "73-896": "8e41b6521379a3c6bace820002baea1ea75101f1673882b1507eb9b80d4957f5",
+    "73-898": "f3948f470b55558ee88ca060e3fd83c19ebe703abdfe412284142064a369b61e",
+    "73-899": "1ea59aa3ba173eb5f5aff4ed67a0b972f88fd04f0a33a6ccb4fc82254ae298f5",
+    "73-900": "41d75038f272a2866b0b850db4dec3b03ba7ae578f98dc388a2e5653fd58111a",
+    "73-906": "8862e3756b2dcba9ca4b0664b2f7872cdc7e453ff79b32a44091ed36bfc0a5bf",
+    "73-936": "026fb6c3c884ef0b6ecb1535a949ce9d39cc48f6f7ac1e7951ddfdae6b98efd7",
+    "73-937": "0ab33c68c43efc2eee1576461c0ab60160aca8e325aa19dae33152244282fdd1"
+  },
+  "plans": {
+    "10-standard-option": {
+      "fields": {
+        "deductibleMode": "embedded",
+        "individualDeductible": 350,
+        "individualMax": 6000,
+        "coinsurance": 15
+      },
+      "services": {
+        "primary": {
+          "payment": "copay",
+          "amount": 30.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt"
+        },
+        "specialist": {
+          "payment": "copay",
+          "amount": 40.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt"
+        },
+        "rx1": {
+          "payment": "copay",
+          "amount": 7.5,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "payment": "coinsurance",
+          "amount": 30.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "label": "Tier 2 — 30-Day Network Fill"
+        },
+        "rx3": {
+          "payment": "coinsurance",
+          "amount": 50.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "label": "Tier 3 — 30-Day Network Fill"
+        },
+        "labs": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 15,
+          "deductible": "shared"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 15,
+          "deductible": "shared"
+        },
+        "surgery": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 15,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 15,
+          "deductible": "shared"
+        },
+        "inpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 350,
+          "deductible": "exempt"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "2fae949598311fc56f7a3c94141ed8698a5ebef88d3aca507f6e9bd329256db0",
+          "dee8add368d8fb64ab7e57651205480862b6f43843118e227f520b8d5acd3b43",
+          "edb4399ef0a305dcd8a93be1fd20dac258dbeae8b536858d6a10745e6375bcdd"
+        ]
+      },
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "11-basic-option": {
+      "fields": {
+        "deductibleMode": "embedded",
+        "individualDeductible": 0,
+        "individualMax": 7500
+      },
+      "services": {
+        "primary": {
+          "payment": "copay",
+          "amount": 35.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt"
+        },
+        "specialist": {
+          "payment": "copay",
+          "amount": 50.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt"
+        },
+        "rx1": {
+          "payment": "copay",
+          "amount": 15.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "payment": "coinsurance",
+          "amount": 35.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 150,
+          "label": "Tier 2 — 30-Day Network Fill"
+        },
+        "rx3": {
+          "payment": "coinsurance",
+          "amount": 60.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "label": "Tier 3 — 30-Day Network Fill"
+        },
+        "rx1_90": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 40,
+          "deductible": "exempt",
+          "label": "Tier 1 — 31–90 Days"
+        },
+        "rx2_90": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 35,
+          "deductible": "exempt",
+          "maximum": 400,
+          "label": "Tier 2 — 31–90 Days"
+        },
+        "labsBlood": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "exempt",
+          "label": "Blood Tests / Pathology / EKG — Professional Bill"
+        },
+        "labsXray": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 40,
+          "deductible": "exempt",
+          "label": "X-Ray / Ultrasound — Professional Bill"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 100,
+          "deductible": "exempt"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 250,
+          "deductible": "exempt",
+          "label": "Outpatient Facility — per Day (Enter Days as Count)"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "2fae949598311fc56f7a3c94141ed8698a5ebef88d3aca507f6e9bd329256db0",
+          "dee8add368d8fb64ab7e57651205480862b6f43843118e227f520b8d5acd3b43",
+          "edb4399ef0a305dcd8a93be1fd20dac258dbeae8b536858d6a10745e6375bcdd"
+        ]
+      },
+      "removeServices": [
+        "labs",
+        "inpatient"
+      ],
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "31-high-option": {
+      "fields": {
+        "deductibleMode": "embedded",
+        "individualDeductible": 500,
+        "individualMax": 7500,
+        "coinsurance": 20
+      },
+      "services": {
+        "specialist": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 45,
+          "deductible": "exempt"
+        },
+        "primary": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 30,
+          "deductible": "exempt"
+        },
+        "labs": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "surgery": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "inpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "rx1": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "label": "Tier 1 — 30 Days, Non-Maintenance"
+        },
+        "rx2": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "exempt",
+          "maximum": 250,
+          "label": "Tier 2 — 30 Days, Non-Maintenance"
+        },
+        "rx3": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 40,
+          "deductible": "exempt",
+          "maximum": 400,
+          "label": "Tier 3 — 30 Days, Non-Maintenance"
+        },
+        "rx4": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "exempt",
+          "maximum": 350,
+          "label": "Preferred Specialty — 30 Days, CVS Specialty"
+        },
+        "rx5": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 40,
+          "deductible": "exempt",
+          "maximum": 400,
+          "label": "Non-Preferred Specialty — 30 Days, CVS Specialty"
+        },
+        "rx1_maintenance": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "label": "Tier 1 — 30-Day Retail Maintenance (Outside Maintenance Choice)",
+          "after": {
+            "count": 2,
+            "group": "",
+            "payment": "coinsurance",
+            "amount": 50,
+            "deductible": "exempt",
+            "keepHigher": true
+          }
+        },
+        "rx2_maintenance": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "exempt",
+          "maximum": 250,
+          "label": "Tier 2 — 30-Day Retail Maintenance (Outside Maintenance Choice)",
+          "after": {
+            "count": 2,
+            "group": "",
+            "payment": "coinsurance",
+            "amount": 50,
+            "deductible": "exempt",
+            "keepHigher": true
+          }
+        },
+        "rx3_maintenance": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 40,
+          "deductible": "exempt",
+          "maximum": 400,
+          "label": "Tier 3 — 30-Day Retail Maintenance (Outside Maintenance Choice)",
+          "after": {
+            "count": 2,
+            "group": "",
+            "payment": "coinsurance",
+            "amount": 50,
+            "deductible": "exempt",
+            "keepHigher": true
+          }
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "b9d664be7d2abd98f9eedbad65f7ede4d422380edce17734b0a1aa2848803546",
+          "4ee5592fe55f01c75a79a3fb06edcae543fce51b1754d670e0f11c0adffed10a",
+          "564f57da1178ab0440a9f4945aa638bbf56a8cf871f992cbdb38e3a4aaf39a9f",
+          "4ba6fa96e0ee420bdf4b23bde60030e15ebde61e5ec7831335d355375c823b59",
+          "481649b488d914edbdaed1315c05b0fe71db1fa4ad99d935500fc9714d218cee",
+          "8c619aff0d14693f3c2251579744b4e84ac2ddd243812ddccbd93d5f080d1c10",
+          "7c1f8a8349c8a706a5de2412ca2c10fe4ce07632075f6fa8ea6c929a67e13427",
+          "c3954c62a1efc1e56cd136c5f38612a4e9e06e5493fdd2ebfe9e34f7955ae028",
+          "5d86627d298c2fd68be4505d9cdb2ebb2f8b1fe02ea60791ae583c99862f85af",
+          "6e16c2ff643c4452045d99816091965f1c1d4be4ada674ed8985fd5123f85a8e",
+          "eb09da350c338d9501865723c7d2b9e224131935406ceddd602a1141a554081a",
+          "7c1b2d87e0bd99e6807449fb558be7e6d4031eda7bcf89bb3379b20373538dee",
+          "63fad7776d912c266ad0f86133e5b7e74d95b5e694ec4941272475ef31b2954f",
+          "6e16c2ff643c4452045d99816091965f1c1d4be4ada674ed8985fd5123f85a8e",
+          "4ef9df1a63877fab7c84bceb113ea0ba4476132462f39bc6cb6408f71e67bb5d",
+          "edfcd18d8a99a53a55f8308248e8f1a60493cf097fb16c5bf3ef991c706b9ba4",
+          "16023467f5116b1d23a6cd367ae88aafa22001b794a42e2254706a6e8daee654",
+          "7c1b2d87e0bd99e6807449fb558be7e6d4031eda7bcf89bb3379b20373538dee",
+          "8735a04ed3dd5ea958d49fc00d27dc8d8d01e36d099b90860699d10ed2136c3f",
+          "a7533540a92631d93907974b5bd8c43a3a35990c76fa4e5861c0ca65c37934d2"
+        ]
+      },
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "31-standard-option": {
+      "fields": {
+        "deductibleMode": "embedded",
+        "individualDeductible": 500,
+        "individualMax": 8000,
+        "coinsurance": 25
+      },
+      "services": {
+        "specialist": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 50,
+          "deductible": "exempt"
+        },
+        "primaryAdult": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 35,
+          "deductible": "exempt",
+          "label": "Primary Care — Age 18 or Older"
+        },
+        "primaryChild": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 0,
+          "deductible": "exempt",
+          "label": "Primary Care — Under Age 18",
+          "after": {
+            "count": 1,
+            "group": "primary-child",
+            "payment": "copay",
+            "amount": 35,
+            "deductible": "exempt"
+          }
+        },
+        "labs": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared"
+        },
+        "surgery": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared"
+        },
+        "inpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared"
+        },
+        "rx1": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 40,
+          "deductible": "exempt",
+          "maximum": 350,
+          "label": "Tier 2 — 30-Day Network Fill"
+        },
+        "rx3": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 60,
+          "deductible": "exempt",
+          "maximum": 550,
+          "label": "Tier 3 — 30-Day Network Fill"
+        },
+        "rx4": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 50,
+          "deductible": "exempt",
+          "maximum": 450,
+          "label": "Preferred Specialty — 30 Days, CVS Specialty"
+        },
+        "rx5": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 50,
+          "deductible": "exempt",
+          "maximum": 600,
+          "label": "Non-Preferred Specialty — 30 Days, CVS Specialty"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "b9d664be7d2abd98f9eedbad65f7ede4d422380edce17734b0a1aa2848803546",
+          "4ee5592fe55f01c75a79a3fb06edcae543fce51b1754d670e0f11c0adffed10a",
+          "564f57da1178ab0440a9f4945aa638bbf56a8cf871f992cbdb38e3a4aaf39a9f",
+          "4ba6fa96e0ee420bdf4b23bde60030e15ebde61e5ec7831335d355375c823b59",
+          "481649b488d914edbdaed1315c05b0fe71db1fa4ad99d935500fc9714d218cee",
+          "8c619aff0d14693f3c2251579744b4e84ac2ddd243812ddccbd93d5f080d1c10",
+          "7c1f8a8349c8a706a5de2412ca2c10fe4ce07632075f6fa8ea6c929a67e13427",
+          "c3954c62a1efc1e56cd136c5f38612a4e9e06e5493fdd2ebfe9e34f7955ae028",
+          "5d86627d298c2fd68be4505d9cdb2ebb2f8b1fe02ea60791ae583c99862f85af",
+          "6e16c2ff643c4452045d99816091965f1c1d4be4ada674ed8985fd5123f85a8e",
+          "eb09da350c338d9501865723c7d2b9e224131935406ceddd602a1141a554081a",
+          "7c1b2d87e0bd99e6807449fb558be7e6d4031eda7bcf89bb3379b20373538dee",
+          "63fad7776d912c266ad0f86133e5b7e74d95b5e694ec4941272475ef31b2954f",
+          "6e16c2ff643c4452045d99816091965f1c1d4be4ada674ed8985fd5123f85a8e",
+          "4ef9df1a63877fab7c84bceb113ea0ba4476132462f39bc6cb6408f71e67bb5d",
+          "edfcd18d8a99a53a55f8308248e8f1a60493cf097fb16c5bf3ef991c706b9ba4",
+          "16023467f5116b1d23a6cd367ae88aafa22001b794a42e2254706a6e8daee654",
+          "7c1b2d87e0bd99e6807449fb558be7e6d4031eda7bcf89bb3379b20373538dee",
+          "8735a04ed3dd5ea958d49fc00d27dc8d8d01e36d099b90860699d10ed2136c3f",
+          "a7533540a92631d93907974b5bd8c43a3a35990c76fa4e5861c0ca65c37934d2"
+        ]
+      },
+      "removeServices": [
+        "primary"
+      ],
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "34-hdhp": {
+      "fields": {
+        "deductibleMode": "aggregate",
+        "individualMax": 6000,
+        "coinsurance": 5
+      },
+      "services": {
+        "primary": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "specialist": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "labs": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "surgery": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "inpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "emergency": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "urgent": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "mental": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 5,
+          "deductible": "shared"
+        },
+        "rx1": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared",
+          "label": "Tier 2 — 30-Day Network Fill"
+        },
+        "rx3": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 40,
+          "deductible": "shared",
+          "label": "Tier 3 — 30-Day Network Fill"
+        },
+        "rx4": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 25,
+          "deductible": "shared",
+          "label": "Tier 4 — 30-Day Network Fill"
+        },
+        "rx5": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 40,
+          "deductible": "shared",
+          "label": "Tier 5 — 30-Day Network Fill"
+        },
+        "rxInsulin": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 15,
+          "deductible": "exempt",
+          "label": "Preferred Insulin — 30-Day Network Retail"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "c38766560c5354b454ea8bc30f6467162524126c507c4d294599f31e63110e84",
+          "272e02c5832e439516e04b3205f3fe13ed2f68094d7aea90c77cc4021af15f4c",
+          "6af596475c66bc050b0c5d95ed6258962393aef9d760aa8ea1e871a87e3e9bac",
+          "153e154e7f5da1547fb0259cfa2ad6f54cd5230eb4d3ae3d3db53328030d31aa",
+          "81d5c653b935bc58ae2e29aa828c332ac40a7280c1d30fc9d84a19b745dee2c9",
+          "71f693bcf5c29239ed6b2e612e35f371e772fa42fbe9cc9f1cfcd1988e4e42ab",
+          "4a86313aba2a8c5c367384b71030d38a7679f33e141c7961c697ee247af0ab4c",
+          "2314160d36fd5036d219d148e8079c43aee69ff1ddac0a385abd20b78e5242c6",
+          "8449e23181b6ce466574b99aa1d8ad65c6db76170584de93ac3f33cc55d2e354",
+          "0814a7309d10463234fc1da40482d66637fa733d32e605bce34cf99a6e3470bd",
+          "abe41ab4abb46a3244b2f0f6f73ce3848d7314ade34ce42605847b8a6469b716",
+          "3c456613c094ab746f56d29717fc2bf31225db2c935d55a0653546351ffe323b"
+        ]
+      },
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "13-fep-blue-focus": {
+      "fields": {
+        "deductibleMode": "embedded",
+        "individualDeductible": 750,
+        "individualMax": 10000,
+        "coinsurance": 30
+      },
+      "services": {
+        "primary": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "after": {
+            "count": 10,
+            "group": "office-mental",
+            "payment": "coinsurance",
+            "amount": 30,
+            "deductible": "shared"
+          }
+        },
+        "specialist": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "after": {
+            "count": 10,
+            "group": "office-mental",
+            "payment": "coinsurance",
+            "amount": 30,
+            "deductible": "shared"
+          }
+        },
+        "mental": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "after": {
+            "count": 10,
+            "group": "office-mental",
+            "payment": "coinsurance",
+            "amount": 30,
+            "deductible": "shared"
+          }
+        },
+        "labs": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 30,
+          "deductible": "shared"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 30,
+          "deductible": "shared"
+        },
+        "surgery": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 30,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 30,
+          "deductible": "shared"
+        },
+        "inpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 30,
+          "deductible": "shared"
+        },
+        "rx1": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 5,
+          "deductible": "exempt",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 40,
+          "deductible": "exempt",
+          "maximum": 500,
+          "label": "Tier 2 — 30-Day Network Fill"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "15660dbd74778b3bee87caea9307968daaba55d0bebe294b80839ba0219bd965",
+          "3697c098242e04ee7a272df1b8699cb52457c97f9f416a9a6f6d4b7054ff4cb8",
+          "c9bc3f88c8a13653de090ccc1edc15c81cbe097cd3809b4cf9c63739aff58454",
+          "267cc1d5af35d3545e99945a2a64720f4d3fd777af2a885618069078be2f4793"
+        ]
+      },
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "45-standard-option": {
+      "fields": {
+        "deductibleMode": "embedded",
+        "individualMax": 6000,
+        "individualDeductible": 350,
+        "coinsurance": 10
+      },
+      "services": {
+        "specialist": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 30,
+          "deductible": "exempt"
+        },
+        "primaryAdult": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 20,
+          "deductible": "exempt",
+          "label": "Primary Care — Employee / Spouse or Child Age 22+"
+        },
+        "primaryChild": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "label": "Primary Care — Dependent Child Through Age 21"
+        },
+        "labs": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 10,
+          "deductible": "shared"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 10,
+          "deductible": "shared"
+        },
+        "surgery": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 10,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 10,
+          "deductible": "shared"
+        },
+        "rx1": {
+          "payment": "copay",
+          "amount": 5.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "payment": "coinsurance",
+          "amount": 30.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 200.0,
+          "label": "Tier 2 — 30-Day Network Fill"
+        },
+        "rx3": {
+          "payment": "coinsurance",
+          "amount": 50.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 200.0,
+          "label": "Tier 3 — 30-Day Network Fill"
+        },
+        "rx4": {
+          "payment": "coinsurance",
+          "amount": 15.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 225.0,
+          "label": "Tier 4 — 30-Day Network Fill"
+        },
+        "rx5": {
+          "payment": "coinsurance",
+          "amount": 15.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 225.0,
+          "label": "Tier 5 — 30-Day Network Fill"
+        },
+        "rx6": {
+          "payment": "coinsurance",
+          "amount": 25.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 275.0,
+          "label": "Tier 6 — 30-Day Network Fill"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "07f42377610a89b39a1ffcbd7a3c8d8bb4ff12c44d91588dcd69aa9707d3850a",
+          "0cbed90fafd4079075e6c04143406733e0222eeeaf77acffc9c39b23acf151d9",
+          "ec5648f6117f16b0fc79724a70bc0599cab42e0a9895137174b7ce9259c80c42",
+          "c63370764dfdfa48d89d1e956291aeea0cfc467166505faa4cf5dee5339a53cc",
+          "ab3be4fc39faf5692ab1adb5eafad0e02cd9665709803d633810c65181a63463"
+        ]
+      },
+      "removeServices": [
+        "primary"
+      ],
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "41-value-option": {
+      "fields": {
+        "deductibleMode": "embedded",
+        "individualMax": 6600,
+        "individualDeductible": 600,
+        "coinsurance": 20
+      },
+      "services": {
+        "specialist": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 50,
+          "deductible": "exempt"
+        },
+        "primaryAdult": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 30,
+          "deductible": "exempt",
+          "label": "Primary Care — Employee / Spouse or Child Age 22+"
+        },
+        "primaryChild": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 10,
+          "deductible": "exempt",
+          "label": "Primary Care — Dependent Child Through Age 21"
+        },
+        "labs": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "imaging": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "surgery": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "coinsurance",
+          "amount": 20,
+          "deductible": "shared"
+        },
+        "rx1": {
+          "payment": "copay",
+          "amount": 10.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "payment": "coinsurance",
+          "amount": 45.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 300.0,
+          "label": "Tier 2 — 30-Day Network Fill"
+        },
+        "rx3": {
+          "payment": "coinsurance",
+          "amount": 75.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 500.0,
+          "label": "Tier 3 — 30-Day Network Fill"
+        },
+        "rx4": {
+          "payment": "coinsurance",
+          "amount": 50.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 600.0,
+          "label": "Tier 4 — 30-Day Network Fill"
+        },
+        "rx5": {
+          "payment": "coinsurance",
+          "amount": 50.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 600.0,
+          "label": "Tier 5 — 30-Day Network Fill"
+        },
+        "rx6": {
+          "payment": "coinsurance",
+          "amount": 50.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "exempt",
+          "maximum": 700.0,
+          "label": "Tier 6 — 30-Day Network Fill"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "07f42377610a89b39a1ffcbd7a3c8d8bb4ff12c44d91588dcd69aa9707d3850a",
+          "0cbed90fafd4079075e6c04143406733e0222eeeaf77acffc9c39b23acf151d9",
+          "ec5648f6117f16b0fc79724a70bc0599cab42e0a9895137174b7ce9259c80c42",
+          "c63370764dfdfa48d89d1e956291aeea0cfc467166505faa4cf5dee5339a53cc",
+          "ab3be4fc39faf5692ab1adb5eafad0e02cd9665709803d633810c65181a63463"
+        ]
+      },
+      "removeServices": [
+        "primary"
+      ],
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    },
+    "48-consumer-option": {
+      "fields": {
+        "deductibleMode": "aggregate",
+        "individualMax": 6500
+      },
+      "services": {
+        "specialist": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 15,
+          "deductible": "shared"
+        },
+        "primary": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 15,
+          "deductible": "shared"
+        },
+        "outpatient": {
+          "coverage": "covered",
+          "countsOop": "yes",
+          "payment": "copay",
+          "amount": 150,
+          "deductible": "shared"
+        },
+        "rx1": {
+          "payment": "copay",
+          "amount": 10.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "shared",
+          "label": "Tier 1 — 30-Day Network Fill"
+        },
+        "rx2": {
+          "payment": "coinsurance",
+          "amount": 30.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "shared",
+          "maximum": 200.0,
+          "label": "Tier 2 — 30-Day Network Fill"
+        },
+        "rx3": {
+          "payment": "coinsurance",
+          "amount": 50.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "shared",
+          "maximum": 200.0,
+          "label": "Tier 3 — 30-Day Network Fill"
+        },
+        "rx4": {
+          "payment": "coinsurance",
+          "amount": 30.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "shared",
+          "maximum": 225.0,
+          "label": "Tier 4 — 30-Day Network Fill"
+        },
+        "rx5": {
+          "payment": "coinsurance",
+          "amount": 30.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "shared",
+          "maximum": 225.0,
+          "label": "Tier 5 — 30-Day Network Fill"
+        },
+        "rx6": {
+          "payment": "coinsurance",
+          "amount": 30.0,
+          "coverage": "covered",
+          "countsOop": "yes",
+          "deductible": "shared",
+          "maximum": 275.0,
+          "label": "Tier 6 — 30-Day Network Fill"
+        }
+      },
+      "evidence": {
+        "section": "Sections 4, 5(a), 5(f)",
+        "lineHashes": [
+          "9798aec6fbd7abed76dbc2fd9e5a4c2e06e79f1320640842b6b8a2c6022887ce",
+          "c41de628baff343a61b4013cf5cacaf24ba4b19a37189960443a297fda059a46",
+          "7708d662fa69aa416b3e51f1e40e66b24f43711c916cbdfe59da9120e0e8e89e",
+          "5e50aa21c990b14773cc68e234ba9423b4a446fc0552446460855939e3896acc"
+        ]
+      },
+      "scope": "Covered in-network care without Medicare coordination. Itemize visits, facility charges and prescriptions separately. Formulary tier, required approvals and negotiated prices remain person-specific."
+    }
+  },
+  "supplements": {
+    "71-004": "87c2e63e0005c0f806df50007ac3f323e71aff3780448dbe124e9ba021dad9f3",
+    "71-005": "e5b371dbff81c71808da05fb2a4e2bad7b11c39bb3b49fdee1505c043111a7c1",
+    "71-006": "84ae6e29cb2f65c1f56a7f7e1191a813cdd1aec0bf8978a5de57a98660b5a21a",
+    "71-007": "59292980304af31aeffeb3dc2e778576bd1645447d2dd22e74e80924c8cd39e9",
+    "71-014": "c93430bcc42e9ada4799d964e4bb95817827d069c96fd031f637bd1deeab222f",
+    "71-015": "91541648b9ad4eb2743fa4612b97802bed475efd9b0fa4176d6fe74e2fe69b77",
+    "71-016": "366c14196c31c99d5f74fa09f326078a7fb1f87d8f75caf8c2d7e5b45ee115e2",
+    "71-017": "08109c847b02bd5c99e25501c8ca447fe951b770b231da5ad8bd215a3d23fc5b",
+    "71-018": "fb4f97b205ecd5c4e5d609f246cbd1cbc68b70cb7740ff552647a7e35548ef35",
+    "71-028": "05e71a2e92d83681ce4eaef0f39234d7ef8bf28de1779c9f136948ea83b60b56",
+    "72-001": "a4405dd58ea865fc4991a564cbef031316248134aaa603a6b6bdefeeb170a7f7",
+    "72-004": "f8905c37dee7124ece42d8c22fc13982971d6d704a8aa50ba7448c8d766b0e36",
+    "73-003": "bc33eecef20fbff1dbd03efb6488335ea477652c498690cedf00d8a0cef30c9d",
+    "73-004": "f7f062b59a12b74547ce50ed27290652b65f5e3e149963015a00b55be42b118b",
+    "73-005": "8567618a0c2a6a114fc6bff9c03a705239ee5af7594f774b7735d3f66f128aba",
+    "73-009": "828927b5656346c57936864b3cb29c83679fd6964ac1c4d1f9e8246120618038",
+    "73-010": "97aff2f50676d29a3bed2e802b548b19ba6c2c13f71a04b99523b58f6219ea28",
+    "73-012": "5d9ddf085143b60f4900826a1c562c0794eb5d9c604971eb082abbfed98c3f96",
+    "73-015": "cc2274aee83fa8afd0509c2ed093b571fde673e320acb9a6919e853563673425",
+    "73-016": "65941f50ff59cae345eb1fe04c42523a92237a3739659dfe9d5a263f58851bed",
+    "73-017": "d80fff879906269bdae3c4ca8feeb8c9a41707ebf4fee7bbe40b3e44c3e1bf0f",
+    "73-019": "6d1f81fc053535c3e3245bb1b83f4e7510402c917e38d737f9eb410da8f2e427",
+    "73-047": "d9df2103fc7063f23e209570ae4e888d100b46498693736e52fd446394f0be11",
+    "73-051": "1af8266b96ee74ac6268df0302595177298d04df1ae465be014c88866390942f",
+    "73-052": "721527bb3e0da237c7938c76d58ce937d50e7508ee4fc47ac03303bf21b6000d",
+    "73-061": "19356082602f64fbd4a6a88dd5557db20c6d84426af864d329386ff3312c645f",
+    "73-100": "246f61514ed3166bcbb6ccb7211d26f90f97c14d0c81b38d0db3278aaf3eb6cb",
+    "73-103": "3748b5d9f17846d07ab364a2a0e08edac37254188188de71a442c9ff9751b9ee",
+    "73-129": "0efacba1efbd6490fb4f3f351f4d9ced6b267c53a45bdb3269ba4e1b22152d81",
+    "73-153": "b0bd2f5ac83b2bbd88f54c4273da74338d7e57a9509dc365c6321965f72f2047",
+    "73-159": "e32a136ab2e648f2f2de2f91eb574b498f1d192b121119eaf6bfc7e7243a152b",
+    "73-197": "00d6284b01ecc7c71380d389c8af71d484749c8735139b44fb6af9d7d560ff63",
+    "73-321": "5974e2574ee6212601d164a8a5491ff6e21aaa74a22891c66406ae870146a7f4",
+    "73-563": "20570e0335aed8fbe729c51545040fdb8da127113a97ab98897d73c0bec1a70a",
+    "73-564": "b774234ede6e1c3fcbe15bf1e943766e64aa2e94aed6ea4351bbe240a2b02351",
+    "73-718": "9f163839052c8c953f84e2cc33987caaa1bc83e993dc8c48db2a257b02293381",
+    "73-776": "14cd03073f184460c94749b742ced1166fce7367f91d3ecb1bb51b269d1a13b6",
+    "73-797": "ab1b55543f88cab6d304c783b90b20b90e92a35dd2146c8cf06e54a77432b815",
+    "73-806": "a69e90a9d6189cfc39dc06863a40d3628913267a54b0dac03b3a6c12bdeaf4f9",
+    "73-822": "a79cf8058394075623c61cafad2f6a3d1577f3b55847afa5f7189f2cc8c20283",
+    "73-828": "3d22ff119e64fe1a0bdc8d57ade25f86c920c76bd87f3252c71535ec782974eb",
+    "73-849": "d4ad1d2512a94b873643302797fe09d7a25ee26ee151a165bc1aa0fadcf146d3",
+    "73-851": "57bb9c2bf5d1cc1e0f97058476a0cb921996a07df7cad334b48aab23b963718c",
+    "73-860": "8aa1677c2aeec26e37cbe5945b71b31ba4644b5ce7c2db55a52c7404726c9fe0",
+    "73-865": "cb573ee761b174ef0e17a1e707b61898cec401fe031e82e89bccf9a1b519b195",
+    "73-874": "9b5aaf4cbd4bb344e4386aca840f01d5d44a83c41a5c7a32cfd5a5ecc28edae9",
+    "73-877": "55313ef37ffe7f7159cf989ebc28a5939391f6f969bca2b5e621e9d5dcf07501",
+    "73-879": "671662a91f7dcdb2e7e7d0858ee9c7dd37b5bacb9710a1b9736bac73e7ec30fd",
+    "73-881": "9975379ca987ebe81642865fe7325aba06a0f3cf88648723778df7745c1dc498",
+    "73-889": "308d75ff828321496dc958cd3935d4f05c0793cb53e11e6ed7da159281833e44",
+    "73-890": "9793b2a4c6aff87ccc5a465b2f96a703c54def7cb877fe20cf50fdb4c097d372",
+    "73-891": "aa5c80fa49c1e0cb58294e712d80786dfae37c97f936078b94c8b7c099ec8e33",
+    "73-896": "0b13f58f8c1c994304cffa35f6a0bed236d7ccd11a666713b30571cf1620f700",
+    "73-898": "cc89c25e790455889ab597a839275a9dc6b20d54cdcf2668e03fa8ea6d53495e",
+    "73-899": "23d430d6bd4679622943addaf03f41fad254a6569b9eae93c6448d992d429366",
+    "73-900": "ac94b3f54d95c41b849281763603cfe573fd2f860c808578ce9a47af7ff4f12c",
+    "73-906": "7e4d34a4e68197592682228cbf1fc345586a6558975ebe6e83b65ef6ec94c133",
+    "73-936": "541496f244b90dcec0a334fa1e5a20266db66fd316c1260ef9bde321a766cec9",
+    "73-937": "f1bc4323c2f85cc557dd2c6deb66de69264edf67950192361910ccacc992aa6e"
+  },
+  "sources": [
+    {
+      "name": "key",
+      "url": "https://www.opm.gov/healthcare-insurance/healthcare/transparency-in-healthcare/public-use-files/2026/fehb/2026-fehb-plan-key-11202025.xlsx",
+      "released": "2025-11-20",
+      "sha256": "da3f046c20758a944c49e3306ea46ce42c95e761e1faa78472cede42f69a7805"
+    },
+    {
+      "name": "rates",
+      "url": "https://www.opm.gov/healthcare-insurance/healthcare/transparency-in-healthcare/public-use-files/2026/fehb/2026-fehb-rates-10232025.xlsx",
+      "released": "2025-10-23",
+      "sha256": "8203394c0baa5046013cd0cf0a3ecadd58d4b77f6ed6362021e7810bda072167"
+    },
+    {
+      "name": "benefits",
+      "url": "https://www.opm.gov/healthcare-insurance/healthcare/transparency-in-healthcare/public-use-files/2026/fehb/2026-fehb-plan-benefits-11202025.xlsx",
+      "released": "2025-11-20",
+      "sha256": "046276ab692f9af9e8aa3a6e344a01333de9fc865fd78e101f2176e9655cda52"
+    },
+    {
+      "name": "areas",
+      "url": "https://www.opm.gov/healthcare-insurance/healthcare/transparency-in-healthcare/public-use-files/2026/fehb/2026-fehb-service-area-03242026.xlsx",
+      "released": "2026-03-24",
+      "sha256": "21275722416d08d4ef3f705432265c0f54f4240eeec63484732b4ee3a125a919"
+    }
+  ],
+  "retrieved": "2026-09-11",
+  "expectedCounts": {
+    "planNames": 56,
+    "options": 132,
+    "enrollmentCodes": 396
+  },
+  "headers": {
+    "key": {
+      "A": "Carrier Name",
+      "B": "Plan Option Name",
+      "C": "Plan Code",
+      "D": "Plan Code Name",
+      "E": "Enrollment Code",
+      "F": "Enrollment Type",
+      "G": "Network Type",
+      "H": "Plan Option Type",
+      "I": "Formulary IDs",
+      "J": "Brochure Number",
+      "K": "Brochure Name",
+      "L": "Phone Number",
+      "M": "Carrier URL",
+      "N": "SBC URL",
+      "O": "Provider Directory URL",
+      "P": "Plan Formulary URL"
+    },
+    "rates": {
+      "A": "Plan Code",
+      "B": "Enrollment Code",
+      "C": "Rate Type",
+      "D": "Plan Code Option Type",
+      "E": "Enrollment Type",
+      "F": "Biweekly/Monthly",
+      "G": "Employee Pays",
+      "H": "Government Pays",
+      "I": "Plan Code Name"
+    },
+    "benefits": {
+      "A": "Plan Option Name",
+      "B": "Brochure Number",
+      "C": "Plan Code",
+      "D": "Plan Name",
+      "E": "In-network/out-of-network",
+      "F": "Plan Option Type",
+      "G": "Annual deductible (Self)",
+      "H": "Annual deductible (Self Plus One)",
+      "I": "Annual deductible (Self & Family)",
+      "J": "Type of account",
+      "K": "Medical account contribution (Self)",
+      "L": "Medical account contribution (Self Plus One)",
+      "M": "Medical account contribution (Self & Family)",
+      "N": "Net deductible (Self)",
+      "O": "Net deductible (Self Plus One)",
+      "P": "Net deductible (Self & Family)",
+      "Q": "Annual out-of-pocket maximum (Self)",
+      "R": "Annual out-of-pocket maximum (Self Plus One)",
+      "S": "Annual out-of-pocket maximum (Self & Family)",
+      "T": "Deductible waiver (with Medicare Part A as Primary)",
+      "U": "Deductible waiver (with Medicare Part A as Primary) Additional Details",
+      "V": "Deductible waiver (with Medicare Part B as Primary)",
+      "W": "Deductible waiver (with Medicare Part B as Primary) Additional Details",
+      "X": "Deductible waiver (with Medicare Parts A and B as Primary)",
+      "Y": "Deductible waiver (with Medicare Parts A and B as Primary) Additional Details",
+      "Z": "Out-of-pocket maximum (with Medicare Parts A and B as Primary)",
+      "AA": "Out-of-pocket maximum (with Medicare Parts A and B as Primary) Additional Details",
+      "AB": "Primary care physician office visit (with Medicare Part B as Primary)",
+      "AC": "Primary care physician office visit (with Medicare Part B as Primary) Additional Details",
+      "AD": "Specialty office physician visit (with Medicare Part B as Primary)",
+      "AE": "Specialty office physician visit (with Medicare Part B as Primary) Additional Details",
+      "AF": "Inpatient Hospital Services (with Medicare Part A as Primary)",
+      "AG": "Inpatient Hospital Services (with Medicare Part A as Primary) Additional Details",
+      "AH": "Outpatient hospital services (with Medicare Part A as Primary)",
+      "AI": "Outpatient hospital services (with Medicare Part A as Primary) Additional Details",
+      "AJ": "Outpatient physician services (with Medicare Part B as Primary)",
+      "AK": "Outpatient physician services (with Medicare Part B as Primary) Additional Details",
+      "AL": "Part B Premium Reimbursement (with Medicare as Primary)",
+      "AM": "Part B Premium Reimbursement (with Medicare as Primary) Additional Details",
+      "AN": "Requirement for Part B Reimbursement",
+      "AO": "Requirement for Part B Reimbursement Additional Details",
+      "AP": "Deductible Waiver (with Medicare Advantage Part C as Primary)",
+      "AQ": "Deductible Waiver (with Medicare Advantage Part C as Primary) Additional Details",
+      "AR": "Out-of-Pocket Maximum (with Medicare Advantage Part C as Primary)",
+      "AS": "Out-of-Pocket Maximum (with Medicare Advantage Part C as Primary) Additional Details",
+      "AT": "Primary Care Physician Office Visit (with Medicare Advantage Part C as Primary)",
+      "AU": "Primary Care Physician Office Visit (with Medicare Advantage Part C as Primary) Additional Details",
+      "AV": "Specialty Physician Office Visit (with Medicare Advantage Part C as Primary)",
+      "AW": "Specialty Physician Office Visit (with Medicare Advantage Part C as Primary) Additional Details",
+      "AX": "Inpatient Hospital Services (with Medicare Advantage Part C as Primary)",
+      "AY": "Inpatient Hospital Services (with Medicare Advantage Part C as Primary) Additional Details",
+      "AZ": "Outpatient Hospital Facility Services (with Medicare Advantage Part C as Primary)",
+      "BA": "Outpatient Hospital Facility Services (with Medicare Advantage Part C as Primary) Additional Details",
+      "BB": "Outpatient physician services (with Medicare Advantage Part C as Primary)",
+      "BC": "Outpatient physician services (with Medicare Advantage Part C as Primary) Additional Details",
+      "BD": "Part B Premium Reimbursement (with Medicare Advantage Part C as Primary)",
+      "BE": "Part B Premium Reimbursement (with Medicare Advantage Part C as Primary) Additional Details",
+      "BF": "Medicare Part D EGWP Prescription Drug Deductible Waiver",
+      "BG": "Medicare Part D EGWP Prescription Drug Deductible Waiver Additional Details",
+      "BH": "Medicare Part D EGWP Prescription Drug Out-of-Pocket Maximum",
+      "BI": "Medicare Part D EGWP Prescription Drug Out-of-Pocket Maximum Additional Details",
+      "BJ": "Medicare Part D EGWP Tier 0",
+      "BK": "Medicare Part D EGWP Tier 0 Additional Details",
+      "BL": "Medicare Part D EGWP Tier 1",
+      "BM": "Medicare Part D EGWP Tier 1 Additional Details",
+      "BN": "Medicare Part D EGWP Tier 2",
+      "BO": "Medicare Part D EGWP Tier 2 Additional Details",
+      "BP": "Medicare Part D EGWP Tier 3",
+      "BQ": "Medicare Part D EGWP Tier 3 Additional Details",
+      "BR": "Medicare Part D EGWP Tier 4",
+      "BS": "Medicare Part D EGWP Tier 4 Additional Details",
+      "BT": "Medicare Part D EGWP Tier 5",
+      "BU": "Medicare Part D EGWP Tier 5 Additional Details",
+      "BV": "Medicare Part D EGWP Tier 6",
+      "BW": "Medicare Part D EGWP Tier 6 Additional Details",
+      "BX": "Preventive Care",
+      "BY": "Preventive Care Additional Details",
+      "BZ": "Preventive Care Prior Authorization",
+      "CA": "Primary Care Office Visit",
+      "CB": "Primary Care Office Visit Additional Details",
+      "CC": "Primary Care Office Visit Prior Authorization",
+      "CD": "Specialist Office Visit",
+      "CE": "Specialist Office Visit Additional Details",
+      "CF": "Specialist Office Visit Prior Authorization",
+      "CG": "Emergency Care",
+      "CH": "Emergency Care Additional Details",
+      "CI": "Emergency Care Prior Authorization",
+      "CJ": "Urgent Care",
+      "CK": "Urgent Care Additional Details",
+      "CL": "Urgent Care Prior Authorization",
+      "CM": "Doctor Costs for Inpatient Surgery",
+      "CN": "Doctor Costs for Inpatient Surgery Additional Details",
+      "CO": "Doctor Costs for Inpatient Surgery Prior Authorization",
+      "CP": "Hospital Inpatient Cost Per Admission",
+      "CQ": "Hospital Inpatient Cost Per Admission Additional Details",
+      "CR": "Hospital Inpatient Cost Per Admission Prior Authorization",
+      "CS": "Hospital Room Costs",
+      "CT": "Hospital Room Costs Additional Details",
+      "CU": "Hospital Room Costs Prior Authorization",
+      "CV": "Other Inpatient Hospital Costs",
+      "CW": "Other Inpatient Hospital Costs Additional Details",
+      "CX": "Other Inpatient Hospital Costs Prior Authorization",
+      "CY": "Doctor Costs for Outpatient Surgery",
+      "CZ": "Doctor Costs for Outpatient Surgery Additional Details",
+      "DA": "Doctor Costs for Outpatient Surgery Prior Authorization",
+      "DB": "Other Outpatient Surgery Costs",
+      "DC": "Other Outpatient Surgery Costs Additional Details",
+      "DD": "Other Outpatient Surgery Costs Prior Authorization",
+      "DE": "Diagnostic Tests or Procedures (e.g., Blood Tests, X-rays, Urinalysis, Ultrasounds)",
+      "DF": "Diagnostic Tests or Procedures (e.g., Blood Tests, X-rays, Urinalysis, Ultrasounds) Additional Details",
+      "DG": "Diagnostic Tests or Procedures (e.g., Blood Tests, X-rays, Urinalysis, Ultrasounds) Prior Authorization",
+      "DH": "Diagnostic Tests or Procedures (e.g., CT scans, MRIs, PET Scans)",
+      "DI": "Diagnostic Tests or Procedures (e.g., CT scans, MRIs, PET Scans) Additional Details",
+      "DJ": "Diagnostic Tests or Procedures (e.g., CT scans, MRIs, PET Scans) Prior Authorization",
+      "DK": "Enhanced Lab Network",
+      "DL": "Enhanced Lab Network Additional Details",
+      "DM": "Enhanced Lab Network Prior Authorization",
+      "DN": "Annual Out-of-Pocket Maximum for Prescriptions",
+      "DO": "Annual Deductible for Prescriptions Only (Self)",
+      "DP": "Annual Deductible for Prescriptions Only (Self Plus One)",
+      "DQ": "Annual Deductible for Prescriptions Only (Self & Family)",
+      "DR": "Tier 0",
+      "DS": "Tier 0 Additional Details",
+      "DT": "Tier 0 Prior Authorization",
+      "DU": "Tier 1",
+      "DV": "Tier 1 Additional Details",
+      "DW": "Tier 1 Prior Authorization",
+      "DX": "Tier 2",
+      "DY": "Tier 2 Additional Details",
+      "DZ": "Tier 2 Prior Authorization",
+      "EA": "Tier 3",
+      "EB": "Tier 3 Additional Details",
+      "EC": "Tier 3 Prior Authorization",
+      "ED": "Tier 4",
+      "EE": "Tier 4 Additional Details",
+      "EF": "Tier 4 Prior Authorization",
+      "EG": "Tier 5",
+      "EH": "Tier 5 Additional Details",
+      "EI": "Tier 5 Prior Authorization",
+      "EJ": "Tier 6",
+      "EK": "Tier 6 Additional Details",
+      "EL": "Tier 6 Prior Authorization",
+      "EM": "Mail Service Pharmacy Benefit (Prescription Drugs)",
+      "EN": "Mail Order Pharmacy Restriction (Prescription Drugs)",
+      "EO": "Specialty Pharmacy Restriction (Prescription Drugs)",
+      "EP": "Applied Behavioral Analysis (ABA)",
+      "EQ": "Applied Behavioral Analysis (ABA) Additional Details",
+      "ER": "Applied Behavioral Analysis (ABA) Prior Authorization",
+      "ES": "Chiropractic",
+      "ET": "Chiropractic Additional Details",
+      "EU": "Chiropractic Prior Authorization",
+      "EV": "Occupational Therapy",
+      "EW": "Occupational Therapy Additional Details",
+      "EX": "Occupational Therapy Prior Authorization",
+      "EY": "Physical Therapy",
+      "EZ": "Physical Therapy Additional Details",
+      "FA": "Physical Therapy Prior Authorization",
+      "FB": "Speech Therapy",
+      "FC": "Speech Therapy Additional Details",
+      "FD": "Speech Therapy Prior Authorization",
+      "FE": "Professional Services (Mental Health and Substance Use Disorder)",
+      "FF": "Professional Services (Mental Health and Substance Use Disorder) Additional Details",
+      "FG": "Professional Services (Mental Health and Substance Use Disorder) Prior Authorization",
+      "FH": "Inpatient Hospital (Mental Health and Substance Use Disorder Services)",
+      "FI": "Inpatient Hospital (Mental Health and Substance Use Disorder Services) Additional Details",
+      "FJ": "Inpatient Hospital (Mental Health and Substance Use Disorder Services) Prior Authorization",
+      "FK": "Outpatient Hospital (Mental Health and Substance Use Disorder Services)",
+      "FL": "Outpatient Hospital (Mental Health and Substance Use Disorder Services) Additional Details",
+      "FM": "Outpatient Hospital (Mental Health and Substance Use Disorder Services) Prior Authorization",
+      "FN": "Diagnosis and Treatment (Infertility Services)",
+      "FO": "Diagnosis and Treatment (Infertility Services) Additional Details",
+      "FP": "Diagnosis and Treatment (Infertility Services) Prior Authorization",
+      "FQ": "Fertility Preservation Procedures (e.g., iatrogenic infertility) (Infertility Services)",
+      "FR": "Fertility Preservation Procedures (e.g., iatrogenic infertility) (Infertility Services) Additional Details",
+      "FS": "Fertility Preservation Procedures (e.g., iatrogenic infertility) (Infertility Services) Prior Authorization",
+      "FT": "Artificial Insemination Services (e.g. ICI, IVI, IUI)",
+      "FU": "Artificial Insemination Services (e.g. ICI, IVI, IUI) Additional Details",
+      "FV": "Artificial Insemination Services (e.g. ICI, IVI, IUI) Prior Authorization",
+      "FW": "Assisted Reproductive Technology (ART) (e.g., IVF, GIFT, ZIFT) (Infertility Services)",
+      "FX": "Assisted Reproductive Technology (ART) (e.g., IVF, GIFT, ZIFT) (Infertility Services) Additional Details",
+      "FY": "Assisted Reproductive Technology (ART) (e.g., IVF, GIFT, ZIFT) (Infertility Services) Prior Authorization",
+      "FZ": "Surgical Procedures",
+      "GA": "Surgical Procedures Additional Details",
+      "GB": "Surgical Procedures Prior Authorization",
+      "GC": "Reconstructive Surgery",
+      "GD": "Reconstructive Surgery Additional Details",
+      "GE": "Reconstructive Surgery Prior Authorization",
+      "GF": "Hearing Services",
+      "GG": "Hearing Services Additional Details",
+      "GH": "Hearing Services Prior Authorization",
+      "GI": "Hearing Aids (external)",
+      "GJ": "Hearing Aids (external) Additional Details",
+      "GK": "Hearing Aids (external) Prior Authorization",
+      "GL": "Prenatal Care, Screening for Gestational Diabetes, Delivery, and Postpartum Care (Maternity Care)",
+      "GM": "Prenatal Care, Screening for Gestational Diabetes, Delivery, and Postpartum Care (Maternity Care) Additional Details",
+      "GN": "Prenatal Care, Screening for Gestational Diabetes, Delivery, and Postpartum Care (Maternity Care) Prior Authorization",
+      "GO": "Hospital Stay--Vaginal Birth, Cesarean Birth (Maternity Care)",
+      "GP": "Hospital Stay--Vaginal Birth, Cesarean Birth (Maternity Care) Additional Details",
+      "GQ": "Hospital Stay--Vaginal Birth, Cesarean Birth (Maternity Care) Prior Authorization",
+      "GR": "Hospice Care",
+      "GS": "Hospice Care Additional Details",
+      "GT": "Hospice Care Prior Authorization",
+      "GU": "Home Health Services (Skilled Nursing Care)",
+      "GV": "Home Health Services (Skilled Nursing Care) Additional Details",
+      "GW": "Home Health Services (Skilled Nursing Care) Prior Authorization",
+      "GX": "Durable Medical Equipment",
+      "GY": "Durable Medical Equipment Additional Details",
+      "GZ": "Durable Medical Equipment Prior Authorization",
+      "HA": "Outpatient Rehabilitation (Skilled Nursing Care Facility)",
+      "HB": "Outpatient Rehabilitation (Skilled Nursing Care Facility) Additional Details",
+      "HC": "Outpatient Rehabilitation (Skilled Nursing Care Facility) Prior Authorization",
+      "HD": "Diabetes Education",
+      "HE": "Diabetes Education Additional Details",
+      "HF": "Diabetes Education Prior Authorization",
+      "HG": "Nutritional Counseling",
+      "HH": "Nutritional Counseling Additional Details",
+      "HI": "Nutritional Counseling Prior Authorization",
+      "HJ": "Routine Dental Exams and Cleaning for Adults",
+      "HK": "Routine Dental Exams and Cleaning for Adults Additional Details",
+      "HL": "Routine Dental Exams and Cleaning for Adults Prior Authorization",
+      "HM": "Routine Dental Exams and Cleaning for Children",
+      "HN": "Routine Dental Exams and Cleaning for Children Additional Details",
+      "HO": "Routine Dental Exams and Cleaning for Children Prior Authorization",
+      "HP": "Routine Eye Exams",
+      "HQ": "Routine Eye Exams Additional Details",
+      "HR": "Routine Eye Exams Prior Authorization",
+      "HS": "Eye Exams for Medical Condition or Non-Surgical Treatment",
+      "HT": "Eye Exams for Medical Condition or Non-Surgical Treatment Additional Details",
+      "HU": "Eye Exams for Medical Condition or Non-Surgical Treatment Prior Authorization",
+      "HV": "Eyeglasses",
+      "HW": "Eyeglasses Additional Details",
+      "HX": "Eyeglasses Prior Authorization",
+      "HY": "Contact Lenses",
+      "HZ": "Contact Lenses Additional Details",
+      "IA": "Contact Lenses Prior Authorization",
+      "IB": "Acupuncture",
+      "IC": "Acupuncture Additional Details",
+      "ID": "Acupuncture Prior Authorization",
+      "IE": "Chronic Disease Management: Heart Disease",
+      "IF": "Chronic Disease Management: Heart Disease Prior Authorization",
+      "IG": "Chronic Disease Management: Obesity",
+      "IH": "Chronic Disease Management: Obesity Prior Authorization",
+      "II": "Chronic Disease Management: Hypertension",
+      "IJ": "Chronic Disease Management: Hypertension Prior Authorization",
+      "IK": "Chronic Disease Management: Asthma",
+      "IL": "Chronic Disease Management: Asthma Prior Authorization"
+    },
+    "areas": {
+      "A": "Option",
+      "B": "Plan Code",
+      "C": "Plan Name",
+      "D": "Enrollment Code",
+      "E": "Nationwide (Y/N)",
+      "F": "State code",
+      "G": "Statewide (Y/N)",
+      "H": "County",
+      "I": "County FIPS",
+      "J": "Countywide (Y/N)",
+      "K": "ZIP code"
+    }
+  }
+}

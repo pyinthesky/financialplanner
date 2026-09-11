@@ -3,12 +3,13 @@ import { employerAdjustments, type Waiver, type Arrangement } from './enrollment
 /** Local, user-entered benefit comparison. See docs/open-enrollment.md for boundaries. */
 export type Money = number | null;
 export type CareKind = 'medical' | 'prescription' | 'preventive' | 'noncovered';
-export type Care = { id: string; kind: CareKind; label: string; allowed: Money; count: Money; timing: 'spread' | 'once'; month: Money; payAtService?: boolean; hsaExcluded?: boolean };
+export type Care = { service?: string; id: string; kind: CareKind; label: string; allowed: Money; count: Money; timing: 'spread' | 'once'; month: Money; payAtService?: boolean; hsaExcluded?: boolean };
 export type Person = { id: string; householdMemberId?: string; hsaEligible?: 'unknown' | 'yes' | 'no'; annualMedical: Money; basis: 'allowed' | 'priorOop'; timing: 'spread' | 'once'; month: Money; care: Care[] };
-export type Rule = { minimum?: Money; maximum?: Money; allowedOverride?: Money; coverage: 'unknown' | 'covered' | 'excluded'; deductible: 'shared' | 'separate' | 'exempt'; payment: 'coinsurance' | 'copay'; amount: Money; countsOop: 'unknown' | 'yes' | 'no' };
+export type StepRule = {count:number;group:string;payment:'coinsurance'|'copay';amount:number;deductible:'shared'|'separate'|'exempt';keepHigher?:boolean};
+export type Rule = { service?:string; manual?:boolean; after?:StepRule; minimum?: Money; maximum?: Money; allowedOverride?: Money; coverage: 'unknown' | 'covered' | 'excluded'; deductible: 'shared' | 'separate' | 'exempt'; payment: 'coinsurance' | 'copay'; amount: Money; countsOop: 'unknown' | 'yes' | 'no' };
 export type HealthOption = {
-  id: string; label: string; autoTaxEstimate?:boolean; coveredPersonIds?:string[]; hraAnnual?:Money; hraConfirmed?:boolean; employer?: ''|'you'|'partner'; spouseSurcharge?: Money; surchargeConfirmed?: boolean; federalReference?: {id:string;version:string;tier:string;pinned?:boolean;reviewed:boolean;careSignature:string}; network: 'unspecified' | 'PPO' | 'HMO' | 'EPO' | 'POS'; premium: Money; payPeriods: Money; premiumTaxRate: Money;
-  deductibleMode: 'embedded' | 'aggregate'; individualDeductible: Money; familyDeductible: Money;
+  id: string; label: string; autoTaxEstimate?:boolean; coveredPersonIds?:string[]; hraAnnual?:Money; hraConfirmed?:boolean; employer?: ''|'you'|'partner'; spouseSurcharge?: Money; surchargeConfirmed?: boolean; federalReference?: {id:string;version:string;benefitVersion?:string;tier:string;pinned?:boolean;reviewed:boolean;careSignature:string}; network: 'unspecified' | 'PPO' | 'HMO' | 'EPO' | 'POS'; premium: Money; payPeriods: Money; premiumTaxRate: Money;
+  deductibleMode: 'embedded' | 'aggregate' | 'unknown'; individualDeductible: Money; familyDeductible: Money;
   individualMax: Money; familyMax: Money; coinsurance: Money;
   rxIndividualDeductible: Money; rxFamilyDeductible: Money; rxIndividualMax: Money; rxFamilyMax: Money;
   rules: Record<string, Rule>; hsa: boolean; eligibilityConfirmed: boolean; contributionLimit: Money;
@@ -27,6 +28,11 @@ const int = (x: unknown, max: number, min = 0): Money => typeof x === 'number' &
 const str = (x: unknown) => typeof x === 'string' ? x.slice(0, 100) : '';
 const choice = <T extends string>(x: unknown, values: readonly T[], fallback: T): T => values.includes(x as T) ? x as T : fallback;
 const list = (x: unknown, max: number): unknown[] => Array.isArray(x) ? x.slice(0, max) : [];
+function normalizeStep(value:unknown):StepRule|undefined {
+  const a=obj(value),count=int(a.count,366),amount=num(a.amount,a.payment==='copay'?1e9:100);
+  if(count===null||amount===null||!['copay','coinsurance'].includes(String(a.payment))||!['shared','separate','exempt'].includes(String(a.deductible)))return undefined;
+  return {count,amount,group:str(a.group),payment:a.payment as StepRule['payment'],deductible:a.deductible as StepRule['deductible'],keepHigher:a.keepHigher===true};
+}
 export function normalizeEnrollment(value: unknown): Enrollment | undefined {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
   const v = obj(value), e = structuredClone(EMPTY_ENROLLMENT);
@@ -35,12 +41,12 @@ export function normalizeEnrollment(value: unknown): Enrollment | undefined {
   e.qualifiedConfirmed = v.qualifiedConfirmed === true; e.employmentYears = num(v.employmentYears, 50);
   const ids = new Set<string>();
   const id = (x: unknown, fallback: string) => { const candidate = str(x); let next = candidate && !ids.has(candidate) && !['__proto__','constructor','prototype'].includes(candidate) ? candidate : fallback; while(ids.has(next))next += '-'; ids.add(next); return next; };
-  e.people = list(v.people, 8).map((raw, i) => { const p = obj(raw); return { id: id(p.id, `person-${i}`), householdMemberId: str(p.householdMemberId), hsaEligible: choice<'unknown'|'yes'|'no'>(p.hsaEligible,['unknown','yes','no'],'unknown'), annualMedical: num(p.annualMedical), basis: choice(p.basis, ['allowed', 'priorOop'], 'allowed'), timing: choice(p.timing, ['spread','once'], 'spread'), month: int(p.month,12,1), care: list(p.care,20).map((raw,j)=>{const c=obj(raw);return {id:id(c.id,`care-${i}-${j}`),kind:choice(c.kind,['medical','prescription','preventive','noncovered'],'medical'),label:str(c.label),allowed:num(c.allowed),count:int(c.count,366),timing:choice(c.timing,['spread','once'],'spread'),month:int(c.month,12,1),payAtService:typeof c.payAtService==='boolean'?c.payAtService:c.kind==='prescription',hsaExcluded:c.hsaExcluded===true};}) }; });
+  e.people = list(v.people, 8).map((raw, i) => { const p = obj(raw); return { id: id(p.id, `person-${i}`), householdMemberId: str(p.householdMemberId), hsaEligible: choice<'unknown'|'yes'|'no'>(p.hsaEligible,['unknown','yes','no'],'unknown'), annualMedical: num(p.annualMedical), basis: choice(p.basis, ['allowed', 'priorOop'], 'allowed'), timing: choice(p.timing, ['spread','once'], 'spread'), month: int(p.month,12,1), care: list(p.care,20).map((raw,j)=>{const c=obj(raw);return {id:id(c.id,`care-${i}-${j}`),service:str(c.service),kind:choice(c.kind,['medical','prescription','preventive','noncovered'],'medical'),label:str(c.label),allowed:num(c.allowed),count:int(c.count,366),timing:choice(c.timing,['spread','once'],'spread'),month:int(c.month,12,1),payAtService:typeof c.payAtService==='boolean'?c.payAtService:c.kind==='prescription',hsaExcluded:c.hsaExcluded===true};}) }; });
   const careIds = e.people.flatMap(p=>p.care.map(c=>c.id));
-  const normalizeOptions=(values:unknown,limit:number):HealthOption[]=>list(values,limit).map((raw,i)=>{const p=obj(raw), out=newOption(id(p.id,`option-${i}`));if(Array.isArray(p.coveredPersonIds))out.coveredPersonIds=list(p.coveredPersonIds,8).map(str);out.hraAnnual=num(p.hraAnnual);out.hraConfirmed=p.hraConfirmed===true;out.label=str(p.label);out.employer=choice<''|'you'|'partner'>(p.employer,['','you','partner'],'');out.spouseSurcharge=num(p.spouseSurcharge);out.surchargeConfirmed=p.surchargeConfirmed===true;const ref=obj(p.federalReference);if(ref.id)out.federalReference={id:str(ref.id),version:str(ref.version),tier:str(ref.tier),pinned:ref.pinned===true,reviewed:ref.reviewed===true,careSignature:typeof ref.careSignature==='string'?ref.careSignature.slice(0,200):''};out.network=choice(p.network,['unspecified','PPO','HMO','EPO','POS'],'unspecified');
+  const normalizeOptions=(values:unknown,limit:number):HealthOption[]=>list(values,limit).map((raw,i)=>{const p=obj(raw), out=newOption(id(p.id,`option-${i}`));if(Array.isArray(p.coveredPersonIds))out.coveredPersonIds=list(p.coveredPersonIds,8).map(str);out.hraAnnual=num(p.hraAnnual);out.hraConfirmed=p.hraConfirmed===true;out.label=str(p.label);out.employer=choice<''|'you'|'partner'>(p.employer,['','you','partner'],'');out.spouseSurcharge=num(p.spouseSurcharge);out.surchargeConfirmed=p.surchargeConfirmed===true;const ref=obj(p.federalReference);if(ref.id)out.federalReference={id:str(ref.id),version:str(ref.version),benefitVersion:str(ref.benefitVersion),tier:str(ref.tier),pinned:ref.pinned===true,reviewed:ref.reviewed===true,careSignature:typeof ref.careSignature==='string'?ref.careSignature.slice(0,200):''};out.network=choice(p.network,['unspecified','PPO','HMO','EPO','POS'],'unspecified');
     for(const k of ['premium','individualDeductible','familyDeductible','individualMax','familyMax','rxIndividualDeductible','rxFamilyDeductible','rxIndividualMax','rxFamilyMax','contributionLimit','employerHsa','ownHsa','openingHsa'] as const)out[k]=num(p[k]);
-    out.payPeriods=int(p.payPeriods,366,1);out.coinsurance=num(p.coinsurance,100);out.taxRate=num(p.taxRate,100);out.premiumTaxRate=num(p.premiumTaxRate,100);out.deductibleMode=choice(p.deductibleMode,['embedded','aggregate'],'embedded');out.employerTiming=choice(p.employerTiming,['monthly','upfront'],'monthly');out.hsa=p.hsa===true;out.eligibilityConfirmed=p.eligibilityConfirmed===true;
-    for(const cid of careIds){const r=obj(obj(p.rules)[cid]);out.rules[cid]={minimum:num(r.minimum),maximum:num(r.maximum),allowedOverride:num(r.allowedOverride),coverage:choice(r.coverage,['unknown','covered','excluded'],'unknown'),deductible:choice(r.deductible,['shared','separate','exempt'],'shared'),payment:choice(r.payment,['coinsurance','copay'],'coinsurance'),amount:num(r.amount,r.payment==='copay'?1e9:100),countsOop:choice(r.countsOop,['unknown','yes','no'],'unknown')};}return out;});
+    out.payPeriods=int(p.payPeriods,366,1);out.coinsurance=num(p.coinsurance,100);out.taxRate=num(p.taxRate,100);out.premiumTaxRate=num(p.premiumTaxRate,100);out.deductibleMode=choice(p.deductibleMode,['embedded','aggregate','unknown'],'embedded');out.employerTiming=choice(p.employerTiming,['monthly','upfront'],'monthly');out.hsa=p.hsa===true;out.eligibilityConfirmed=p.eligibilityConfirmed===true;
+    for(const cid of careIds){const r=obj(obj(p.rules)[cid]);out.rules[cid]={service:str(r.service),manual:r.manual===true,after:normalizeStep(r.after),minimum:num(r.minimum),maximum:num(r.maximum),allowedOverride:num(r.allowedOverride),coverage:choice(r.coverage,['unknown','covered','excluded'],'unknown'),deductible:choice(r.deductible,['shared','separate','exempt'],'shared'),payment:choice(r.payment,['coinsurance','copay'],'coinsurance'),amount:num(r.amount,r.payment==='copay'?1e9:100),countsOop:choice(r.countsOop,['unknown','yes','no'],'unknown')};}return out;});
   e.options=normalizeOptions(v.options,4);
   if(v.federal){const f=obj(v.federal);e.federal={enabled:f.enabled===true,employee:choice(f.employee,['','you','partner'],''),zip:str(f.zip).replace(/\D/g,'').slice(0,5),state:str(f.state).slice(0,2).toUpperCase(),county:str(f.county).slice(0,5),eligible:f.eligible===true,showAll:f.showAll===true,options:normalizeOptions(f.options,12)};}
   if(v.waivers)e.waivers=list(v.waivers,2).map(raw=>{const w=obj(raw);return {employer:choice(w.employer,['','you','partner'],''),amount:num(w.amount),basis:choice(w.basis,['net','gross'],'net'),taxRate:num(w.taxRate,100),firstMonth:int(w.firstMonth,12,1),lastMonth:int(w.lastMonth,12,1),payment:choice(w.payment,['monthly','quarterly','annual'],'monthly'),payoutMonth:int(w.payoutMonth,12,1),confirmed:w.confirmed===true};});
@@ -56,21 +62,26 @@ const monthKey=(start:string,offset:number)=>{const [y,m]=start.split('-').map(N
 /** One complete benefit year; allowances accrue by service month, never bill month. */
 function compareBaseHealth(e: Enrollment, p: HealthOption, medicalScale = 1): EnrollmentResult {
   const issues = Object.values(healthInputErrors(e,p)), n=e.people.length, family=n>1;
-  type Event={person:number;label:string;month:number;allowed:number;kind:CareKind;rule:Rule;payAtService?:boolean;hsaExcluded?:boolean};
+  type Event={person:number;careId?:string;label:string;month:number;allowed:number;kind:CareKind;rule:Rule;payAtService?:boolean;hsaExcluded?:boolean};
   const events:Event[]=[];
   e.people.forEach((person,i)=>{
     const annual=(person.annualMedical??0)*medicalScale;
     for(let j=0;j<(person.timing==='spread'?12:1);j++)events.push({person:i,label:'General Medical',month:person.timing==='spread'?j:(person.month??1)-1,allowed:annual/(person.timing==='spread'?12:1),kind:'medical',rule:{coverage:'covered',deductible:'shared',payment:'coinsurance',amount:p.coinsurance,countsOop:'yes'}});
     person.care.forEach((c,j)=>{const label=c.label||`${c.kind==='prescription'?'Prescription':'Care'} ${j+1}`;
       const rule=c.kind==='noncovered'?{...EMPTY_RULE,coverage:'excluded' as const}:p.rules[c.id]??EMPTY_RULE;
-      for(let k=0;k<(c.count??0);k++)events.push({person:i,label,month:c.timing==='once'?(c.month??1)-1:Math.floor(k*12/(c.count||1)),allowed:(rule.allowedOverride??c.allowed??0)*(c.kind==='medical'?medicalScale:1),kind:c.kind,rule,payAtService:c.payAtService??c.kind==='prescription',hsaExcluded:c.hsaExcluded});
+      for(let k=0;k<(c.count??0);k++)events.push({person:i,careId:c.id,label,month:c.timing==='once'?(c.month??1)-1:Math.floor(k*12/(c.count||1)),allowed:(rule.allowedOverride??c.allowed??0)*(c.kind==='medical'?medicalScale:1),kind:c.kind,rule,payAtService:c.payAtService??c.kind==='prescription',hsaExcluded:c.hsaExcluded});
     });
   });
   const claims:Claim[]=[], deductible=Array(n).fill(0), rxDeductible=Array(n).fill(0), oop=Array(n).fill(0), rxOop=Array(n).fill(0);
   const people=Array.from({length:n},()=>({medical:0,prescriptions:0,excluded:0,oop:0}));
   events.sort((a,b)=>a.month-b.month); // Stable: member order, then general medical, then listed services.
+  const visits=new Map<string,number>();
   for(const event of events){
-    const {person:i,allowed,rule,kind}=event;let member=0,appliedDed=0,credit=0;
+    const {person:i,allowed,kind}=event;let rule=event.rule;let floorRate=0;
+    if(rule.after){const key=`${i}:${rule.after.group||event.careId}`,count=(visits.get(key)??0)+1;visits.set(key,count);
+      if(count>rule.after.count){if(rule.after.keepHigher)floorRate=rule.after.amount;else rule={...rule,...rule.after,minimum:null,maximum:null};}
+    }
+    let member=0,appliedDed=0,credit=0;
     const covered=rule.coverage==='covered';
     if(!covered)member=allowed;
     else if(kind!=='preventive'){
@@ -79,7 +90,7 @@ function compareBaseHealth(e: Enrollment, p: HealthOption, medicalScale = 1): En
       const remaining=rule.deductible==='exempt'?0:Math.max(0,family?Math.min(Math.max(0,fam-sum(acc)),p.deductibleMode==='embedded'?Math.max(0,individual-acc[i]):Infinity):individual-acc[i]);
       appliedDed=Math.min(allowed,remaining);
       const after=allowed-appliedDed;const share=rule.payment==='copay'?rule.amount??0:after*(rule.amount??0)/100;
-      member=appliedDed+Math.min(after,Math.max(0,Math.min(rule.maximum??Infinity,Math.max(rule.minimum??0,share))));
+      member=appliedDed+Math.min(after,Math.max(0,Math.min(rule.maximum??Infinity,Math.max(rule.minimum??0,share)),after*floorRate/100));
       if(rule.countsOop==='yes'){
         let cap=Math.max(0,Math.min((p.individualMax??0)-oop[i],family?(p.familyMax??0)-sum(oop):Infinity));
         if(kind==='prescription')cap=Math.max(0,Math.min(cap,p.rxIndividualMax===null?Infinity:p.rxIndividualMax-rxOop[i],family&&p.rxFamilyMax!==null?p.rxFamilyMax-sum(rxOop):Infinity));

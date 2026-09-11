@@ -1,3 +1,4 @@
+import { withFederalBenefits } from './federal-benefits.ts';
 import type { PlannerData } from './planner.ts';
 import { calculateFederalIncomeTax } from './federal-tax.ts';
 import { payrollReconciliation, retirementMonths } from './budget-calendar.ts';
@@ -24,6 +25,7 @@ export function enrollmentFederalRate(plan:PlannerData):number|null{
   return calculateFederalIncomeTax(income,h.filingStatus).marginalRate*100;
 }
 export function withEnrollmentTax(plan:PlannerData,e:Enrollment):Enrollment{
+  e=withFederalBenefits(e);
   const rate=enrollmentFederalRate({...plan,enrollment:e});
   if(rate===null)return e;
   const income=payrollAnnualIncome(plan)!;

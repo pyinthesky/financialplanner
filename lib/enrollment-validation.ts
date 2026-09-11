@@ -9,6 +9,7 @@ export function healthInputErrors(e: Enrollment, p: HealthOption): EnrollmentErr
   if(!e.people.length)issue('people','Add at least one covered person.');
   need(p.premium,o+'premium');need(p.payPeriods,o+'payPeriods','Enter the number of premium deductions per year.');
   need(p.individualMax,o+'individualMax','Find the per-person out-of-pocket maximum in the benefits summary.');
+  if(family&&p.deductibleMode==='unknown')issue(o+'deductibleMode','Choose the family deductible structure from the benefits summary.');
   if(family){need(p.familyMax,o+'familyMax');need(p.familyDeductible,o+'familyDeductible');}
   if(!family||p.deductibleMode==='embedded')need(p.individualDeductible,o+'individualDeductible');
   if(family&&p.individualMax!=null&&p.familyMax!=null&&p.individualMax>p.familyMax)issue(o+'individualMax','The per-person maximum cannot exceed the family maximum.');

@@ -26,7 +26,7 @@ test('location matches nationwide, state, county and explicit ZIP without treati
 });
 test('explicit federal selection copies published tier amounts without inventing embedded family limits',()=>{
  const plan=FEHB.plans.find(p=>p.id==='34-hdhp'),t=plan.tiers.find(t=>t.tier==='family');const p=federalDraft(plan,t,'you');
- close(p.premium,t.biweekly);assert.equal(p.payPeriods,26);assert.equal(p.individualMax,null);assert.equal(p.individualDeductible,null);assert.equal(p.familyMax,t.maximum);assert.equal(p.federalReference.reviewed,false);assert.equal(p.coinsurance,null);
+ close(p.premium,t.biweekly);assert.equal(p.payPeriods,26);assert.equal(p.individualMax,6000);assert.equal(p.individualDeductible,null);assert.equal(p.familyMax,t.maximum);assert.equal(p.federalReference.reviewed,false);assert.equal(p.coinsurance,5);
  const self=federalDraft(plan,plan.tiers.find(t=>t.tier==='self'),'you');assert.notEqual(self.individualMax,null);
 });
 test('federal ranking excludes stale, ineligible, wrong-year, wrong-group plans without certification gates',()=>{
@@ -41,7 +41,7 @@ test('federal ranking excludes stale, ineligible, wrong-year, wrong-group plans 
 });
 test('top-three rank uses total modeled cost, preserves every private option and re-ranks on medical stress',()=>{
  const {e,p}=fixture();e.options=Array.from({length:4},(_,i)=>({...p,id:`private-${i}`}));e.federal={...blankFederal(),enabled:true,employee:'you',eligible:true};
- const plans=FEHB.plans.filter(p=>p.nationwide&&p.account==='Not Applicable').slice(0,4);e.federal.options=plans.map((plan,i)=>{const o={...federalDraft(plan,plan.tiers.find(t=>t.tier==='family'),'you'),hsa:false,hraAnnual:null,employerHsa:null,premium:[0,100,200,300][i],payPeriods:12,coinsurance:[100,0,0,0][i],individualDeductible:0,familyDeductible:0,individualMax:99999,familyMax:999999};o.federalReference.reviewed=true;o.federalReference.careSignature=careSignature(e);return o;});
+ const plans=FEHB.plans.filter(p=>p.nationwide&&p.account==='Not Applicable').slice(0,4);e.federal.options=plans.map((plan,i)=>{const o={...federalDraft(plan,plan.tiers.find(t=>t.tier==='family'),'you'),hsa:false,hraAnnual:null,employerHsa:null,deductibleMode:'embedded',premium:[0,100,200,300][i],payPeriods:12,coinsurance:[100,0,0,0][i],individualDeductible:0,familyDeductible:0,individualMax:99999,familyMax:999999};o.federalReference.reviewed=true;o.federalReference.careSignature=careSignature(e);return o;});
  const normal=comparisonEnrollment(e);assert.equal(normal.options.length,7);assert.deepEqual(normal.options.slice(0,4),e.options);assert.equal(normal.options[4].id,e.federal.options[1].id);assert.ok(normal.options.some(p=>p.id===e.federal.options[0].id));
  const stressed=comparisonEnrollment(e,5);assert.ok(!stressed.options.some(p=>p.id===e.federal.options[0].id));e.federal.options[0].federalReference.pinned=true;assert.equal(comparisonEnrollment(e,5).options.length,8);e.federal.options[0].federalReference.pinned=false;e.federal.showAll=true;assert.equal(comparisonEnrollment(e,5).options.length,8);
 });

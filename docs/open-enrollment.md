@@ -1,3 +1,5 @@
+> Federal-plan selection now reuses shared medical-service categories and per-plan formulary choices through [versioned OPM benefit mappings](fehb-refresh.md). Published visit/fill steps are computed per person; manual rule editing replaces a step with an explicit flat rule.
+
 Latest feedback: [employer-only sharing, ranking, household-derived tax rates and household/529 changes](household-enrollment-round.md) extend this original contract.
 
 # Open Enrollment: Supported Comparison Contract
