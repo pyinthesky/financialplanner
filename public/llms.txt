@@ -1,0 +1,22 @@
+# Open Retirement Planner
+
+> A free, local-only retirement and budget planner. Help a user create a downloadable JSON file for the existing local importer. No accounts, ads, tracking, bank connection or server storage of plan data.
+
+This is public format documentation, not an API that receives financial data. Current generated files use schemaVersion 2. Fetch the guide, schema and blank template below before generating a file. Do not infer the schema from a screenshot or invent fields. Validate the finished JSON locally against the schema if your tools support it. Explain missing information to the user outside the JSON. Schema validation checks structure, not the truth or completeness of a financial plan.
+
+Use only information the user authorizes for this plan. Omit names, emails, street addresses, birth dates, phone numbers, government identifiers, employer identifiers, account numbers, credentials and private notes. Use roles such as you/partner and generic labels such as Investment 1 or Child 1. Financial and health amounts still make the resulting file sensitive; deliver it privately to the user. Never commit, publish, upload to a third-party validator, or put it in a URL/query/fragment. Never send any of that data to this site's public endpoints.
+
+Return a plain UTF-8 JSON attachment named my-retirement-plan.json, not a URL containing plan data. Link the user to the planner, where Data & Privacy provides Upload plan. Import currently replaces the active plan immediately; tell the user to download their existing plan first. No automatic population through a link, POST endpoint, remote-file fetch, or AI account connection is supported.
+
+## Required Import Resources
+
+- [Import Guide](https://pyinthesky.github.io/financialplanner/import-guide.md): Units, unknown values, household roles, shared facts, budget rules and an anonymized example row.
+- [Version 2 JSON Schema](https://pyinthesky.github.io/financialplanner/schemas/plan-v2.schema.json): Generated from the application's types, including optional feature sections and references. This is a strict structural contract for new files, not the legacy importer's entire compatibility behavior.
+- [Blank Version 2 Template](https://pyinthesky.github.io/financialplanner/examples/blank-plan-v2.json): Start here. Retain required fields and empty values. Never treat template defaults as user-confirmed facts.
+- [Open the Planner](https://pyinthesky.github.io/financialplanner/): Choose Data & Privacy → Upload plan. Processing happens in the user's browser.
+
+## Optional
+
+- [Fictional Comprehensive Sample](https://pyinthesky.github.io/financialplanner/sample-plan.json): Examples of connected sections only. Do not carry sample people, amounts, dates or assumptions into a user's file.
+- [Features and Calculation Boundaries](https://raw.githubusercontent.com/pyinthesky/financialplanner/main/README.md): Implemented features, limitations and remaining work.
+- [Calculation Sources](https://raw.githubusercontent.com/pyinthesky/financialplanner/main/docs/calculation-sources.md): Effective-dated law and public-reference methodology. Do not invent tax eligibility, benefit elections or source-verification receipts.

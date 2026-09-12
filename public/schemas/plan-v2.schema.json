@@ -1,0 +1,2959 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PlannerData",
+  "definitions": {
+    "PlannerData": {
+      "type": "object",
+      "properties": {
+        "education": {
+          "$ref": "#/definitions/Education"
+        },
+        "enrollment": {
+          "$ref": "#/definitions/Enrollment"
+        },
+        "realEstate": {
+          "$ref": "#/definitions/RealEstate"
+        },
+        "refinancing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RefinanceCase"
+          }
+        },
+        "returnReferences": {
+          "type": "object",
+          "properties": {
+            "preRetirementReturn": {
+              "$ref": "#/definitions/ReturnReceipt"
+            },
+            "retirementReturn": {
+              "$ref": "#/definitions/ReturnReceipt"
+            },
+            "cashReturn": {
+              "$ref": "#/definitions/ReturnReceipt"
+            }
+          },
+          "additionalProperties": false
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 2
+        },
+        "budget": {
+          "$ref": "#/definitions/BudgetData"
+        },
+        "laboratory": {
+          "$ref": "#/definitions/Laboratory"
+        },
+        "inflationReference": {
+          "$ref": "#/definitions/InflationReceipt"
+        },
+        "household": {
+          "type": "object",
+          "properties": {
+            "dependents": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Dependent"
+              }
+            },
+            "maritalStatus": {
+              "type": "string",
+              "enum": [
+                "single",
+                "married"
+              ]
+            },
+            "filingStatus": {
+              "$ref": "#/definitions/FilingStatus"
+            },
+            "marriedFilingSeparatelyLivedApart": {
+              "type": "boolean"
+            },
+            "currentAge": {
+              "type": "number"
+            },
+            "birthYear": {
+              "type": "number"
+            },
+            "partnerAge": {
+              "type": "number"
+            },
+            "partnerBirthYear": {
+              "type": "number"
+            },
+            "retirementAge": {
+              "type": "number"
+            },
+            "partnerRetirementAge": {
+              "type": "number"
+            },
+            "planToAge": {
+              "type": "number"
+            },
+            "state": {
+              "type": "string"
+            },
+            "zipCode": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "maritalStatus",
+            "filingStatus",
+            "marriedFilingSeparatelyLivedApart",
+            "currentAge",
+            "birthYear",
+            "partnerAge",
+            "partnerBirthYear",
+            "retirementAge",
+            "partnerRetirementAge",
+            "planToAge",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        "assumptions": {
+          "type": "object",
+          "properties": {
+            "annualSpending": {
+              "type": "number"
+            },
+            "inflation": {
+              "type": "number"
+            },
+            "preRetirementReturn": {
+              "type": "number"
+            },
+            "retirementReturn": {
+              "type": "number"
+            },
+            "cashReturn": {
+              "type": "number"
+            },
+            "stateEffectiveTaxRate": {
+              "type": "number"
+            },
+            "capitalGainsRate": {
+              "type": "number"
+            },
+            "taxableGainFraction": {
+              "type": "number"
+            },
+            "targetOrdinaryIncome": {
+              "type": "number"
+            },
+            "taxExemptInterest": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "annualSpending",
+            "inflation",
+            "preRetirementReturn",
+            "retirementReturn",
+            "stateEffectiveTaxRate",
+            "capitalGainsRate",
+            "taxableGainFraction",
+            "targetOrdinaryIncome",
+            "taxExemptInterest"
+          ],
+          "additionalProperties": false
+        },
+        "qcdPlanning": {
+          "type": "object",
+          "properties": {
+            "annualGiftYou": {
+              "type": "number"
+            },
+            "annualGiftPartner": {
+              "type": "number"
+            },
+            "unusedDeductibleContributionOffsetYou": {
+              "type": "number"
+            },
+            "unusedDeductibleContributionOffsetPartner": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "annualGiftYou",
+            "annualGiftPartner",
+            "unusedDeductibleContributionOffsetYou",
+            "unusedDeductibleContributionOffsetPartner"
+          ],
+          "additionalProperties": false
+        },
+        "earlyWithdrawalPlanning": {
+          "type": "object",
+          "properties": {
+            "annualConfirmedExceptionYou": {
+              "type": "number"
+            },
+            "annualConfirmedExceptionPartner": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "annualConfirmedExceptionYou",
+            "annualConfirmedExceptionPartner"
+          ],
+          "additionalProperties": false
+        },
+        "rothConversionPlanning": {
+          "type": "object",
+          "properties": {
+            "baselineGrossOrdinaryIncome": {
+              "type": "number"
+            },
+            "taxableConversionAmount": {
+              "type": "number"
+            },
+            "targetBracketRate": {
+              "type": "number"
+            },
+            "annualConversionYou": {
+              "type": "number"
+            },
+            "startAgeYou": {
+              "type": "number"
+            },
+            "endAgeYou": {
+              "type": "number"
+            },
+            "annualConversionPartner": {
+              "type": "number"
+            },
+            "startAgePartner": {
+              "type": "number"
+            },
+            "endAgePartner": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "baselineGrossOrdinaryIncome",
+            "taxableConversionAmount",
+            "targetBracketRate",
+            "annualConversionYou",
+            "startAgeYou",
+            "endAgeYou",
+            "annualConversionPartner",
+            "startAgePartner",
+            "endAgePartner"
+          ],
+          "additionalProperties": false
+        },
+        "medicareIrmaaPlanning": {
+          "type": "object",
+          "properties": {
+            "magi2024": {
+              "type": "number"
+            },
+            "filingCategory": {
+              "type": "string",
+              "enum": [
+                "",
+                "individual",
+                "marriedJoint",
+                "marriedSeparateLivedTogether"
+              ]
+            },
+            "partBEnrollees": {
+              "type": "number"
+            },
+            "partDEnrollees": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "magi2024",
+            "filingCategory",
+            "partBEnrollees",
+            "partDEnrollees"
+          ],
+          "additionalProperties": false
+        },
+        "acaPlanning": {
+          "type": "object",
+          "properties": {
+            "householdMagi": {
+              "type": "number"
+            },
+            "taxFamilySize": {
+              "type": "number"
+            },
+            "location": {
+              "type": "string",
+              "enum": [
+                "",
+                "contiguous",
+                "alaska",
+                "hawaii"
+              ]
+            },
+            "annualEnrollmentPremium": {
+              "type": "number"
+            },
+            "annualBenchmarkPremium": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "householdMagi",
+            "taxFamilySize",
+            "location",
+            "annualEnrollmentPremium",
+            "annualBenchmarkPremium"
+          ],
+          "additionalProperties": false
+        },
+        "capitalGainsPlanning": {
+          "type": "object",
+          "properties": {
+            "grossOrdinaryIncome": {
+              "type": "number"
+            },
+            "netLongTermCapitalGain": {
+              "type": "number"
+            },
+            "modifiedAdjustedGrossIncome": {
+              "type": "number"
+            },
+            "netInvestmentIncome": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "grossOrdinaryIncome",
+            "netLongTermCapitalGain",
+            "modifiedAdjustedGrossIncome",
+            "netInvestmentIncome"
+          ],
+          "additionalProperties": false
+        },
+        "housing": {
+          "type": "object",
+          "properties": {
+            "propertyTaxMode": {
+              "type": "string",
+              "enum": [
+                "mills",
+                "annual"
+              ]
+            },
+            "annualPropertyTax": {
+              "type": "number"
+            },
+            "statement": {
+              "$ref": "#/definitions/MortgageStatement"
+            },
+            "homeValue": {
+              "type": "number"
+            },
+            "assessedPercent": {
+              "type": "number"
+            },
+            "millRate": {
+              "type": "number"
+            },
+            "annualInsurance": {
+              "type": "number"
+            },
+            "includeInNetWorth": {
+              "type": "boolean"
+            },
+            "payoffMortgageAtRetirement": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "homeValue",
+            "assessedPercent",
+            "millRate",
+            "annualInsurance",
+            "includeInNetWorth",
+            "payoffMortgageAtRetirement"
+          ],
+          "additionalProperties": false
+        },
+        "healthcare": {
+          "type": "object",
+          "properties": {
+            "preMedicareAnnual": {
+              "type": "number"
+            },
+            "medicareAnnual": {
+              "type": "number"
+            },
+            "healthInflation": {
+              "type": "number"
+            },
+            "longTermCareAnnual": {
+              "type": "number"
+            },
+            "longTermCareStartAge": {
+              "type": "number"
+            },
+            "longTermCareYears": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "preMedicareAnnual",
+            "medicareAnnual",
+            "healthInflation",
+            "longTermCareAnnual",
+            "longTermCareStartAge",
+            "longTermCareYears"
+          ],
+          "additionalProperties": false
+        },
+        "debtStrategy": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "snowball",
+                "avalanche",
+                "custom"
+              ]
+            },
+            "extraMonthlyPayment": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "method",
+            "extraMonthlyPayment"
+          ],
+          "additionalProperties": false
+        },
+        "accounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Account"
+          }
+        },
+        "income": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IncomeStream"
+          }
+        },
+        "debts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Debt"
+          }
+        },
+        "recurringCosts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RecurringCost"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "budget",
+        "household",
+        "assumptions",
+        "qcdPlanning",
+        "earlyWithdrawalPlanning",
+        "rothConversionPlanning",
+        "medicareIrmaaPlanning",
+        "acaPlanning",
+        "capitalGainsPlanning",
+        "housing",
+        "healthcare",
+        "debtStrategy",
+        "accounts",
+        "income",
+        "debts",
+        "recurringCosts"
+      ],
+      "additionalProperties": false
+    },
+    "Education": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EducationAccount"
+          }
+        }
+      },
+      "required": [
+        "accounts"
+      ],
+      "additionalProperties": false
+    },
+    "EducationAccount": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "beneficiaryId": {
+          "type": "string"
+        },
+        "balance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "monthlyContribution": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "returnRate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "beneficiaryId",
+        "balance",
+        "monthlyContribution",
+        "returnRate"
+      ],
+      "additionalProperties": false
+    },
+    "Enrollment": {
+      "type": "object",
+      "properties": {
+        "federal": {
+          "$ref": "#/definitions/FederalSelection"
+        },
+        "waivers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Waiver"
+          }
+        },
+        "arrangements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Arrangement"
+          }
+        },
+        "startMonth": {
+          "type": "string"
+        },
+        "people": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Person"
+          }
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HealthOption"
+          }
+        },
+        "processingMonths": {
+          "$ref": "#/definitions/Money"
+        },
+        "dueMonths": {
+          "$ref": "#/definitions/Money"
+        },
+        "reimbursementMonths": {
+          "$ref": "#/definitions/Money"
+        },
+        "qualifiedConfirmed": {
+          "type": "boolean"
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TermQuote"
+          }
+        },
+        "employmentYears": {
+          "$ref": "#/definitions/Money"
+        }
+      },
+      "required": [
+        "startMonth",
+        "people",
+        "options",
+        "processingMonths",
+        "dueMonths",
+        "reimbursementMonths",
+        "qualifiedConfirmed",
+        "quotes",
+        "employmentYears"
+      ],
+      "additionalProperties": false
+    },
+    "FederalSelection": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "employee": {
+          "type": "string",
+          "enum": [
+            "",
+            "you",
+            "partner"
+          ]
+        },
+        "zip": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "county": {
+          "type": "string"
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "showAll": {
+          "type": "boolean"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HealthOption"
+          }
+        }
+      },
+      "required": [
+        "enabled",
+        "employee",
+        "zip",
+        "state",
+        "county",
+        "eligible",
+        "options"
+      ],
+      "additionalProperties": false
+    },
+    "HealthOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "autoTaxEstimate": {
+          "type": "boolean"
+        },
+        "coveredPersonIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hraAnnual": {
+          "$ref": "#/definitions/Money"
+        },
+        "hraConfirmed": {
+          "type": "boolean"
+        },
+        "employer": {
+          "type": "string",
+          "enum": [
+            "",
+            "you",
+            "partner"
+          ]
+        },
+        "spouseSurcharge": {
+          "$ref": "#/definitions/Money"
+        },
+        "surchargeConfirmed": {
+          "type": "boolean"
+        },
+        "federalReference": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "benefitVersion": {
+              "type": "string"
+            },
+            "tier": {
+              "type": "string"
+            },
+            "pinned": {
+              "type": "boolean"
+            },
+            "reviewed": {
+              "type": "boolean"
+            },
+            "careSignature": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "tier",
+            "reviewed",
+            "careSignature"
+          ],
+          "additionalProperties": false
+        },
+        "network": {
+          "type": "string",
+          "enum": [
+            "unspecified",
+            "PPO",
+            "HMO",
+            "EPO",
+            "POS"
+          ]
+        },
+        "premium": {
+          "$ref": "#/definitions/Money"
+        },
+        "payPeriods": {
+          "$ref": "#/definitions/Money"
+        },
+        "premiumTaxRate": {
+          "$ref": "#/definitions/Money"
+        },
+        "deductibleMode": {
+          "type": "string",
+          "enum": [
+            "embedded",
+            "aggregate",
+            "unknown"
+          ]
+        },
+        "individualDeductible": {
+          "$ref": "#/definitions/Money"
+        },
+        "familyDeductible": {
+          "$ref": "#/definitions/Money"
+        },
+        "individualMax": {
+          "$ref": "#/definitions/Money"
+        },
+        "familyMax": {
+          "$ref": "#/definitions/Money"
+        },
+        "coinsurance": {
+          "$ref": "#/definitions/Money"
+        },
+        "rxIndividualDeductible": {
+          "$ref": "#/definitions/Money"
+        },
+        "rxFamilyDeductible": {
+          "$ref": "#/definitions/Money"
+        },
+        "rxIndividualMax": {
+          "$ref": "#/definitions/Money"
+        },
+        "rxFamilyMax": {
+          "$ref": "#/definitions/Money"
+        },
+        "rules": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Rule"
+          }
+        },
+        "hsa": {
+          "type": "boolean"
+        },
+        "eligibilityConfirmed": {
+          "type": "boolean"
+        },
+        "contributionLimit": {
+          "$ref": "#/definitions/Money"
+        },
+        "employerHsa": {
+          "$ref": "#/definitions/Money"
+        },
+        "employerTiming": {
+          "type": "string",
+          "enum": [
+            "monthly",
+            "upfront"
+          ]
+        },
+        "ownHsa": {
+          "$ref": "#/definitions/Money"
+        },
+        "openingHsa": {
+          "$ref": "#/definitions/Money"
+        },
+        "taxRate": {
+          "$ref": "#/definitions/Money"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "network",
+        "premium",
+        "payPeriods",
+        "premiumTaxRate",
+        "deductibleMode",
+        "individualDeductible",
+        "familyDeductible",
+        "individualMax",
+        "familyMax",
+        "coinsurance",
+        "rxIndividualDeductible",
+        "rxFamilyDeductible",
+        "rxIndividualMax",
+        "rxFamilyMax",
+        "rules",
+        "hsa",
+        "eligibilityConfirmed",
+        "contributionLimit",
+        "employerHsa",
+        "employerTiming",
+        "ownHsa",
+        "openingHsa",
+        "taxRate"
+      ],
+      "additionalProperties": false
+    },
+    "Money": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Local, user-entered benefit comparison. See docs/open-enrollment.md for boundaries."
+    },
+    "Rule": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "manual": {
+          "type": "boolean"
+        },
+        "after": {
+          "$ref": "#/definitions/StepRule"
+        },
+        "minimum": {
+          "$ref": "#/definitions/Money"
+        },
+        "maximum": {
+          "$ref": "#/definitions/Money"
+        },
+        "allowedOverride": {
+          "$ref": "#/definitions/Money"
+        },
+        "coverage": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "covered",
+            "excluded"
+          ]
+        },
+        "deductible": {
+          "type": "string",
+          "enum": [
+            "shared",
+            "separate",
+            "exempt"
+          ]
+        },
+        "payment": {
+          "type": "string",
+          "enum": [
+            "coinsurance",
+            "copay"
+          ]
+        },
+        "amount": {
+          "$ref": "#/definitions/Money"
+        },
+        "countsOop": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "yes",
+            "no"
+          ]
+        }
+      },
+      "required": [
+        "coverage",
+        "deductible",
+        "payment",
+        "amount",
+        "countsOop"
+      ],
+      "additionalProperties": false
+    },
+    "StepRule": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "number"
+        },
+        "group": {
+          "type": "string"
+        },
+        "payment": {
+          "type": "string",
+          "enum": [
+            "coinsurance",
+            "copay"
+          ]
+        },
+        "amount": {
+          "type": "number"
+        },
+        "deductible": {
+          "type": "string",
+          "enum": [
+            "shared",
+            "separate",
+            "exempt"
+          ]
+        },
+        "keepHigher": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "count",
+        "group",
+        "payment",
+        "amount",
+        "deductible"
+      ],
+      "additionalProperties": false
+    },
+    "Waiver": {
+      "type": "object",
+      "properties": {
+        "employer": {
+          "$ref": "#/definitions/Employer"
+        },
+        "amount": {
+          "$ref": "#/definitions/Money"
+        },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "net",
+            "gross"
+          ]
+        },
+        "taxRate": {
+          "$ref": "#/definitions/Money"
+        },
+        "firstMonth": {
+          "$ref": "#/definitions/Money"
+        },
+        "lastMonth": {
+          "$ref": "#/definitions/Money"
+        },
+        "payment": {
+          "type": "string",
+          "enum": [
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "payoutMonth": {
+          "$ref": "#/definitions/Money"
+        },
+        "confirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "employer",
+        "amount",
+        "basis",
+        "taxRate",
+        "firstMonth",
+        "lastMonth",
+        "payment",
+        "payoutMonth",
+        "confirmed"
+      ],
+      "additionalProperties": false
+    },
+    "Employer": {
+      "type": "string",
+      "enum": [
+        "",
+        "you",
+        "partner"
+      ]
+    },
+    "Arrangement": {
+      "type": "object",
+      "properties": {
+        "confirmed": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "optionId": {
+                "type": "string"
+              },
+              "personIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "optionId",
+              "personIds"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "groups"
+      ],
+      "additionalProperties": false
+    },
+    "Person": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "householdMemberId": {
+          "type": "string"
+        },
+        "hsaEligible": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "yes",
+            "no"
+          ]
+        },
+        "annualMedical": {
+          "$ref": "#/definitions/Money"
+        },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "allowed",
+            "priorOop"
+          ]
+        },
+        "timing": {
+          "type": "string",
+          "enum": [
+            "spread",
+            "once"
+          ]
+        },
+        "month": {
+          "$ref": "#/definitions/Money"
+        },
+        "care": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Care"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "annualMedical",
+        "basis",
+        "timing",
+        "month",
+        "care"
+      ],
+      "additionalProperties": false
+    },
+    "Care": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/definitions/CareKind"
+        },
+        "label": {
+          "type": "string"
+        },
+        "allowed": {
+          "$ref": "#/definitions/Money"
+        },
+        "count": {
+          "$ref": "#/definitions/Money"
+        },
+        "timing": {
+          "type": "string",
+          "enum": [
+            "spread",
+            "once"
+          ]
+        },
+        "month": {
+          "$ref": "#/definitions/Money"
+        },
+        "payAtService": {
+          "type": "boolean"
+        },
+        "hsaExcluded": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "allowed",
+        "count",
+        "timing",
+        "month"
+      ],
+      "additionalProperties": false
+    },
+    "CareKind": {
+      "type": "string",
+      "enum": [
+        "medical",
+        "prescription",
+        "preventive",
+        "noncovered"
+      ]
+    },
+    "TermQuote": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "ownership": {
+          "type": "string",
+          "enum": [
+            "individual",
+            "employer"
+          ]
+        },
+        "coverage": {
+          "$ref": "#/definitions/Money"
+        },
+        "premium": {
+          "$ref": "#/definitions/Money"
+        },
+        "years": {
+          "$ref": "#/definitions/Money"
+        },
+        "guaranteedYears": {
+          "$ref": "#/definitions/Money"
+        },
+        "portable": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "yes",
+            "no"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "ownership",
+        "coverage",
+        "premium",
+        "years",
+        "guaranteedYears",
+        "portable"
+      ],
+      "additionalProperties": false
+    },
+    "RealEstate": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RentalProperty"
+          }
+        },
+        "trial": {
+          "$ref": "#/definitions/PropertyTrial"
+        }
+      },
+      "required": [
+        "properties"
+      ],
+      "additionalProperties": false
+    },
+    "RentalProperty": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "debtId": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "vacancy": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "management": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "tax": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "insurance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "maintenance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "repairs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "reserveTarget": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "taxableProfit": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "taxConfirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "debtId",
+        "value",
+        "rent",
+        "vacancy",
+        "management",
+        "tax",
+        "insurance",
+        "maintenance",
+        "repairs",
+        "reserveTarget",
+        "taxableProfit",
+        "taxConfirmed"
+      ],
+      "additionalProperties": false
+    },
+    "PropertyTrial": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "purchase",
+            "keep"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "equity": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "buyingCosts": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "years": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "holdingYears": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "vacancy": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "costs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "repairs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "appreciation": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "investmentReturn": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "saleCostPercent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "value",
+        "equity",
+        "buyingCosts",
+        "rate",
+        "years",
+        "holdingYears",
+        "rent",
+        "vacancy",
+        "costs",
+        "repairs",
+        "appreciation",
+        "investmentReturn",
+        "saleCostPercent"
+      ],
+      "additionalProperties": false
+    },
+    "RefinanceCase": {
+      "type": "object",
+      "properties": {
+        "debtId": {
+          "type": "string"
+        },
+        "years": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "fees": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "financed": {
+          "type": "boolean"
+        },
+        "horizon": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "benchmarkEligible": {
+          "type": "boolean"
+        },
+        "snoozeUntil": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "debtId",
+        "years",
+        "rate",
+        "fees",
+        "financed",
+        "horizon",
+        "benchmarkEligible",
+        "snoozeUntil"
+      ],
+      "additionalProperties": false
+    },
+    "ReturnReceipt": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "previousValue": {
+          "type": "number"
+        },
+        "label": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "previousValue",
+        "label",
+        "period"
+      ],
+      "additionalProperties": false
+    },
+    "BudgetData": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BudgetLine"
+          }
+        },
+        "pay": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BudgetPay"
+          }
+        },
+        "retirementSpendingSource": {
+          "type": "string",
+          "enum": [
+            "legacy",
+            "worksheet"
+          ],
+          "description": "Migration never silently mixes category detail with an old aggregate."
+        },
+        "reviewed": {
+          "type": "boolean"
+        },
+        "presentation": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "category"
+          ]
+        },
+        "savings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BudgetSaving"
+          }
+        },
+        "overrides": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BudgetOverride"
+          }
+        },
+        "timeline": {
+          "type": "object",
+          "properties": {
+            "startYear": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "retirementMonthYou": {
+              "type": "string"
+            },
+            "retirementMonthPartner": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "startYear",
+            "retirementMonthYou",
+            "retirementMonthPartner"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "lines",
+        "pay",
+        "retirementSpendingSource",
+        "reviewed"
+      ],
+      "additionalProperties": false
+    },
+    "BudgetLine": {
+      "type": "object",
+      "properties": {
+        "allocations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "amount": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "retirement": {
+                "type": "object",
+                "properties": {
+                  "rule": {
+                    "type": "string",
+                    "enum": [
+                      "continue",
+                      "stop",
+                      "replace"
+                    ]
+                  },
+                  "amount": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "rule",
+                  "amount"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "amount",
+              "retirement"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Optional explanation of the envelope; never additional spending rows."
+        },
+        "reference": {
+          "$ref": "#/definitions/BudgetReferenceReceipt"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frequency": {
+          "$ref": "#/definitions/Frequency"
+        },
+        "essential": {
+          "type": "boolean"
+        },
+        "flexibility": {
+          "type": "string",
+          "enum": [
+            "fixed",
+            "flexible"
+          ]
+        },
+        "owner": {
+          "$ref": "#/definitions/BudgetOwner"
+        },
+        "nextDueDate": {
+          "type": "string",
+          "description": "ISO date anchors actual cash dates. Without one, only averages are known."
+        },
+        "endDate": {
+          "type": "string"
+        },
+        "retirement": {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "$ref": "#/definitions/RetirementRule"
+            },
+            "amount": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "rule",
+            "amount",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "amount",
+        "frequency",
+        "essential",
+        "owner",
+        "nextDueDate",
+        "endDate",
+        "retirement"
+      ],
+      "additionalProperties": false
+    },
+    "BudgetReferenceReceipt": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "$ref": "#/definitions/BudgetReference"
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "current",
+            "retirement"
+          ]
+        },
+        "applied": {
+          "type": "number"
+        },
+        "frequency": {
+          "$ref": "#/definitions/BudgetLine"
+        },
+        "previousAmount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "previousRetirement": {
+          "$ref": "#/definitions/BudgetLine"
+        }
+      },
+      "required": [
+        "reference",
+        "target",
+        "applied",
+        "frequency",
+        "previousAmount",
+        "previousRetirement"
+      ],
+      "additionalProperties": false
+    },
+    "BudgetReference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "monthly": {
+          "type": "number"
+        },
+        "geography": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "published": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "population": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "category",
+        "monthly",
+        "geography",
+        "period",
+        "published",
+        "source",
+        "population",
+        "method"
+      ],
+      "additionalProperties": false
+    },
+    "Frequency": {
+      "type": "string",
+      "enum": [
+        "weekly",
+        "biweekly",
+        "semimonthly",
+        "monthly",
+        "quarterly",
+        "annual"
+      ]
+    },
+    "BudgetOwner": {
+      "type": "string",
+      "enum": [
+        "you",
+        "partner",
+        "household"
+      ]
+    },
+    "RetirementRule": {
+      "type": "string",
+      "enum": [
+        "continue",
+        "stop",
+        "replace",
+        "percent",
+        "retirementOnly"
+      ]
+    },
+    "BudgetPay": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string",
+          "enum": [
+            "you",
+            "partner"
+          ]
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frequency": {
+          "$ref": "#/definitions/Frequency"
+        },
+        "nextPayDate": {
+          "type": "string"
+        },
+        "payroll": {
+          "type": "object",
+          "properties": {
+            "allocations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PayrollAllocation"
+              }
+            },
+            "employerTaxable": {
+              "type": "number"
+            },
+            "election": {
+              "$ref": "#/definitions/ContributionElection"
+            },
+            "gross": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "taxableWages": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "incomeTaxWithheld": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "otherDeductions": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "employeeSavings": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "employerSavings": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "accountId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "gross",
+            "taxableWages",
+            "incomeTaxWithheld",
+            "otherDeductions",
+            "employeeSavings",
+            "employerSavings",
+            "accountId"
+          ],
+          "additionalProperties": false,
+          "description": "All values are per paycheck; withholding is income tax only."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "owner",
+        "amount",
+        "frequency",
+        "nextPayDate"
+      ],
+      "additionalProperties": false
+    },
+    "PayrollAllocation": {
+      "type": "object",
+      "properties": {
+        "accountId": {
+          "type": "string"
+        },
+        "employee": {
+          "type": "number"
+        },
+        "employer": {
+          "type": "number"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "traditional",
+            "roth"
+          ]
+        }
+      },
+      "required": [
+        "accountId",
+        "employee",
+        "employer",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "ContributionElection": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "fixed",
+            "percent",
+            "maximum"
+          ]
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "catchUp": {
+          "type": "boolean"
+        },
+        "priorYearWages": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "otherDeferrals": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "employeeRothPercent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "employerAmount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "employerRothPercent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "employerRothConfirmed": {
+          "type": "boolean"
+        },
+        "otherPretax": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "traditionalAccountId": {
+          "type": "string"
+        },
+        "rothAccountId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "year",
+        "mode",
+        "amount",
+        "catchUp",
+        "priorYearWages",
+        "otherDeferrals",
+        "employeeRothPercent",
+        "employerAmount",
+        "employerRothPercent",
+        "employerRothConfirmed",
+        "otherPretax",
+        "traditionalAccountId",
+        "rothAccountId"
+      ],
+      "additionalProperties": false
+    },
+    "BudgetSaving": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "accountId": {
+          "type": "string"
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frequency": {
+          "$ref": "#/definitions/Frequency"
+        },
+        "owner": {
+          "$ref": "#/definitions/BudgetOwner"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "accountId",
+        "amount",
+        "frequency",
+        "owner"
+      ],
+      "additionalProperties": false
+    },
+    "BudgetOverride": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "lineId": {
+          "type": "string"
+        },
+        "fromMonth": {
+          "type": "string"
+        },
+        "throughMonth": {
+          "type": "string"
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "lineId",
+        "fromMonth",
+        "throughMonth",
+        "amount"
+      ],
+      "additionalProperties": false
+    },
+    "Laboratory": {
+      "type": "object",
+      "properties": {
+        "simulation": {
+          "$ref": "#/definitions/SimulationInputs"
+        },
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "settings": {
+          "$ref": "#/definitions/MonthlySettings"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlanEvent"
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SavedScenario"
+          }
+        }
+      },
+      "required": [
+        "version",
+        "settings",
+        "events",
+        "scenarios"
+      ],
+      "additionalProperties": false
+    },
+    "SimulationInputs": {
+      "type": "object",
+      "properties": {
+        "mean": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "volatility": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "fee": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "samples": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "seed": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mean",
+        "volatility",
+        "fee",
+        "samples",
+        "seed"
+      ],
+      "additionalProperties": false
+    },
+    "MonthlySettings": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "cashCoverageMonths": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "dependableIncomeMonthly": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "dependableIncomeSource": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "benefits"
+          ]
+        },
+        "reserveExtra": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "refillCash": {
+          "type": "boolean"
+        },
+        "guardrailFloor": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "discretionaryCutPercent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "legacyTarget": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "legacyRealDollars": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled",
+        "cashCoverageMonths",
+        "dependableIncomeMonthly",
+        "reserveExtra",
+        "refillCash",
+        "guardrailFloor",
+        "discretionaryCutPercent",
+        "legacyTarget",
+        "legacyRealDollars"
+      ],
+      "additionalProperties": false
+    },
+    "PlanEvent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "month": {
+          "type": "string"
+        },
+        "throughMonth": {
+          "type": "string",
+          "description": "Expense repeats monthly through this month; absent means one-time."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "expense",
+            "cashReceipt"
+          ]
+        },
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "taxableAmount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "confirmedCashTreatment": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "month",
+        "kind",
+        "amount",
+        "taxableAmount",
+        "confirmedCashTreatment"
+      ],
+      "additionalProperties": false
+    },
+    "SavedScenario": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "baseline": {
+          "type": "string",
+          "description": "Immutable local snapshot; never sent to a server."
+        },
+        "overrides": {
+          "$ref": "#/definitions/ScenarioOverrides"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "baseline",
+        "overrides"
+      ],
+      "additionalProperties": false
+    },
+    "ScenarioOverrides": {
+      "type": "object",
+      "properties": {
+        "refinance": {
+          "$ref": "#/definitions/RefinanceCase"
+        },
+        "debtStrategy": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "snowball",
+                "avalanche",
+                "custom"
+              ]
+            },
+            "extraMonthlyPayment": {
+              "type": "number"
+            },
+            "customExtraPayments": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "homeMove": {
+          "$ref": "#/definitions/HomeMove"
+        },
+        "mortgagePayoff": {
+          "type": "object",
+          "properties": {
+            "debtId": {
+              "type": "string"
+            },
+            "month": {
+              "type": "string"
+            },
+            "destination": {
+              "type": "string",
+              "enum": [
+                "cash",
+                "invest"
+              ]
+            },
+            "accountId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "debtId",
+            "month",
+            "destination",
+            "accountId"
+          ],
+          "additionalProperties": false
+        },
+        "retirementMonthYou": {
+          "type": "string"
+        },
+        "retirementMonthPartner": {
+          "type": "string"
+        },
+        "spendingChangePercent": {
+          "type": "number"
+        },
+        "inflation": {
+          "type": "number"
+        },
+        "planToAge": {
+          "type": "number"
+        },
+        "returnYears": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "rate": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "year",
+              "rate"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlanEvent"
+          }
+        },
+        "cashCoverageMonths": {
+          "type": "number"
+        },
+        "discretionaryCutPercent": {
+          "type": "number"
+        },
+        "guardrailFloor": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "HomeMove": {
+      "type": "object",
+      "properties": {
+        "month": {
+          "type": "string"
+        },
+        "mortgageId": {
+          "type": "string"
+        },
+        "salePrice": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "sellingCosts": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "adjustedBasis": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "exclusion": {
+          "type": "string",
+          "enum": [
+            "none",
+            "standard"
+          ]
+        },
+        "eligibilityConfirmed": {
+          "type": "boolean"
+        },
+        "standardCaseConfirmed": {
+          "type": "boolean"
+        },
+        "replacementPrice": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "replacementClosingCosts": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "newMonthlyHousing": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "newAnnualPropertyTax": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "newAnnualInsurance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "month",
+        "mortgageId",
+        "salePrice",
+        "sellingCosts",
+        "adjustedBasis",
+        "exclusion",
+        "eligibilityConfirmed",
+        "standardCaseConfirmed",
+        "replacementPrice",
+        "replacementClosingCosts",
+        "newMonthlyHousing",
+        "newAnnualPropertyTax",
+        "newAnnualInsurance"
+      ],
+      "additionalProperties": false
+    },
+    "InflationReceipt": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "const": "bls-cpi-u-annual-2004-2024-v1"
+            },
+            "title": {
+              "type": "string",
+              "const": "20-Year Historical Inflation (2004–2024)"
+            },
+            "source": {
+              "type": "string",
+              "const": "Bureau of Labor Statistics, CPI-U, U.S. City Average, All Items"
+            },
+            "url": {
+              "type": "string",
+              "const": "https://www.bls.gov/cpi/tables/supplemental-files/historical-cpi-u-202412.pdf"
+            },
+            "reviewedOn": {
+              "type": "string",
+              "const": "2026-09-07"
+            },
+            "period": {
+              "type": "string",
+              "const": "Annual-average index, 2004 to 2024"
+            },
+            "geography": {
+              "type": "string",
+              "const": "United States urban consumers"
+            },
+            "units": {
+              "type": "string",
+              "const": "percent per year"
+            },
+            "startIndex": {
+              "type": "number",
+              "const": 188.9
+            },
+            "endIndex": {
+              "type": "number",
+              "const": 313.689
+            },
+            "years": {
+              "type": "number",
+              "const": 20
+            },
+            "method": {
+              "type": "string",
+              "const": "(313.689 / 188.9)^(1 / 20) - 1; compound annual change, not the average of yearly percentage changes"
+            },
+            "limitation": {
+              "type": "string",
+              "const": "Historical reference, not a forecast. This window ends in 2024; October 2025 CPI is unavailable, so this is not labeled the latest rolling 20-year annual-average window."
+            },
+            "missingDataUrl": {
+              "type": "string",
+              "const": "https://www.bls.gov/regions/mid-atlantic/data/consumerpriceindexhistorical_us_table.htm"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "source",
+            "url",
+            "reviewedOn",
+            "period",
+            "geography",
+            "units",
+            "startIndex",
+            "endIndex",
+            "years",
+            "method",
+            "limitation",
+            "missingDataUrl"
+          ],
+          "additionalProperties": false
+        },
+        "previousValue": {
+          "type": "number"
+        },
+        "appliedValue": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "reference",
+        "previousValue",
+        "appliedValue"
+      ],
+      "additionalProperties": false
+    },
+    "Dependent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "birthYear": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "collegeStartYear": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "collegeYears": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "annualCost": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "costGrowth": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "birthYear",
+        "collegeStartYear",
+        "collegeYears",
+        "annualCost",
+        "costGrowth"
+      ],
+      "additionalProperties": false
+    },
+    "FilingStatus": {
+      "type": "string",
+      "enum": [
+        "single",
+        "marriedJoint",
+        "headOfHousehold",
+        "marriedSeparate"
+      ]
+    },
+    "MortgageStatement": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "debtId": {
+          "type": "string"
+        },
+        "total": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "principalInterest": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "propertyTax": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "insurance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "mortgageInsurance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "otherEscrow": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "debtId",
+        "total",
+        "principalInterest",
+        "propertyTax",
+        "insurance",
+        "mortgageInsurance",
+        "otherEscrow"
+      ],
+      "additionalProperties": false
+    },
+    "Account": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/definitions/AccountKind"
+        },
+        "owner": {
+          "$ref": "#/definitions/Owner"
+        },
+        "balance": {
+          "type": "number"
+        },
+        "annualContribution": {
+          "type": "number"
+        },
+        "costBasis": {
+          "type": "number"
+        },
+        "qcdEligibleIra": {
+          "type": "boolean"
+        },
+        "conversionEligiblePretax": {
+          "type": "boolean"
+        },
+        "rothQualifiedFromYear": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "owner",
+        "balance",
+        "annualContribution"
+      ],
+      "additionalProperties": false
+    },
+    "AccountKind": {
+      "type": "string",
+      "enum": [
+        "taxable",
+        "traditional",
+        "roth",
+        "cash",
+        "hsa"
+      ]
+    },
+    "Owner": {
+      "type": "string",
+      "enum": [
+        "you",
+        "partner",
+        "joint"
+      ]
+    },
+    "IncomeStream": {
+      "type": "object",
+      "properties": {
+        "withholdingPercent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Entered income-tax withholding only; blank preserves unknown deposit timing."
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string",
+          "enum": [
+            "you",
+            "partner"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "pension",
+            "socialSecurity"
+          ]
+        },
+        "startAge": {
+          "type": "number"
+        },
+        "annualAmount": {
+          "type": "number"
+        },
+        "cola": {
+          "type": "number"
+        },
+        "survivorPercent": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "owner",
+        "kind",
+        "startAge",
+        "annualAmount",
+        "cola",
+        "survivorPercent"
+      ],
+      "additionalProperties": false
+    },
+    "Debt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "mortgage",
+            "creditCard",
+            "auto",
+            "student",
+            "other"
+          ]
+        },
+        "balance": {
+          "type": "number"
+        },
+        "interestRate": {
+          "type": "number"
+        },
+        "minimumPayment": {
+          "type": "number"
+        },
+        "customExtraPayment": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "balance",
+        "interestRate",
+        "minimumPayment"
+      ],
+      "additionalProperties": false
+    },
+    "RecurringCost": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "annualAmount": {
+          "type": "number"
+        },
+        "startAge": {
+          "type": "number"
+        },
+        "endAge": {
+          "type": "number"
+        },
+        "inflationLinked": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "annualAmount",
+        "startAge",
+        "endAge",
+        "inflationLinked"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$id": "https://pyinthesky.github.io/financialplanner/schemas/plan-v2.schema.json",
+  "title": "Open Retirement Planner — Version 2 Plan File",
+  "description": "Structural contract generated from PlannerData. Read /financialplanner/import-guide.md for units, shared facts, unknown values and privacy. Validation does not establish calculation completeness or financial-law eligibility."
+}

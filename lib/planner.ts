@@ -6,7 +6,7 @@ import { calculateFederalIncomeTax, type FilingStatus } from "./federal-tax.ts";
 import { budgetTotals, EMPTY_BUDGET, normalizeBudget, type BudgetData } from "./budget.ts";
 import { buildDebtLedger, type DebtLedgerMonth } from "./debt-ledger.ts";
 import { reconcileMortgage, type MortgageStatement } from "./housing.ts";
-import type { InflationReceipt } from "./references.ts";
+import type { InflationReceipt, ReturnReceipt } from "./references.ts";
 import { normalizeLaboratory, type Laboratory } from './monthly-model.ts';
 import { calculateTaxableSocialSecurity } from "./social-security-tax.ts";
 import { calculateRmd } from "./rmd.ts";
@@ -76,7 +76,7 @@ export interface PlannerData {
   enrollment?: Enrollment;
   realEstate?: RealEstate;
   refinancing?: RefinanceCase[];
-  returnReferences?: Partial<Record<'preRetirementReturn'|'retirementReturn'|'cashReturn', import('./references.ts').ReturnReceipt>>;
+  returnReferences?: Partial<Record<'preRetirementReturn'|'retirementReturn'|'cashReturn', ReturnReceipt>>;
   schemaVersion: 1 | 2;
   budget: BudgetData;
   laboratory?: Laboratory;

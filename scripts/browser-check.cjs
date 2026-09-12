@@ -7,7 +7,7 @@ const http = require('node:http');
 const root = path.resolve('dist-pages');
 const out = path.resolve('browser-evidence');
 fs.mkdirSync(out, { recursive: true });
-const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml' };
+const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain', '.md': 'text/plain' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const relative = decodeURIComponent(url.pathname).replace(/^\/financialplanner\/?/, '');
@@ -33,6 +33,15 @@ const server = http.createServer((req, res) => {
         page.on('crash',()=>console.error(`Renderer crashed: ${name} ${width}px`));
         page.on('pageerror', e => errors.push(e.message));
         await page.goto('http://127.0.0.1:4173/financialplanner/');
+        if(width===320){
+          for(const resource of ['llms.txt','import-guide.md','schemas/plan-v2.schema.json','examples/blank-plan-v2.json']){
+            const response=await page.request.get('http://127.0.0.1:4173/financialplanner/'+resource);
+            assert.equal(response.status(),200,`Public import resource: ${resource}`);
+            if(resource.endsWith('.json'))assert.ok(await response.json());
+            else assert.match(await response.text(),/^# /);
+          }
+          assert.equal(await page.locator('link[rel="describedby"]').getAttribute('href'),'./llms.txt');
+        }
         console.log(`Checking ${name} at ${width}px`);
         let navigationChecked=false;
         const navigate = async label => {

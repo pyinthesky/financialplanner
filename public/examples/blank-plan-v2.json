@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 2,
+  "budget": {
+    "version": 1,
+    "lines": [],
+    "pay": [],
+    "retirementSpendingSource": "legacy",
+    "reviewed": false
+  },
+  "household": {
+    "maritalStatus": "single",
+    "filingStatus": "single",
+    "marriedFilingSeparatelyLivedApart": false,
+    "currentAge": 0,
+    "birthYear": 0,
+    "partnerAge": 0,
+    "partnerBirthYear": 0,
+    "retirementAge": 0,
+    "partnerRetirementAge": 0,
+    "planToAge": 0,
+    "state": ""
+  },
+  "assumptions": {
+    "annualSpending": 0,
+    "inflation": 0,
+    "preRetirementReturn": 0,
+    "retirementReturn": 0,
+    "cashReturn": 0,
+    "stateEffectiveTaxRate": 0,
+    "capitalGainsRate": 0,
+    "taxableGainFraction": 0,
+    "targetOrdinaryIncome": 0,
+    "taxExemptInterest": 0
+  },
+  "qcdPlanning": {
+    "annualGiftYou": 0,
+    "annualGiftPartner": 0,
+    "unusedDeductibleContributionOffsetYou": 0,
+    "unusedDeductibleContributionOffsetPartner": 0
+  },
+  "earlyWithdrawalPlanning": {
+    "annualConfirmedExceptionYou": 0,
+    "annualConfirmedExceptionPartner": 0
+  },
+  "rothConversionPlanning": {
+    "baselineGrossOrdinaryIncome": 0,
+    "taxableConversionAmount": 0,
+    "targetBracketRate": 0,
+    "annualConversionYou": 0,
+    "startAgeYou": 0,
+    "endAgeYou": 0,
+    "annualConversionPartner": 0,
+    "startAgePartner": 0,
+    "endAgePartner": 0
+  },
+  "medicareIrmaaPlanning": {
+    "magi2024": 0,
+    "filingCategory": "",
+    "partBEnrollees": 0,
+    "partDEnrollees": 0
+  },
+  "acaPlanning": {
+    "householdMagi": 0,
+    "taxFamilySize": 0,
+    "location": "",
+    "annualEnrollmentPremium": 0,
+    "annualBenchmarkPremium": 0
+  },
+  "capitalGainsPlanning": {
+    "grossOrdinaryIncome": 0,
+    "netLongTermCapitalGain": 0,
+    "modifiedAdjustedGrossIncome": 0,
+    "netInvestmentIncome": 0
+  },
+  "housing": {
+    "homeValue": 0,
+    "assessedPercent": 0,
+    "millRate": 0,
+    "annualInsurance": 0,
+    "includeInNetWorth": false,
+    "payoffMortgageAtRetirement": false
+  },
+  "healthcare": {
+    "preMedicareAnnual": 0,
+    "medicareAnnual": 0,
+    "healthInflation": 0,
+    "longTermCareAnnual": 0,
+    "longTermCareStartAge": 0,
+    "longTermCareYears": 0
+  },
+  "debtStrategy": {
+    "method": "snowball",
+    "extraMonthlyPayment": 0
+  },
+  "accounts": [],
+  "income": [],
+  "debts": [],
+  "recurringCosts": []
+}

@@ -1,5 +1,7 @@
 # Delivery History
 
+- September 12: public LLM import instructions, generated version-2 JSON Schema and blank template, with drift and import-example tests. Financial data remains local; this is static documentation, not an upload API.
+
 The Knowledge Center release also adds an opt-in, independently calculated savings-rate curve inspired by the user-selected 2012 article. See [model and limitations](savings-illustration.md).
 
 Current capabilities and unfinished work live in the [README](../README.md). Historical proposals below are not active backlog items.

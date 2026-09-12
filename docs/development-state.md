@@ -4,6 +4,8 @@ Updated September 12, 2026 for the Knowledge Center and documentation consolidat
 
 ## Current Change
 
+Public import documentation ships at `llms.txt` and `import-guide.md`, with `schemas/plan-v2.schema.json` and `examples/blank-plan-v2.json`. `scripts/public-import-contract.mjs` generates the strict structural schema from PlannerData and the blank template from DEFAULT_PLAN. `npm run schema:write` updates them; tests check drift and example normalization. No runtime importer, URL ingestion or remote plan transport was added. The guide warns that the existing import action replaces state immediately; strict arbitrary-file validation/preview remains a follow-up.
+
 Knowledge Center is a standalone Explore destination using GraduationCap, shared Tailwind layout primitives and nine bundled guides. `lib/knowledge.ts` owns content, source editions/review date and local search; `components/knowledge-center.tsx` owns accessible disclosure/filter controls. It accepts no plan props, changes no financial state and sends no search data. Links open external sites explicitly without a referrer or appended plan context. Copy explains supported decisions; it does not claim provider vetting, personalized legal/medical advice or a complete eligibility engine.
 
 README now separates the shipped catalog, calculation boundaries, unfinished backlog and routine public-data maintenance. Old release counts/priorities moved to archives. Delivered FEHB mappings, family arrangements, per-fill caps, HRA allowances, payroll/529 and layout work are no longer incorrectly listed as future foundations.

@@ -14,6 +14,7 @@ This is the current product inventory. Every item below is implemented within th
 
 - Session-only use or an optional encrypted local vault, with visible saving/locked/error states.
 - Raw JSON download and re-import, including compatibility with earlier saved plans.
+- Public [llms.txt](https://pyinthesky.github.io/financialplanner/llms.txt), [import guide](https://pyinthesky.github.io/financialplanner/import-guide.md), generated version-2 JSON Schema and blank template for user-controlled file generation. CI checks schema drift and import examples; no plan-receiving endpoint or data-bearing links.
 - One-button fictional sample loading and confirmed Create New Plan, with an opportunity to download the current plan before replacement.
 - No bank connections or server storage of plan data. Google Search Console ownership verification is a meta tag, not analytics.
 
@@ -132,6 +133,8 @@ Plan data, credentials and private screenshots must never enter repository asset
 | 7 | Research-dependent public references | Broader reviewed FEHB mappings; refreshed economic/cohort references; a rights-cleared term-life price dataset with age/term/coverage/underwriting assumptions and stale-data suppression; employer age-band term schedules |
 | 8 | Evidence and accessibility depth (Batch 6) | More detailed audit trails and downloadable ledgers, physical-device/assistive-technology checks, performance work and sourced knowledge expansion; historical replay/calibrated uncertainty only with suitable data |
 
+A separate import follow-up is a strict allowed-field validation boundary and a local preview/confirmation before replacing the active plan with an arbitrary generated file. The public schema documents structure; the existing legacy importer has broader compatibility and no such preview yet.
+
 Optional AI and cloud connections remain deferred until the core calculation dependencies are resolved and a separate privacy design is approved. No timed feature builds are enabled.
 
 The product benchmark remains connected reasoning, clear assumptions, useful answers and easy entry without data collection. Compare against CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate and bank tools on those dimensions; no superiority claim is implied.
@@ -167,9 +170,12 @@ Validate a release:
 
 ```bash
 npm test
+npm run schema:check
 npx tsc --noEmit
 npm run build:pages
 ```
+
+Regenerate public import contracts after changing plan types or defaults: `npm run schema:write`. Commit the reviewed schema/template diff; the test suite fails on drift. These are development-only dependencies, not browser or network services.
 
 ## Deployment & Contributing
 
