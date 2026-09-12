@@ -7,7 +7,7 @@ const OpenEnrollment = lazy(() => import('@/components/open-enrollment').then(m 
 const EnrollmentPrint = lazy(() => import('@/components/open-enrollment').then(m => ({default:m.EnrollmentPrint})));
 import { EMPTY_ENROLLMENT } from '@/lib/enrollment';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, BriefcaseBusiness, Building2, Calculator, ChevronRight, CircleDollarSign, Download, FileUp, HeartPulse, Home, Landmark, Lock, LockKeyhole, Menu, Plus, Printer, ReceiptText, ShieldCheck, Trash2, Unlock, WalletCards } from "lucide-react";
+import { Activity, TreePalm, PiggyBank, FlaskConical, BriefcaseBusiness, Building2, Calculator, ChevronRight, CircleDollarSign, Download, FileUp, HeartPulse, Home, Landmark, Lock, LockKeyhole, Menu, Plus, Printer, ReceiptText, ShieldCheck, Trash2, Unlock, WalletCards } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
@@ -59,16 +59,16 @@ const VAULT_KEY = "open-retirement-planner-vault-v1";
 const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "data", label: "Data & Privacy", icon: ShieldCheck },
   { id: "household", label: "Household", icon: Home },
-  { id: "portfolio", label: "Cash & Investments", icon: BriefcaseBusiness },
+  { id: "portfolio", label: "Cash & Investments", icon: PiggyBank },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
   { id: "debt", label: "Loans & Debts", icon: WalletCards },
   { id: "realEstate", label: "Real Estate", icon: Home },
   { id: "health", label: "Health & Long-Term Care", icon: HeartPulse },
   { id: "taxes", label: "Taxes & Withdrawals", icon: Calculator },
   { id: "currentBudget", label: "Current Budget", icon: ReceiptText },
-  { id: "retirementBudget", label: "Retirement Budget", icon: ReceiptText },
+  { id: "retirementBudget", label: "Retirement Budget", icon: TreePalm },
   { id: "overview", label: "Plan Summary", icon: Activity },
-  { id: "scenarios", label: "Scenario Laboratory", icon: Activity },
+  { id: "scenarios", label: "Scenario Laboratory", icon: FlaskConical },
   { id: "enrollment", label: "Open Enrollment", icon: ShieldCheck },
 ];
 

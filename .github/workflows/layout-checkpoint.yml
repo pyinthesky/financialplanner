@@ -1,0 +1,27 @@
+name: Preserve Pre-Layout Rollback Tag
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/layout-checkpoint.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Preserve the icon-only version before layout migration
+        env:
+          CHECKPOINT_TAG: pre-tailwind-layout-2026-09-12
+        run: |
+          if git rev-parse "refs/tags/$CHECKPOINT_TAG" >/dev/null 2>&1; then
+            echo "Checkpoint already exists; never move a rollback tag."
+            exit 0
+          fi
+          git tag "$CHECKPOINT_TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$CHECKPOINT_TAG"
