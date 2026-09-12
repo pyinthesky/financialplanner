@@ -2396,7 +2396,7 @@ export default function HomePage() {
               </Button>
             </div>
           </header>
-          <PageContent as="main" className="content-wrap">
+          <PageContent as="div" className="content-wrap">
             <Stack as="div" className="page-flow">{content}</Stack>
           </PageContent>
           <footer className="site-footer">

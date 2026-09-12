@@ -67,7 +67,7 @@ const server = http.createServer((req, res) => {
           assert.deepEqual(wrappedAmounts,[],`${name} ${width} ${label}: summary amounts stay fully readable on one line`);
           // Verify rendered geometry: a viewport-overflow check alone misses uneven
           // padding, collapsed section gaps, and grids squeezed by nested cards.
-          const layoutProblems=await page.locator('main').evaluate(main=>{
+          const layoutProblems=await page.locator('[data-layout="content"]').evaluate(main=>{
             const visible=el=>el.getClientRects().length&&el.getBoundingClientRect().height>0;
             const problems=[];
             const expectedPadding=window.innerWidth>=1280?20:window.innerWidth>=768?16:12;
@@ -97,6 +97,7 @@ const server = http.createServer((req, res) => {
             }
             return problems.slice(0,10);
           });
+          if(layoutProblems.length)await page.screenshot({path:path.join(out,`${name}-${width}-layout-failure.png`),fullPage:true});
           assert.deepEqual(layoutProblems,[],`${name} ${width} ${label}: shared card padding, section gaps and form containment`);
         };
         const checkDialog = async () => {

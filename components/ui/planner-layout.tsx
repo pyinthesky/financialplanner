@@ -9,7 +9,7 @@ type LayoutProps = HTMLAttributes<HTMLElement> & {
 };
 
 /** Shared screen-layout primitives. Keep print reports on their dedicated layout. */
-export function PageContent({ as = 'main', className, ...props }: LayoutProps) {
+export function PageContent({ as = 'div', className, ...props }: LayoutProps) {
   return createElement(as, { ...props, 'data-layout': 'content', className: cn(
     '@container/planner mx-auto w-full min-w-0 max-w-[1440px] p-3 md:p-5 xl:p-8', className,
   ) });
