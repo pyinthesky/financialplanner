@@ -7,7 +7,7 @@ const http = require('node:http');
 const root = path.resolve('dist-pages');
 const out = path.resolve('browser-evidence');
 fs.mkdirSync(out, { recursive: true });
-const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain', '.md': 'text/plain' };
+const types = { '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain', '.md': 'text/plain', '.webp': 'image/webp' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const relative = decodeURIComponent(url.pathname).replace(/^\/financialplanner\/?/, '');
@@ -120,6 +120,14 @@ const server = http.createServer((req, res) => {
         };
         await page.getByRole('heading',{name:'Make a Plan for the Life You Want.',exact:true}).waitFor();
         assert.doesNotMatch(await page.locator('[data-layout="content"]').innerText(),/AES|JSON|PBKDF2/,'Welcome uses everyday language');
+        await page.locator('.welcome-hero-art').evaluate(img=>img.decode());
+        const hero=await page.locator('.welcome-hero').evaluate(el=>{
+          const image=el.querySelector('img'),copy=el.querySelector('.welcome-hero-copy');
+          const box=el.getBoundingClientRect(),art=image.getBoundingClientRect(),text=copy.getBoundingClientRect();
+          return {loaded:image.naturalWidth>0,local:new URL(image.currentSrc).origin===location.origin,decorative:image.alt==='',fits:art.left>=box.left&&art.right<=box.right+1,stacked:art.top>=text.bottom-1};
+        });
+        assert.ok(hero.loaded&&hero.local&&hero.decorative&&hero.fits,'Hero artwork loads locally, stays decorative and fits');
+        if(width<768)assert.ok(hero.stacked,'Mobile artwork sits below all hero text and actions');
         await noOverflow('Welcome');
         await page.screenshot({path:path.join(out,`${name}-${width}-welcome.png`),fullPage:true});
         await page.getByRole('button',{name:'Start My Plan',exact:true}).click();
