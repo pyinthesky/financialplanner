@@ -1,3 +1,14 @@
+# Delivery History
+
+The Knowledge Center release also adds an opt-in, independently calculated savings-rate curve inspired by the user-selected 2012 article. See [model and limitations](savings-illustration.md).
+
+Current capabilities and unfinished work live in the [README](../README.md). Historical proposals below are not active backlog items.
+
+- [README and release narratives archived September 12](readme-history-2026-09-12.md)
+- [Technical handoffs archived September 12](development-history-2026-09-12.md)
+- September 12: shared Tailwind layouts and distinct menu icons; rollback tag `pre-tailwind-layout-2026-09-12`; [successful deployment](https://github.com/pyinthesky/financialplanner/actions/runs/34667774571).
+- September 12: Knowledge Center and a rewritten capability/backlog inventory; release evidence is in the Pages workflow for its commit.
+
 # Delivery History Through September 8, 2026
 
 Historical snapshot retained for traceability. Completion notes, checkbox states and proposed priorities below describe earlier decisions; they are not the active backlog. The [README delivery roadmap](../README.md#delivery-roadmap) is authoritative for current priorities and status. Consult linked implementation contracts for technical detail, and verify code and evidence before marking work complete.

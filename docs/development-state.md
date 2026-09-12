@@ -1,93 +1,42 @@
-# Refinance Follow-up — September 9, 2026
+# Current Technical Handoff
 
-Connected the loan comparison to saved household scenarios. Read [the refinance contract](refinance-scenarios.md). The baseline remains unchanged; the new refinance override adjusts opening debt/P&I and reconciled escrow, and appends upfront fees once to January spending. Existing cascade settings remain. Rental financing, changed escrow/PMI and concurrent home-move/payoff transactions are excluded. Local validation: 206 tests, TypeScript and production build. The Pages browser gate now edits a quote and opens its saved monthly scenario at all six widths. Timed builds remain disabled.
+Updated September 12, 2026 for the Knowledge Center and documentation consolidation. The [README](../README.md#delivery-roadmap) is the only active backlog. This file maps code and contracts; historical handoffs are [archived](development-history-2026-09-12.md) and do not direct new work.
 
-# Latest Handoff — September 9, 2026
+## Current Change
 
-Implemented the current enrollment/household feedback. Read [the new contract](household-enrollment-round.md) and the README latest delivery before older handoffs below. Employer sharing is an allowlist, never raw-plan redaction. Payroll election previews apply per-paycheck snapshots; monthly allocation sums and employer Roth tax are reconciled. Education is a separate beneficiary-level projection; explicit budget provisions affect retirement cash, while education-only edits do not stale saved household scenarios. Keep new fields blank, keep raw plan compatibility, and retain source/eligibility boundaries. Timed feature builds remain disabled.
+Knowledge Center is a standalone Explore destination using GraduationCap, shared Tailwind layout primitives and nine bundled guides. `lib/knowledge.ts` owns content, source editions/review date and local search; `components/knowledge-center.tsx` owns accessible disclosure/filter controls. It accepts no plan props, changes no financial state and sends no search data. Links open external sites explicitly without a referrer or appended plan context. Copy explains supported decisions; it does not claim provider vetting, personalized legal/medical advice or a complete eligibility engine.
 
-Local checks: 200 tests, TypeScript, production build. Release workflow adds populated sharing, contribution, dependent/529 and print checks in Chromium/WebKit at six widths. Verify the exact published commit before reporting deployment; do not infer success from this note. Repository history in this workspace remains synthetic; publish against current remote main as described below.
+README now separates the shipped catalog, calculation boundaries, unfinished backlog and routine public-data maintenance. Old release counts/priorities moved to archives. Delivered FEHB mappings, family arrangements, per-fill caps, HRA allowances, payroll/529 and layout work are no longer incorrectly listed as future foundations.
 
-# Current Priority Handoff — September 8, 2026
+The opt-in savings-rate illustration uses an independent annuity model (`lib/savings-illustration.ts`), a locally drawn interactive SVG and no plan state. Its [model contract](savings-illustration.md) separates inspirational examples from personal projections.
 
-README Delivery Roadmap is authoritative. The user authorized Priorities 1–5, with refinance before Real Estate. Implemented Outlook/month navigation, explanatory debt charts, local refinance comparisons and public snapshot refresh, and bounded existing-rental/pre-tax-property tools. Nine focused tests cover funding status, common-horizon refinancing, freshness/cohort gates, rental cash/debt/tax conservation and sale/investment comparisons. Required Pages browser/PDF gates verify the release. No private screenshots or personal amounts are used. Timed feature builds remain disabled; automatic approval review rejected scheduled main writes for public rate refresh. No rate schedule was added; the manual validated refresh script is available. No delegated agents are authorized.
+## Implementation Map
 
-Real Estate uses optional validated plan records; missing optional sections remain absent on legacy imports. Rental mortgage IDs refer to existing debts; rental receipts/costs appear once. Taxable passive profit is separately confirmed, nonnegative and nominal. Primary-home costs moved to Real Estate. Unsupported losses/sales remain blocked or outside the household engine. Property trials/refinance worksheets are omitted from household scenario snapshot identity because they do not change its cash flows. Rental properties remain part of that identity.
+| Area | Code / contract |
+| --- | --- |
+| Entry, navigation and vault lifecycle | `app/page.tsx`, `lib/plan-lifecycle.ts`, `lib/vault.ts`; [security](../SECURITY.md) |
+| Shared UI | `components/ui/planner-layout.tsx`; [layout contract](ui-layout.md) |
+| Budgets and shared flows | `lib/budget*.ts`, `lib/monthly-projection.ts`, `lib/monthly-funding.ts`; [compact budget](compact-budget-round.md), [Batch 5](batch-5-plan.md), [experience](batch-5-experience.md) |
+| Scenarios and debt | `lib/scenarios.ts`, `lib/debt-ledger.ts`, `lib/refinance-scenario.ts`, `lib/home-move.ts`; [refinance scenarios](refinance-scenarios.md) |
+| Household/payroll/529 | `lib/payroll-contributions.ts`, `lib/education.ts`; [contract](household-enrollment-round.md) |
+| Taxes and account rules | `lib/federal-tax.ts`, `lib/capital-gains-tax.ts`, `lib/social-security-tax.ts`, `lib/rmd.ts`, `lib/qcd.ts`, `lib/early-distribution.ts`, `lib/roth-conversion.ts`; [sources](calculation-sources.md) |
+| Enrollment | `lib/enrollment*.ts`, `lib/federal-health.ts`, `lib/federal-benefits.ts`; [calculation contract](open-enrollment.md), [federal/incentive contract](federal-health-options.md), [FEHB source refresh](fehb-refresh.md) |
+| Knowledge | `lib/knowledge.ts`, `components/knowledge-center.tsx`; reviewed primary sources embedded in each guide |
 
-The following is historical context, not the active queue.
+## Boundaries to Preserve
 
-# Development State
+- Monthly results use opening-January balances, funded transfers, month-end returns and labeled annual tax settlement. Annual worksheets have different scopes. Do not infer integration just because a worksheet exists.
+- Account access, special tax cases, government benefits and state/local rules require explicit support. README boundaries and the relevant contracts describe exclusions.
+- Household facts are canonical. A mortgage, recurring cost, education provision, healthcare selection or reserve must not create duplicate spending or assets.
+- The old envelope-breakdown editor is disabled in the compact budget flow. Timed costs remain expenses, not synthetic loans.
+- FEHB mapping must preserve manual overrides and saved source editions. Separate prescription deductibles with unresolved family structures are not inferred. Broader mapped services are not a claim of complete plan coverage.
+- No ads, tracking, accounts, bank connections or server plan storage. Private screenshots and real plan values never enter the repository, CI evidence or fixtures. Fresh plans stay blank.
+- Timed feature builds remain disabled. The existing weekly mortgage-reference PR workflow and yearly FEHB review task maintain public data; they are not feature-development schedules.
 
-Updated September 7, 2026. User authorized the enhanced current/retirement budget journey and the rest of supported Batch 5. Canonical contracts: [Batch 5 plan](batch-5-plan.md) and [experience](batch-5-experience.md). Timed builds remain disabled. No delegated agents are authorized. Private reference screenshots and personal financial content must never enter repository assets, fixtures, logs or uploaded artifacts.
+## Verification and Publishing
 
-## Release evidence
+Run `npm test`, `npx tsc --noEmit`, and `npm run build:pages`. Pages gates run Chromium and WebKit at 320/375/390/430/768/1280px with synthetic entries, responsive geometry and PDF checks. Knowledge tests cover search/category intersection and reviewed-source metadata; browser checks cover keyboard disclosure, filter reset and external-link attributes. Inspect relevant screenshots, not only overflow totals.
 
-| Release | Outcome | Verification |
-| --- | --- | --- |
-| `ea22a0d` | Annual cash/tax funding repair | 84 tests; Pages `34079855430` succeeded |
-| `76a2d71` | Blank current/retirement budget entry and accessible selects | 92 tests; Pages `34080864820` succeeded |
-| `2ee711f` | Correct debt cascade and ledger | 98 tests; Pages `34081057074` succeeded |
-| `991f607` | Mortgage escrow, cash return, historical reference, printable charts | 106 tests; six-width Chromium/WebKit and PDF; Pages `34082716003` succeeded; artifacts visually inspected |
-| `a1f1b71` | Monthly budget/account/tax ledger and local scenarios | 119 tests/type/build passed; Pages `34159059044` stopped at WebKit 375 with a closed browser; no deployment |
-| `3a5f79e245af63b35e91b461ce84ae4a0025d18d` | Funded mortgage comparisons, compact bill details, normalized scenario snapshots | 122 tests/type/build; full Chromium/WebKit journey; Pages `34159881481` succeeded |
-| `9bc96fee3375432b19806d37c6fd04d534d29864` | Enhanced budgets, home moves, references, coverage, allocations, care events, seeded simulations and funding visuals | 137 tests/type/build; all twelve browser journeys; Pages `34165304340` succeeded; exact-release synthetic mobile/tablet captures and both PDF pages visually inspected |
+The preceding verified baseline is `e0c89890806c41f875f64cd23453077c5f56cb4b`, Pages run `34667774571` (236 tests and all browser/build/deploy gates passed). Verify the exact new commit's workflow before claiming deployment. The rollback tag `pre-tailwind-layout-2026-09-12` retains the requested icons before the layout migration.
 
-Browser checks use a fresh browser process for each viewport, normal clicks, visible drawer closure, rendered-state waits and actual overflow measurements. No animation disabling, forced clicks or skipped engines. Widths: 320, 375, 390, 430, 768 and 1280 in Chromium/WebKit. CI downloads browsers because local browser downloads timed out. Evidence is independently invented synthetic data only. The deployed release’s two-page monthly PDF was rendered and visually inspected: both the portfolio and common-axis scenario charts are populated, the annual table repeats its header, and text fits. The 320px WebKit monthly summary and 768px retirement worksheet were also visually inspected. Physical iPhone keyboard and Firefox remain unverified.
-
-Browser follow-up: `b40e16fb3d934175127d2f18ccce403e993afea7`, run `34161753440`, passed all six Chromium journeys. It stopped at PDF verification because the selector expected one SVG while the enhanced report correctly contained two. The check now explicitly verifies both named charts; no chart or gate is removed. That run did not deploy. The follow-up also adds a same-origin local worker for hypothetical seeded uncertainty comparison and its browser journey.
-
-## Supported implementation
-
-- **Budget:** `lib/budget.ts`, `budget-calendar.ts` and budget components share versioned facts. Blank differs from explicit zero; retirement overlays have independent rules/reasons. Simple/category views regroup the same costs. Optional envelope allocations explain, never add to, a total. Over-allocation pauses comparisons. Dated edits are explicit month-only or future periods. Frequency/anchors distinguish due months from average planning amounts. Gross payroll reconciles net pay, withholding, other deductions and employee/employer savings. Optional benefit withholding is canonical in the benefit record; known net deposits and current timed costs join the entry-stage margin. Unknown benefit deposits remain clearly excluded there; the monthly engine uses the labeled December settlement convention.
-- **Monthly engine:** `lib/monthly-projection.ts` begins with January 1 balances in the entered year. Start-of-month pay/benefits/costs, funded saving transfers, then month-end returns. Annual tax uses the existing sourced federal, Social Security, LTCG/NIIT, early-distribution and RMD/QCD modules. December settlement credits payroll/benefit withholding and iteratively funds resulting tax on asset draws. Cash and investments have separate rates; legacy annual contributions are not added. Every month exposes balance residuals and unfunded spending/tax. Unfunded scheduled debt service invalidates achieved debt-balance assumptions.
-- **Conversions:** confirmed fully pretax eligible source and owner-matched Roth destination, after RMD/QCD. Converted lots are conservatively unavailable for five tax years. Roth draws also require a confirmed qualified year and age 60. Ineligible or unfinished requested transactions produce review status, not rankings.
-- **Scenarios:** immutable normalized baseline snapshots, explicit overrides, duplicate/reset/rebase/change list, up to three common-axis comparisons and full-horizon tax/portfolio/net-worth deltas. Identical scenarios have exact zero deltas; import does not create false staleness. Timing, everyday spending, inflation, longevity, explicit annual return years, coverage/guardrails and scenario-only care/cash events share the same engine. No automatic recommendation. Optional hypothetical simulation requires explicit arithmetic mean, standard deviation, fee, integer seed and 1–250 samples; matching annual lognormal paths feed the same monthly engine across current-baseline scenarios. Cash retains its separate rate. Unsupported paths suppress aggregates rather than bias percentiles by excluding difficult outcomes. The worker is a same-origin static asset; it never sends plan data outside the browser. Inputs export; output is rerunnable from the seed.
-- **Housing:** `mortgage-scenario.ts` funds start-month payoff, preserves other debts' cascaded capacity and ongoing escrow-free home costs, and can invest only the funded released payment. Failed funding rolls back. `home-move.ts` handles one standard long-term personal residence, one linked loan, costs, adjusted basis, confirmed full exclusion, cash replacement or rent, ongoing costs and removal of the old home. Gains feed LTCG/NIIT; no personal-home loss deduction. Compare spendable assets and total net worth separately.
-- **References:** bundled selected BLS 2024 national spending means and EIA 2024 electricity bills for 50 states/DC. Explicit Apply, preserved frequency/independent retirement choice, source receipt and guarded Undo; no runtime external query or inferred ZIP. Existing inflation reference remains the explicit 2004–2024 window, not the latest rolling window.
-- **Reserves/policies:** look ahead over actual upcoming essential bills, housing, entered health/timed costs, debt service and expense events; subtract chosen dependable income. Irregular costs enter once in their due month. Extra reserve covers only obligations not already included. Cash refill uses funded withdrawals, with their taxes. Discretionary guardrail cuts and recovery affect real modeled cash flows and never silently reduce essential rows. Coverage stops at the horizon; the legacy target covers financial assets, excluding the home.
-- **Reports:** Plan Summary/PDF can explicitly select monthly results. Owner/source income charts include pensions; cash-funding ribbons/bars and ledger reconcile asset draws, existing cash, savings, tax settlement/refund and home proceeds. Small screens use labeled bars/cards. PDF portfolio/scenario graphs use deterministic SVG geometry, never hidden responsive measurements. Planned amounts are not observed transactions.
-
-## Effective-dated sources
-
-Reviewed September 7, 2026:
-
-- IRS Publication 590-B (2025), https://www.irs.gov/publications/p590b; Topic 558, https://www.irs.gov/taxtopics/tc558; Publication 505 (2026), https://www.irs.gov/publications/p505. December settlement is a planning convention, not quarterly-payment compliance advice.
-- IRS Publication 523 (2025), https://www.irs.gov/publications/p523, Eligibility Test and Worksheets 1–3. Standard full exclusion only; mortgage balance reduces cash proceeds, not taxable gain.
-- BLS Consumer Expenditures 2024, https://www.bls.gov/news.release/pdf/cesan.pdf, Table A; published December 19, 2025. All-consumer-unit means include nonspenders; not individual targets or family-size-adjusted quotes.
-- EIA 2024 Table 5A, https://www.eia.gov/electricity/sales_revenue_price/pdf/table_5A.pdf, released October 7, 2025. Residential monthly utility-customer averages; not current tariffs. No household information is sent to these sources.
-- The pre-existing 2026 federal/ACA/Medicare source versions in README remain unchanged.
-
-## Boundaries and continuation
-
-These are explicit limitations, not features to silently claim complete:
-
-1. Automatic claiming, spouse/survivor/death benefits depend on Batch 3. State relocation rules, ZIP assistance, local property/insurance/exchange quotes and broader cohort references depend on verified Batch 4 datasets. No precise locality rules are guessed from ZIP alone.
-2. Historical replay and empirical stochastic calibration need a versioned licensed dataset and asset correlations. The available independent annual lognormal simulation is hypothetical, one aggregate investment pool, geometrically spread within each year. It does not model within-year crashes, infer correlations or forecast probabilities; sample percentiles are not confidence intervals. Fees/mean/volatility/sample size/seed are explicit inputs. Fully funded paths do not imply the legacy goal was met or no guardrail cuts occurred.
-3. Separate-return household allocation, special RMD tables/delays, IRA basis/pro-rata, inherited retirement accounts, lot-specific losses, quarterly estimated-tax compliance, ACA/IRMAA-driven monthly premiums and HSA qualified reimbursements are not inferred. State tax remains an entered effective-rate estimate. Cash refills skip December after annual settlement. Benefits start using entered age-based January conventions.
-4. Home moves exclude new mortgage financing, multiple liens, depreciation/nonqualified use, partial exclusions and installment sales. Separate payoff and sale cannot be combined in one scenario. Home value uses general inflation. Lender payoff fees/daily interest are excluded. Overlapping manually entered housing bills require explicit reconciliation.
-5. Cash is pooled, not multiple legally or operationally earmarked accounts. Additional reserves must not repeat an expense already inside lookahead coverage. Financial-asset legacy is not after-estate-tax beneficiary wealth.
-6. The monthly engine is selectable; legacy annual tax worksheets remain separate estimates. Do not suggest that their existence makes every integrated result a complete tax return. Do not add accounts/AI/cloud sync, tracking, default personal amounts or bank-data transmission.
-
-Next: resolve remaining source/rule dependencies in the order agreed in the Batch 5 plan; the supported enhanced release is verified and deployed. Do not rebuild delivered foundations or restart timed work. Model choice remains engineering judgment; no repository-specific first-pass guarantee exists.
-
-Publication note: this workspace was initialized from blob-verified remote main, and its local git history is synthetic. Use a fresh clone or verified file/tree publication; never blindly push the synthetic history. Code-backed artifacts belong in GitHub, not a second file store.
-
-Final coverage review: projected dependable benefits subtract entered withholding before reducing the cash target. The UI explicitly excludes future income-tax settlement from coverage, with additional reserve available. Missing partner ages or positive benefits without a start age block projection rather than assuming a date. The two-page populated PDF with portfolio and shared-axis scenario charts was rendered and visually inspected; both graphs and repeated table headers are present without clipping. Final exact-release browser/artifact verification remains required.
-
-WebKit navigation follow-up: release `d888ba3375e8866dfc874e05917f84d8c97fa370` passed all six Chromium journeys but Pages run `34162702791` stopped at WebKit 320 while the first mobile navigation button remained unstable and the renderer closed. The drawer now uses explicit 2D transform endpoints and a bounded mobile width instead of the generic sheet animation-variable/transition combination. Animation, reduced-motion behavior, Radix focus handling and normal browser clicks remain; the full browser gate is retained. This change still needs the next exact-release run before it can be described as verified.
-
-`dbf1119f98fc0bd3050a6d5d8645ce18d36967ec` passed all 136 tests, types/build, all twelve Chromium/WebKit viewport journeys and deployed in Pages run `34163214699`. Exact-release visual inspection confirmed both PDF charts and the drawer repair, but exposed a mobile summary grid expanding inside an ancestor with clipped overflow. Follow-up uses explicit minmax(0,1fr) tracks and mobile table sizing; the browser gate now checks visible descendant bounds even when ancestors clip. The full monthly ledger is progressively disclosed and explicitly expanded during the bounds check. Do not equate the older document-width-only assertion with complete visual verification.
-
-The strengthened descendant gate in run `34163856013` passed all four phone widths, then caught the older debt-entry table extending beyond the 768px tablet viewport. Card-form rendering now applies through 1100px so the desktop sidebar and editable table do not compete for unavailable width. The gate is retained without exclusions for clipped controls.
-
-Run `34164112780` passed every Chromium viewport and all four WebKit phone widths. The stronger gate caught the desktop-labeled PDF action extending two pixels past the WebKit tablet viewport. Header actions now use their accessible icon layout through the same 1100px breakpoint as data-entry cards. A final owner-rule guard also blocks jointly labeled Roth assets instead of borrowing one spouse’s qualified-distribution status; its independent regression brings the suite to 137 tests.
-
-Run `34164495388` passed all Chromium viewports but encountered an intermittent WebKit renderer crash during mobile navigation. Browser engines now run on separate CI runners with browser-process diagnostics, and navigation waits for the drawer’s normal animation to finish before a standard click. Both engines and all six widths remain required for deployment; this is pending verification, not a claimed root-cause fix.
-
-## Final verified release
-
-Code commit `9bc96fee3375432b19806d37c6fd04d534d29864` deployed successfully in [Pages run 34165304340](https://github.com/pyinthesky/financialplanner/actions/runs/34165304340). Build, Chromium, WebKit and deployment jobs all succeeded. The separate browser artifacts each record six passing viewport journeys. Their synthetic screenshots and Chromium PDF are the exact-release visual evidence; private reference images were not used in those fixtures or artifacts. Earlier failure/pending notes above are historical.
-
-The browser isolation and normal animation-completion wait passed this run; no definitive renderer-crash root cause is claimed. Normal clicks, animations, both engines, descendant-bound checks and all viewports remain in the release gate. Physical devices and Firefox remain unverified.
-
-This documentation-only follow-up records the already deployed code and uses `[skip ci]`; it changes no application, test, build or workflow files. Timed builds remain disabled. The remaining dependencies listed above are intentionally open, not silently treated as implemented.
+Some workspaces contain synthetic mirror history. Inspect remote main before publication; use a genuine clone or create file/tree commits with the real remote parent. Never push synthetic local history over main. No parallel agents are authorized by this document.

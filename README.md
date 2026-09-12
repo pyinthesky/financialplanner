@@ -1,236 +1,181 @@
 # Open Retirement Planner
 
-**Responsive layout update — September 12:** Shared Tailwind page, card, stack, form-grid, column-grid and action-row components replace competing layout rules across the planner. Forms respond to their enclosing card width; section spacing and card padding follow one compact scale. Retirement Budget, Cash & Investments and Scenario Laboratory use Tree Palm, Piggy Bank and Flask Conical icons. The pre-migration version is preserved as `pre-tailwind-layout-2026-09-12`. [Layout contract, checks and rollback](docs/ui-layout.md).
+A free retirement planner that connects today's budget, retirement spending, assets, benefits and financial decisions. No ads, marketing, tracking, accounts, names or email addresses.
 
-**Navigation update — September 9:** The menu stays flat and always open. Data & Privacy stands alone; **Your Plan** groups household, accounts, benefits, debt, property, health, taxes and budgets; **Results** contains Plan Summary; **Explore** contains Scenario Laboratory and Open Enrollment. Subtle rules and bold headings separate sections, with wrapping labels and the existing mobile drawer behavior.
+**[Open the Planner](https://pyinthesky.github.io/financialplanner/)** · [Shipped Features](#shipped-features) · [Remaining Work](#delivery-roadmap) · [Calculation Boundaries](#calculation-boundaries) · [Run Locally](#run-locally)
 
+Start with blank inputs or explicitly load the fictional sample. Enter shared facts once, then see them flow into budgets, scenarios, charts and reports. All calculations run on your device.
 
-**September 9 follow-up — connected refinancing:** Loans & Debts now shows live keep/refinance amounts, specific missing inputs and a remaining-debt chart. **Save Refinance Scenario** captures the current baseline and the offer, then **View Saved Refinance Scenario** opens its monthly results. The scenario replaces the opening-January debt terms, retains cascading extras and reconciled escrow, and charges upfront fees once (or finances them into principal). It does not silently replace the current plan. Rental-loan refinancing, mid-plan closing dates, changed escrow/PMI and combined refinance/home-move/payoff transactions remain excluded. [Calculation and test contract](docs/refinance-scenarios.md).
+## Shipped Features
 
+This is the current product inventory. Every item below is implemented within the stated scope. Future enhancements appear only in [Remaining Work](#delivery-roadmap); release narratives live in [Delivery History](docs/delivery-history.md).
 
-Free retirement planning that runs in your browser: no ads, marketing, tracking, accounts, names or email addresses.
+### Data & Privacy
 
-**[Open the planner](https://pyinthesky.github.io/financialplanner/)** · [Delivery roadmap](#delivery-roadmap) · [Calculation boundaries](#calculation-boundaries) · [Run locally](#run-locally)
+- Session-only use or an optional encrypted local vault, with visible saving/locked/error states.
+- Raw JSON download and re-import, including compatibility with earlier saved plans.
+- One-button fictional sample loading and confirmed Create New Plan, with an opportunity to download the current plan before replacement.
+- No bank connections or server storage of plan data. Google Search Console ownership verification is a meta tag, not analytics.
 
-Start with blank inputs or explicitly load the fictional sample plan. Build a current budget, describe what changes in retirement, and explore the consequences using your own assumptions. The experience should be comforting, informative and practical, without shame or false certainty.
+### Household, Cash & Investments
 
-## What Works Today
+- Anonymous self, partner and dependents; retirement timing, college goals and optional local ZIP/state inputs.
+- Payroll contribution previews using a fixed amount, pay percentage or supported 2026 maximum, with traditional/Roth splits, age catch-up, employer contributions and owner-matched destinations. Explicit Apply reconciles the payroll allocation.
+- Cash, taxable investments, traditional retirement accounts, Roth accounts and HSAs, with ownership and aggregate taxable cost basis.
+- Beneficiary-linked 529 accounts and college-cost projections. Multiple accounts fund one beneficiary goal; explicit saving provisions connect to the household budget. Education assets remain separate from retirement withdrawals.
+- Optional dated inflation, portfolio-return and cash-rate references with explicit application. These are illustrations, not automatic personal assumptions or a universal national average.
 
-| Area | Supported experience |
-| --- | --- |
-| Data & Privacy | Session-only planning, optional encrypted local vault, raw JSON export/import, fictional sample loading and confirmed plan reset |
-| Household | Anonymous self/partner/dependents, college goals, split traditional/Roth payroll contribution builder, optional local ZIP and state selection, explicit Apply/Undo for dated public references |
-| Cash & Investments | Retirement account balances, tax treatment, ownership, taxable basis and separate beneficiary-linked 529 accounts |
-| Pensions & Social Security | Entered benefit amounts, ages, COLAs and withholding; automatic benefit optimization remains planned |
-| Loans & Debts | Loan entry, cascade strategy and local fee/term-aware refinance comparisons with dated public mortgage indicators |
-| Real Estate | Primary-home carrying costs and escrow reconciliation; existing rental records linked to loans, budgets and monthly cash flow; isolated pre-tax property comparisons |
-| Current and Retirement Budgets | Compact expandable categories, editable bill names, timing controls, retirement changes and shared timed costs; linked pay, benefits, healthcare, housing and scheduled loan payments |
-| Open Enrollment | Per-person health/Rx and family limits, HSA economics, bill timing, lowest-cost marker, employer-only options sharing, expected-use PDF and term-only manual quotes |
-| Taxes & Withdrawals | Dated federal worksheets, owner-specific RMD/QCD and distribution checks, conversion comparisons, LTCG/NIIT and an entered state-tax estimate, subject to the boundaries below |
-| Scenario Laboratory | Saved baseline snapshots, explicit overrides, compare/duplicate/reset/rebase, isolated debt-strategy experiments, funded mortgage payoff, supported home-sale/downsize comparisons, cash coverage and hypothetical stresses |
-| Plan Summary | Current/retirement Sankeys and funding details, input-aware Outlook, compact month picker, total/per-loan debt charts with principal/interest and cascade details and annual or monthly projection results |
-| PDF Report | Printable projection/scenario charts, budgets, both Sankeys, assumptions, accounts, benefits, housing, care costs and policy details |
+### Benefits, Health & Taxes
 
-Snowball and Avalanche retain paid-off minimums and roll available payments into the next debt. Custom uses assigned extra payments without rollover. Property tax and insurance continue after a mortgage is paid; escrow cannot become extra principal. A timed expense is not converted into a loan just because it recurs.
+- Entered pension and Social Security amounts, start ages, COLAs and withholding, linked to budget deposits and projections.
+- Healthcare before/after Medicare age, healthcare inflation and long-term-care cost assumptions.
+- 2026 progressive federal-income-tax worksheets; Social Security taxable-benefit calculation; owner-specific RMD/QCD estimates and early-distribution checks.
+- Roth-conversion bracket comparisons and owner-specific conversion schedules; taxable basis, long-term-gain stacking and NIIT estimates.
+- Effective-dated ACA premium-tax-credit and Medicare IRMAA worksheets, with labeled conversion sensitivities and an entered effective state-income-tax estimate.
 
-Inputs remain blank until entered or a reference is explicitly applied. References are dated illustrations, not personalized forecasts. Imported legacy spending amounts remain available until users select the retirement worksheet; the disabled envelope-breakdown editor is not part of the current compact entry flow.
+### Loans, Housing & Real Estate
 
-## Privacy and Security
+- Snowball and Avalanche payment cascading: paid-off minimums stay in the payment budget and flow to the next target. Custom uses assigned extra payments without rollover.
+- Mortgage-statement reconciliation separates principal/interest, escrow, insurance and other charges. Home property tax can use an annual dollar amount or assessed value and mill rate.
+- Total/per-loan payoff charts, principal/interest bars, payoff milestones and a payment-transfer ledger.
+- Fee-, term- and holding-period-aware refinance comparisons with break-even information. Save an eligible offer as a separate household scenario and view its monthly result.
+- Dated public mortgage-reference indicators with local comparison, snooze and stale-data suppression.
+- Existing rental records with linked loans, collected rent, operating costs, separately confirmed taxable profit, reserves and equity. Shared flows reach budgets, monthly projections, Sankeys and reports once.
+- Isolated pre-tax rental buy-versus-invest and keep-versus-sell comparisons. These are educational experiments, not tax-complete property recommendations.
 
-All plan calculations run locally. The optional vault uses Web Crypto AES-256-GCM and PBKDF2-SHA-256 before saving to browser local storage. Its passphrase stays in memory for the open session and is never stored or transmitted. Raw JSON exports are readable and unencrypted.
+### Current & Retirement Budgets
 
-Encryption protects saved data against casual browser-profile access and offline inspection. It cannot protect an unlocked plan against malware, malicious extensions, keylogging, screenshots or a compromised operating system. See [SECURITY.md](SECURITY.md).
+- Compact expandable categories, editable bill names, payment frequency, due dates and explicit month-only or continuing changes.
+- A separate retirement worksheet that carries forward current costs and records changes without duplicating entries.
+- Linked take-home pay, benefits, healthcare, primary-home costs, rental activity and actual scheduled debt payments. Paid-off debts stop contributing loan payments; continuing property taxes and insurance remain.
+- Shared timed expenses for costs with a start and end. Recurring expenses are not automatically treated as loans.
+- Income, spending and margin views; average planning amounts remain distinct from the cash due in a specific month.
 
-No plan data, credentials or personal screenshots belong in the repository, logs, test fixtures or CI artifacts. Tests use independently invented fictional data. The app has no runtime third-party plan-data requests. Proposed public-reference updates must preserve that boundary.
+### Plan Summary & Reports
+
+- An input-aware Outlook with funding-gap reasons and explicit, reproducible spending/inflation comparisons.
+- Cash & Investments and Real Estate starting-position panels, plus a separate College/529 outlook.
+- Current/in-retirement Sankeys, a compact month picker and linked monthly funding details.
+- Debt payoff and cascade views, cash-coverage targets, annual or monthly portfolio projections and visible unfunded obligations.
+- Browser Save as PDF reports with populated projection/scenario charts, budgets, Sankeys, assumptions, accounts, benefits, housing and care costs.
+
+### Explore: Scenario Laboratory
+
+- Local saved baseline snapshots, named overrides, duplicate/reset/rebase controls, change lists and common-axis comparisons.
+- A monthly funding ledger that reconciles income, spending, saving, withdrawals, debt and annual tax settlement.
+- Retirement timing, everyday spending, inflation, longevity, cash coverage, spending guardrails and dated care/cash events.
+- Isolated debt-strategy experiments, funded mortgage payoff comparisons, eligible refinance scenarios and supported home-sale/cash-funded-downsize comparisons.
+- Explicit return-stress years and seeded hypothetical uncertainty paths, with visible assumptions and funding shortfalls.
+
+### Explore: Open Enrollment
+
+- Anonymous per-person medical use and prescriptions, compared across private health options and selected federal options.
+- Individual/family deductibles and out-of-pocket accumulators, embedded/aggregate family structures, shared/separate/exempt Rx deductible treatment, copays, coinsurance, per-fill caps and supported stepped prices.
+- Lower/expected/higher/stress-use comparisons, component charts, per-person ledgers and a gold star for the lowest complete modeled cost, including ties.
+- HSA funding, employer HRA allowances, optional tax savings, service/bill/reimbursement timing and near-term cash needs.
+- Employer waiver stipends, spousal surcharges and two independent household coverage groups, each with its own accumulators.
+- Employer-option-only JSON sharing/import that excludes personal utilization, household data, tax inputs, incentives and coverage-group assignments.
+- A 2026 FEHB directory with 132 options / 396 enrollment codes. Published premiums and supported benefits fill on selection. Nine nationwide options have detailed profiles; 895 service rules and 30 family-limit structures are mapped. Missing mappings remain explicit inputs. Eligible completed federal choices can be shortlisted alongside private options.
+- Standalone comparison PDFs and local employer-versus-individual **term-life** quote comparisons for 10-, 15- and 30-year horizons.
+
+[Enrollment calculation contract](docs/open-enrollment.md) · [Federal coverage and yearly refresh](docs/fehb-refresh.md) · [Employer incentives and coverage arrangements](docs/federal-health-options.md)
+
+### Explore: Knowledge Center
+
+- Graduation-cap navigation icon, local search and topic filters with compact expandable guides.
+- An opt-in interactive savings-rate curve inspired by the [2012 Mr. Money Mustache article](https://www.mrmoneymustache.com/2012/01/13/the-shockingly-simple-math-behind-early-retirement/), independently calculated and drawn. Adjust saving, real returns and a withdrawal assumption; the illustration never fills or changes a personal plan. [Model and boundaries](docs/savings-illustration.md).
+- Nine guides covering budgets/cash reserves, debt cascading, advisor registration and fees, diversified investing, health-plan comparisons, HSAs, benefit start dates, estate preparation and healthy aging.
+- Each guide provides a practical next step, identifies the relevant planner area, and links to official sources with a review date and scope.
+- Neutral provider-selection guidance without referrals, advertising, an advisor directory or automated personalized recommendations. Reading requires no plan data.
+
+### Interface & Accessibility
+
+- Flat navigation grouped into Your Plan, Results and Explore, with Data & Privacy first.
+- Shared Tailwind page/card/form/action components, container-aware grids, consistent spacing, blank numeric entry, visible units, responsive table cards and locally bundled Lucide icons.
+- Keyboard-accessible controls and a mobile drawer. Chromium/WebKit journeys cover six widths, dialogs, form containment, card spacing and report output.
 
 ## Calculation Boundaries
 
-These are educational estimates, not a complete tax return or a guarantee of retirement success. Annual worksheets and the monthly funding engine have different supported scopes; improvements to one do not establish correctness of every other path.
+The planner provides educational estimates. A worksheet or comparison being available does not mean every tax, eligibility or financial-law case is modeled.
 
-- Federal ordinary-income and long-term-gain calculations use published 2026 rules with labeled planning indexation in future years. State tax remains an entered effective estimate. Do not infer jurisdiction-specific deductions, credits or gain treatment.
-- Benefits are entered from statements. Automatic claiming, spousal/survivor, death-year and specialized pension transitions remain open.
-- ACA/IRMAA worksheets and conversion sensitivities use dated rules; they are not automatic forecasts of future premiums or eligibility.
-- Monthly account access is conservative. Inherited accounts, detailed IRA basis, tax lots, special home-sale cases and automatic qualified HSA reimbursements remain unsupported dependencies.
-- The supported home-move comparison covers specified personal-home sales and cash-funded replacement housing. Existing passive rentals require user-confirmed nonnegative taxable profit; operating cash is calculated separately. Rental losses, depreciation and sale tax are not calculated. Property experiments are explicitly pre-tax and excluded from household scenario rankings.
-- Hypothetical investment paths are not calibrated probabilities or historical replay. Unsupported rules, missing inputs and unfunded obligations must remain visible; no recommendation should hide them.
+- Annual worksheets and the monthly engine have different scopes. State tax is an entered effective estimate; ZIP entry does not establish local tax law. Separate-return allocation, detailed IRA basis/pro-rata, inherited-account rules, special RMD tables/delays and lot-level tax accounting are not fully modeled.
+- Benefits use entered amounts and age-based timing conventions. Automated Social Security claiming/spousal/survivor transitions and specialized government pension calculations are not supplied by these entries.
+- ACA/IRMAA worksheets and conversion sensitivities use specified rule years; they do not automatically forecast future premiums or eligibility. Enrollment comparisons do not establish HSA eligibility.
+- Enrollment uses modeled service order and monthly timing, not insurer adjudication. Separate Rx deductibles currently share the medical embedded/aggregate family structure. Changing membership, complex free-text exclusions, networks and formularies can require further review.
+- Existing rentals use nominal inputs and separately confirmed nonnegative taxable profit. Losses, depreciation, recapture and rental-sale tax are not calculated. Property trials remain separate from tax-complete household rankings.
+- Home moves exclude new mortgage financing, multiple liens and specialized gain exclusions. Refinance scenarios exclude rental loans, changed escrow/PMI, mid-plan closing and combined refinance/home-move/payoff transactions.
+- 529 projections assume deposits are funded; college shortfalls are not automatically charged to retirement spending. Cash reserves are pooled; avoid counting the same future expense in multiple reserves.
+- Hypothetical return paths and percentiles are not calibrated retirement-success probabilities. Long-term health cost reductions are not inferred from lifestyle choices.
 
-[Calculation sources and reference methodology](docs/calculation-sources.md) preserve effective dates, exclusions and the methods behind the inflation, portfolio and cash shortcuts. A historical arithmetic portfolio return is not a compound-growth forecast; the existing two-bank cash reference is not a national HYSA average.
+[Calculation sources and reference methodology](docs/calculation-sources.md) · [Detailed implementation contracts](docs/development-state.md)
+
+## Privacy and Security
+
+The optional vault uses Web Crypto AES-256-GCM and PBKDF2-SHA-256 before saving to browser local storage. The passphrase stays in memory and is never stored or transmitted. Raw JSON exports are readable and unencrypted.
+
+Encryption protects stored data against casual browser-profile access and offline inspection. It cannot protect an unlocked plan against malware, malicious extensions, keylogging or a compromised operating system. See [SECURITY.md](SECURITY.md).
+
+Plan data, credentials and private screenshots must never enter repository assets, logs, fixtures or CI artifacts. Tests use independently invented fictional data. Public datasets are bundled; Knowledge Center source links open external sites only when selected, without attaching search text or plan data.
 
 ## Delivery Roadmap
 
-This section is the authoritative priority list. Historical checkboxes are retained in [delivery history](docs/delivery-history.md), not used as the current work queue. Status terms are **Planned**, **In Progress**, **Supported with Limits**, and **Complete**. Complete applies only to the stated scope and its acceptance evidence.
+**Unfinished work only.** This is the sole active backlog; shipped foundations are documented above. The ordering below favors connected planning value. These are future priorities, not scheduled builds or work already underway.
 
-The shared entry journey is **Data & Privacy → Household → Cash & Investments → Pensions & Social Security → Loans & Debts → Real Estate → Health → Open Enrollment → Current Budget → Retirement Budget → Taxes → Scenario Laboratory → Plan Summary**. Enter a fact once; budgets, scenarios, charts and reports should reuse it without double counting.
-
-### Next Priorities
-
-| Order | Work | Status | Completion criteria |
-| --- | --- | --- | --- |
-| 1 | Documentation consolidation | Complete | One visible roadmap; history and calculation methodology linked separately; Real Estate and remaining dependencies retained |
-| 2 | Outlook assessment and compact month navigation | Supported with Limits | Summary opens with explainable, input-aware assessment and tested next actions; accessible month/year picker replaces the long dropdown |
-| 3 | Explainable debt visualization | Complete | Total/per-loan balances, principal/interest payment bars, payoff markers and visible minimum-payment transfers use the actual monthly ledger |
-| 4 | Refinancing opportunity indicators | Supported with Limits | Fresh, user-confirmed comparable mortgage references; local badges/snooze and fee/term comparison; no rate qualification claims |
-| 5 | Real Estate | Supported with Limits | Existing rentals in the monthly engine; linked mortgages; isolated pre-tax buy/invest and keep/sell comparisons; unsupported rental tax and transaction timing remain excluded |
-
-### Latest Feedback Delivery — September 9, 2026
-
-- **Enrollment:** share/import only employer health-option terms with review and numbered labels; private care, Rx, household and HSA/tax inputs never enter that file. Gold stars identify complete lowest-cost estimates, including ties. Cost bars sit above their captions and say “Premiums + Care.” Blank HSA overrides can use a supported 2026 federal wage-income estimate; unsupported cases stay blank and manual rates win.
-- **Household and payroll:** anonymous dependents and college goals; optional covered-person links; fixed/percentage/2026-maximum employee contributions with traditional/Roth split, age catch-up and employer treatment. Preview and apply explicitly; owner-matched transfers and Roth employer taxable income feed monthly projections. Dates, gross pay and withholding must reconcile; future contribution limits are not invented.
-- **College / 529:** beneficiary-linked education accounts in Cash & Investments and a separate Plan Summary/PDF outlook with growth, qualified costs and funding gaps. Multiple accounts fund one beneficiary goal. Explicit budget provisions include planned saving until college. Education assets stay outside retirement withdrawals; projected deposits assume funding and college shortfalls are not automatically charged to the retirement budget.
-
-[Implementation, boundaries, sources and acceptance](docs/household-enrollment-round.md). The fictional sample exercises dependents, 529 goals/provisions and split payroll. Local validation: 200 tests plus TypeScript and production build. Required Chromium/WebKit checks cover six widths, sharing, expanded forms and print geometry; deployment evidence is recorded in the release response. Timed builds remain disabled.
-
-### Current Priority Delivery
-
-Implemented September 8, 2026, in the requested order (refinancing before Real Estate). 153 calculation/regression tests and type/build checks pass locally; the required Chromium/WebKit and PDF release checks run in the Pages workflow.
-
-- **Outlook:** readiness and funding-gap reasons, full-retirement timing, first shortfall, cash-target gaps and legacy gaps. Two explicit comparisons show the effect of 5% lower everyday spending and one percentage point higher inflation on the same baseline and horizon. Reserve review is a third action when relevant. These are conditional illustrations, not personalized investment advice or probabilities. The PDF includes the same assessment.
-- **Month navigation and debt:** calendar month input, bounded previous/next and retirement/payoff jumps; every debt month retained, per-loan view, principal/interest bars and payoff markers. Existing payment-transfer details remain available. Linear zero-interest payoff is deliberately preserved.
-- **Refinancing:** fixed-rate P&I comparison, upfront/financed fees, remaining balances, common holding period, interest, break-even and term-extension warnings. The optional benchmark requires explicit product/cohort confirmation and a 15/30-year comparison term; it is not a refinance offer. Indicators expire after 21 days and can be snoozed. A weekly public-data-only workflow runs after Freddie Mac's usual Thursday PMMS release, validates the source and opens a reviewable pull request; it never writes directly to `main`. The manual equivalent is `node --experimental-strip-types scripts/refresh-mortgage-rates.mjs`. Failed or changed source parsing preserves the last good file; stale files suppress badges. Visitors never contact the rate source, and timed feature builds remain disabled.
-- **Real Estate:** the primary home's existing fields now live here. Existing rental records use distinct canonical mortgages from Loans & Debts; no second mortgage balance is created. Collected rent, operating costs, confirmed taxable profit and property value feed both budgets and the monthly engine, Sankeys, reserves, net worth and PDF. Reserve targets add to the cash target without becoming a second expense or asset; entered repair allowances are actual modeled spending. Enter explicit zeros and confirm taxable profit to unblock projections. Rental records select monthly Summary/PDF output because the legacy annual engine does not model rentals.
-- **Complete fictional sample:** Load Sample Plan now exercises cash and five investment tax treatments, linked payroll and benefits, current/retirement budgets, debt cascading, refinance inputs, a primary home, a linked rental and mortgage, property comparison, tax/health worksheets, life events and three saved scenarios. Plan Summary retains dedicated Cash & Investments and Real Estate starting-position panels when monthly results are selected, followed by reconciled current and retirement Sankeys.
-- **Property experiments:** buy versus same-cash investing and keep versus immediate sale/investing; opening purchase or sale, monthly constant nominal rent/costs, fixed-rate amortization and liquidation at the entered horizon. Both alternatives receive identical additional outside funding; positive rent is reinvested. Selling fees and outstanding debt reduce terminal proceeds. An explicit copy action brings an existing rental into the keep comparison. Inputs remain separate from the household baseline and all tax-complete rankings. Underwater sale-now cases are blocked. This is not a rental acquisition recommendation.
-
-Remaining boundaries: dated mid-plan rental purchases/sales, multiple liens, variable-rate financing, tax losses/depreciation/recapture, return-risk equivalence, exact credit-score pricing and automated personal refinancing recommendations are not supported. Existing-property value and costs remain nominal; changes require explicit edits. Keep-mode payment is estimated from the entered balance/rate/remaining term. Do not duplicate primary-home tax/insurance or rental repairs in another entry section. Rental cash cannot automatically fund a hypothetical purchase; experiments show required cash separately.
-
-### Outlook Assessment
-
-Lead Plan Summary with an answer to “How does my plan look?” Use age, retirement timing, assets and account accessibility together with current/retirement budgets, benefits, debt, cash reserves and modeled funding needs. Do not grade people by age and wealth alone.
-
-- Show “On Track Under These Assumptions,” “Potential Gap,” or “More Inputs Needed,” with the main reasons. Explain unsupported cases rather than generating a reassuring score from partial data.
-- Show time to retirement, the retirement spending gap, cash coverage and any projected shortfall. Separate input completeness and model limitations from financial outcomes.
-- Offer at most three prioritized actions. Where the model supports it, compare explicit changes such as additional saving, lower spending or later retirement and show their quantified effects and trade-offs.
-- Use the same baseline, horizon and assumptions for each comparison. Recommendations must be reproducible from the ledger and must not silently apply edits. Clearly label untested educational suggestions.
-- Use local calculation rules; AI is not a prerequisite. Retain transparent debt-payment burden/resilience components rather than presenting an opaque credit-like score or guaranteed success probability.
-- Keep the assessment and its assumptions consistent in the PDF. Acceptance includes blank/incomplete plans, high assets with high spending, low assets with dependable benefits, inaccessible assets and funding shortfalls.
-
-### Compact Sankey Month Navigation
-
-Replace the long month dropdown with a calendar icon, readable selected month and accessible month/year picker. Add previous/next-month controls and supported milestone jumps such as retirement and final scheduled debt payoff. Keep Current / In Retirement shortcuts, constrain dates to the modeled horizon, and make adjacent cash-flow details use the same selection. Include keyboard, screen-reader, mobile and empty-horizon acceptance; a day picker would imply precision the monthly engine does not have.
-
-### Explainable Debt Visualization
-
-The ledger and baseline/scenario strategy controls are already supported; this priority improves their presentation.
-
-- Show total balance or balances by loan, with every monthly observation and payoff milestone retained.
-- Add principal-versus-interest payment bars and payoff markers explaining which minimum payment became available to the next loan. Keep the existing per-debt payment ledger available.
-- Compare strategies using the same starting debts and an explicitly comparable payment budget. Surface unpaid interest and unfunded scheduled payments.
-- Do not force an exponential shape. With zero interest and a constant total payment budget, aggregate debt falls linearly until paid. At positive rates, declining interest can increase principal repayment even when the total payment budget stays constant. Individual loans can show a sharper change when they receive rolled payments.
-- Acceptance includes zero-interest linear payoff, positive-interest amortization, mixed rates, same-month rollovers, Custom without rollover and a loan not repaid within the horizon.
-
-### Real Estate
-
-Make Real Estate a first-class planning area with **existing property records** and **Scenario Laboratory experiments**. Build the shared property model and a bounded comparison before exposing a dedicated tab; do not imply rental support by renaming the current home-only form.
-
-- Record primary-residence and income-property value, linked financing, property tax, insurance and operating costs. Rental inputs include gross rent, vacancy, management, maintenance and capital-replacement reserves. No tenant identity, address, listing or bank connection is required.
-- Link each mortgage to its property without duplicating the loan. Feed income, expenses, debt service, equity and net worth into the shared plan once. Reserves, transfers and actual expenditure need distinct treatment to avoid charging the same repair twice.
-- Compare buying a rental against investing the same starting cash; keep versus sell; and changes in rent, vacancy, financing or major repairs. Include down payment, purchase/closing costs, initial liquidity needs and the same comparison horizon.
-- Separate operating cash flow, interest, principal reduction, cash invested, equity and net sale proceeds. Handle purchase/sale timing, financing shortfalls and retained costs explicitly.
-- Require supported, sourced rental tax treatment before presenting tax-complete retirement outcomes. A bounded pre-tax comparison may ship first if clearly labeled and excluded from tax-complete rankings. Do not guess depreciation, passive-loss limits, recapture or sale exclusions.
-- Acceptance includes financed and unfinanced properties, zero rent/vacancy stress, maintenance costs, sale-loan settlement and conservation of cash/assets/debt across the comparison.
-
-### Refinancing Opportunity Indicators
-
-Use a restrained notification count on Loans & Debts and a marker on each relevant loan, labeled “Worth Comparing.” Provide a reason, source date and dismiss/snooze behavior; do not imply qualification or a lender offer.
-
-- Start with loan types for which a suitable benchmark exists. Match term/product and disclose population differences. A mortgage benchmark must not be reused for auto, student or credit-card debt.
-- Prefer regularly refreshed public snapshots served with the app; compare against the user's debt entirely locally. The approved weekly updater validates public data and proposes snapshot changes by pull request, leaving review and merge explicit.
-- Validate source schema, values, observation date and usage rights. Preserve the last valid snapshot on failure, show stale data, and suppress fresh-opportunity claims when the benchmark is stale or unsuitable.
-- [Freddie Mac PMMS](https://www.freddiemac.com/pmms) is a candidate weekly mortgage reference, not a personalized refinance quote. Check its methodology and supported borrower/product population before implementation.
-- Credit bands are optional and remain local. Use them only where a source supports meaningful comparisons; never manufacture an exact credit-score rate adjustment.
-- Compare closing costs/points, financed fees, remaining and proposed terms, expected holding period, payment changes, total interest and remaining balance at a common horizon. Expose term extension and break-even assumptions; rate spread alone is not enough.
-- Acceptance includes small balances, short remaining terms, longer replacement terms, no-cost/financed-fee offers, stale or missing data and an attractive headline rate that does not justify refinancing.
-
-### Continuing Feature Development
-
-| Area | Status | Remaining scope |
+| Priority | Unbuilt enhancement | What it would add |
 | --- | --- | --- |
-| Private foundation and portability (Batch 1) | Supported with Limits | Preserve blank onboarding, vault safety and raw export/import; continue real-device/keyboard-open accessibility and mobile checks |
-| Federal worksheets and monthly integration (Batches 2 / 5A) | Supported with Limits | Audit each supported path; retain explicit tax/account-access exclusions and avoid declaring the full annual engine repaired solely from monthly tests |
-| Benefits (Batch 3) | Planned | PIA/earnings-based estimates, early/delayed claiming, spousal/survivor and death-year transitions, pension survivor/lump-sum comparisons; military systems, FERS/CSRS, TSP, FEGLI and FEHB |
-| State, health and references (Batch 4) | Planned | Versioned state/local rules, optional ZIP/locality assistance and international/manual path, exchange-premium lookup guidance, Medicare/LTC references, property-tax assistance and refreshed economic/cohort references |
-| Budgets and scenarios (Batch 5) | Supported with Limits | Preserve compact bill editing, shared current/retirement facts, funded comparisons, cash policies and dated events; add the next priorities above and retain specialized-rule exclusions |
-| HSA planning | Planned | Effective-dated contribution, investing, receipt, qualified-expense, Medicare-enrollment and reimbursement treatment; shared eligibility and tax rules for Open Enrollment Planner |
-| Open Enrollment Planner | Supported with Limits | Standalone per-person medical/Rx, family accumulators, annual economics, HSA funding and monthly cash timing; exact scope below |
-| Portable term-life comparison | Supported with Limits | Local employer/individual 10/15/30-year quote comparison and known-price horizons; public rate dataset remains planned |
-| Education and guidance | Planned | Neutral will/trust/provider education; fiduciary/RIA/Form ADV and official SEC/state registration checks; sourced fee guidance; appropriate diversified-index alternatives; evidence-grounded health/longevity prompts |
-| Trust and accessibility (Batch 6) | Planned | Expanded audit trail, explanations, accessibility, performance and downloadable ledgers; continue compact household entry and progressively reveal relevant questions |
-| Optional AI or cloud connections | Planned, deferred | Only after core tax, benefits, health/state and scenario dependencies are complete; separate explicit design/authorization, no project storage of credentials or financial data |
+| 1 | Automated benefit decisions (Batch 3) | Statement/PIA-based claiming estimates; spousal, survivor and death-year transitions; pension survivor/lump-sum choices; sourced FERS/CSRS, military, TSP and FEGLI/retirement-FEHB rules |
+| 2 | State/local and health-cost assistance (Batch 4) | Versioned state-tax rules, locality resolution beyond ZIP alone, exchange-premium lookup assistance, Medicare/LTC references, property-tax assistance and a clear international/manual path |
+| 3 | Retirement HSA integration | Effective-dated eligibility/contribution limits, Medicare timing, investing/receipt/reimbursement rules and funded qualified withdrawals in retirement projections |
+| 4 | Carry enrollment decisions into the plan | Explicit selection into payroll, budgets and HSA funding with reconciliation; richer FSA/HRA choices, changing covered membership, independently configured medical/Rx family deductible structures, exact claim timing and manufacturer-assistance rules |
+| 5 | Advanced account/tax coverage (Batches 2/5 follow-on) | Separate-return household allocation, special RMD cases, IRA basis/pro-rata, inherited accounts, lot accounting and quarterly-tax conventions; cross-engine scope/conservation audit before exposing additional rankings |
+| 6 | Advanced scenario and property cases (Batch 5 follow-on) | Financed replacement housing, dated property transactions, additional lien/loan structures, tax-supported rental transactions and safe composition of currently incompatible scenario actions |
+| 7 | Research-dependent public references | Broader reviewed FEHB mappings; refreshed economic/cohort references; a rights-cleared term-life price dataset with age/term/coverage/underwriting assumptions and stale-data suppression; employer age-band term schedules |
+| 8 | Evidence and accessibility depth (Batch 6) | More detailed audit trails and downloadable ledgers, physical-device/assistive-technology checks, performance work and sourced knowledge expansion; historical replay/calibrated uncertainty only with suitable data |
 
-The goal is to improve on CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate and typical bank tools through connected reasoning, clear assumptions and privacy. Benchmark public workflows for missing questions, fragmented results, opaque estimates and unnecessary data collection. Budget usability and helpful sourced shortcuts are core requirements, not end-stage polish.
+Optional AI and cloud connections remain deferred until the core calculation dependencies are resolved and a separate privacy design is approved. No timed feature builds are enabled.
 
-### Federal Health Options and Employer Incentives — Supported with Review
+The product benchmark remains connected reasoning, clear assumptions, useful answers and easy entry without data collection. Compare against CFIRESim, Empower, Monarch, Free Financial Plan, EveryDollar, Bankrate and bank tools on those dimensions; no superiority claim is implied.
 
-**Published benefit mapping — September 11:** Federal selections now fill mapped family limits and service rules from OPM workbooks and all 59 official HTML/PDF brochure pairs. Shared medical categories apply each plan’s own price; Rx tiers and fill channels stay plan-specific. Nine nationwide options have detailed profiles, including per-fill caps and stepped visit/fill pricing. Across 132 options, 895 service rules and 30 family-limit structures are mapped; remaining exceptions stay visible as missing inputs. Manual overrides and saved editions are preserved. [Coverage and repeatable yearly refresh](docs/fehb-refresh.md).
+## Public Reference Maintenance
 
+These are maintenance processes for shipped data, not backlog features:
 
-The **Include Federal Employee Options** checkbox opens a compact directory of 132 options / 396 enrollment codes from OPM’s 2026 FEHB public files. Local state, county and ZIP filters distinguish location matches from unresolved service areas. Standard active non-postal employee premiums are supported; PSHB, annuitant and special rate categories are excluded. Published source text, provider/formulary links, source dates and hashes remain available. [Source inventory and calculation contract](docs/federal-health-options.md).
+- **Mortgage references:** the weekly [public-data workflow](.github/workflows/refresh-mortgage-rates.yml) validates the source and opens a reviewable update PR. It preserves the last good file on failure; stale data suppresses indicators. Visitors do not contact the rate source.
+- **Federal health options:** the existing November 1 yearly refresh task prepares the upcoming-year data for review. The [repeatable FEHB process](docs/fehb-refresh.md) pins sources, hashes and brochure evidence, validates joins/mappings, and produces a change report. A new year requires a reviewed manifest and draft PR, not automatic publication.
+- **Knowledge:** sources reviewed September 12, 2026. Changes to rules require an editorial review of affected guides and scope labels; dates are never automatically advanced.
 
-- Review a federal tier without using a private option slot. Published premium and tier totals prefill on explicit selection; family embedded limits are never inferred from self-only values. Copy scalar service prices from the reference, then confirm deductibles, coverage, Rx caps and OOP treatment. Up to 12 federal options can be reviewed. Only complete, matching-year/group options enter the top-three cost shortlist alongside all private options. Pin a completed choice or show all completed choices. Medical-use changes re-rank the federal shortlist; edits to people/care recalculate costs and highlight any newly missing benefit inputs.
-- **Simplified enrollment entry:** year and month use visible standard selects; selecting a federal option fills January 2026 only if the date is blank. Missing inputs expand their containing sections and display red, accessible field-level guidance. The comparison shows one short incomplete notice with a jump to the first missing field. No blanket benefit, HSA, HRA, surcharge, waiver or group-certification checkboxes are required. Entered amounts directly drive the estimate; factual coverage and family-limit questions remain where the calculation needs them.
-- **Optional tax savings:** blank HSA rates use supported Household estimates when available, otherwise zero tax benefit without blocking the comparison. Premium tax savings remain an optional combined-rate adjustment. FEHB premium conversion is explained in ordinary language, without treating the federal bracket alone as a combined state/payroll rate. Blank premiums and actual plan limits remain missing, never fabricated zeroes.
-- Optional **2a. Employer Incentives** supports full-year gross/net waiver amounts, eligible-month proration, monthly/quarterly/annual payout timing and entered payment conditions. Option employer ownership determines which waiver applies. Surcharges are entered on the accepting option; incentives never change insurance limits or silently update Household payroll/budgets.
-- **Household Coverage Arrangements** compares two independent primary coverage groups, rejects duplicate/missing people, and uses the entered premium and benefit tier for each group. Both employers enrolled suppresses both full waivers. Per-person/family accumulators remain separate across plans. Completed federal tiers can cover a subset of the household.
-- Itemized rules support after-deductible per-visit/fill minimums and caps. HRA allowances reduce costs only up to actual covered reimbursements, using the entered full-year allowance available at year start; unused HRA money is not treated as an owned HSA asset. Complex free-text rules, different Rx deductible structures, insurer-negotiated prices and formularies still require review, not automatic interpretation.
-- All computations and location matching stay local; federal data loads with the enrollment tab. Employer-option sharing retains its positive allowlist and excludes employee ownership, incentives, coverage groups and personal care. PDF comparisons include incentives and coverage arrangements. Fresh plans remain blank with the federal checkbox off.
-- A yearly **November 1** source refresh is scheduled, starting in 2026, to prepare a reviewed upcoming-year update. `scripts/refresh-fehb.py` verifies full schemas, hashes, brochure/PDF evidence, joins, counts and calculation mappings; produces an inventory/change report; and supports reproducible checks. A new benefit year requires a reviewed manifest and draft PR, with no automatic publication. FEHB retirement-continuation requirements stay visible beside annual cost comparisons.
+## Development Continuity
 
-The Google Search Console ownership verification meta tag is installed. It adds no analytics or tracking scripts.
+Read this README and the [current technical handoff](docs/development-state.md) before choosing a slice. Keep capabilities, limitations and unfinished enhancements distinct. Move release narratives to [history](docs/delivery-history.md), update the feature inventory when behavior ships, and remove only the delivered scope from the backlog.
 
-### Open Enrollment Planner — Supported with Limits
+Every release preserves local-only privacy, blank onboarding, explicit references/overrides, saved-plan compatibility and reconciliation of shared facts. Calculation changes need meaningful boundary/conservation tests and authoritative effective-dated sources. UI releases must pass the Pages browser/PDF gates and include visual inspection of relevant synthetic captures.
 
-Available in its own **Open Enrollment** tab, separate from Plan Summary. Compact expandable person rows feed up to four health-option cards; advanced prescription, network and HSA fields are disclosed when needed. All numeric inputs remain blank until entered or the fictional sample is explicitly loaded.
+The preceding verified baseline is [the September 12 layout release](https://github.com/pyinthesky/financialplanner/commit/e0c89890806c41f875f64cd23453077c5f56cb4b), with [successful Pages validation](https://github.com/pyinthesky/financialplanner/actions/runs/34667774571): 236 tests, TypeScript/build and Chromium/WebKit at six widths. For the current release, inspect [the workflow history](https://github.com/pyinthesky/financialplanner/actions/workflows/pages.yml). Evidence is release-specific, not a guarantee of every physical device.
 
-- **Per-person care:** annual general medical allowed charges, plus itemized visits, preventive services and prescriptions. Past out-of-pocket amounts are distinguished from insurer-negotiated prices and cannot silently drive deductible calculations. The same people and utilization are compared across options; itemized visits and prescriptions can override their allowed price per option.
-- **Family rules:** embedded or aggregate deductibles, separate individual/family OOP limits, and a visible claim ledger. One high-cost person can exhaust their individual OOP limit before the family deductible is met. Copays and coinsurance accumulate only according to the entered rule.
-- **Prescriptions:** explicit covered/excluded/unknown status, shared/separate/exempt deductible treatment, per-fill copay or coinsurance, and explicit combined-OOP credit. Optional Rx sublimits sit within the overall limits. Missing rules block complete comparisons. Pharmacy payments can be immediate even when medical bills arrive later.
-- **Economics and charts:** annual cost components, lower/expected/higher/stress medical-use comparisons, per-person OOP progress, cash timing and expandable ledgers. Employer HSA funds and entered tax savings are separated from personal contributions and retained assets. A gold star marks the lowest complete modeled cost, with ties; no plan is presumed best before calculation. SVG-based PDF comparisons render independently of hidden screen charts.
-- **Timing:** service liability, EOB processing, payment due and HSA reimbursements are distinct. Service-year accumulators remain intact when bills cross year-end. Monthly/upfront employer funding and reimbursement delays expose the cash needed before HSA funds are available. An EOB is not a bill; the model never advises ignoring actual payment terms.
-- **HSA scope:** one modeled owner, per-person reimbursement eligibility, expense exclusions and an entered contribution allowance, explicit tax-rate override or a supported 2026 federal payroll-derived estimate, and a dated January-2026 base-limit shortcut. Existing HSA balances can fund qualified expenses without new contributions. Full eligibility, catch-up, state/payroll rules and non-calendar contribution allocation are not inferred.
-
-See [implementation, formulas, sources and acceptance contract](docs/open-enrollment.md). The sample now includes three complete fictional health options and per-person medical, high-cost Rx and preventive care. Calculation/regression coverage and populated Chromium/WebKit journeys are required before deployment.
-
-**Remaining:** explicit selection into canonical payroll/budget/HSA entries without double counting; different covered groups or changing membership; independently structured medical/Rx deductibles; exact claim dates and variable per-claim delays; general-medical negotiated-price overrides; specialty per-fill caps and manufacturer-assistance accumulators; network/authorization/formulary lookup guidance; additional FSA/HRA options. These are retained dependencies, not implied by the standalone comparison. Broader retirement HSA, ACA, Medicare and state engines remain separate roadmap work.
-
-### Portable Term-Life Comparison — Supported with Limits
-
-The **Term Life** view compares employer term coverage and individually owned level-term quotes over 10, 15 or 30 years. Enter matching death benefits, annual premiums, guaranteed-price periods and an employment-change horizon. Graphs stop at the end of known pricing; portability alone does not establish a post-employment premium or guarantee continued coverage. Different coverage amounts and durations are flagged. Quotes are local and do not feed budgets automatically.
-
-**Remaining:** a quarterly reviewed public reference dataset by age bracket and insurer-used male/female rating category, term, coverage, tobacco/underwriting class and jurisdiction, limited to source-supported distinctions. Establish credible reuse rights, observation/effective dates, cohort assumptions and stale-data suppression before publishing any reference prices. Manual quotes are available now; no averages, risk-class adjustments, leads or remote quote requests are fabricated. Age-band employer schedules, equal-premium coverage comparisons, matched coverage-end ages and explicit budget selection remain planned. Specialized FEGLI behavior stays with Batch 3.
-
-## Development Continuity and Release Gates
-
-Before implementing, read this roadmap, [development state](docs/development-state.md) and the relevant [Batch 5 contract](docs/batch-5-plan.md), [experience contract](docs/batch-5-experience.md) or [compact-budget revision](docs/compact-budget-round.md). This roadmap governs priority; older documents retain design detail and historical context. Resolve conflicts against the latest agreed user requirements and verified code. Do not infer completion from an old batch label.
-
-Work in coherent, reviewable slices. Mark only work actually underway as In Progress, attach evidence when updating status, and move release narratives to [delivery history](docs/delivery-history.md). Keep original batch identifiers for continuity without scattering duplicate active checklists across documents. Timed feature builds remain disabled.
-
-Every relevant release must preserve local-only privacy, blank onboarding, explicit references/overrides, saved-plan compatibility and reconciliation of shared facts. Calculation changes need meaningful boundary/conservation tests and authoritative effective-dated sources. UI changes need mobile/keyboard checks; print changes need populated charts and visual PDF inspection. Never hide unsupported outcomes behind success percentages.
-
-Latest application verification before this documentation cleanup: [September 8 release](https://github.com/pyinthesky/financialplanner/commit/e3829160d62a5e4c07ff32943354207c4f8fe8a3), [Pages workflow](https://github.com/pyinthesky/financialplanner/actions/runs/34265147085): 144 tests, TypeScript/build, Chromium and WebKit at six widths, and an eight-page fictional PDF visually inspected. WebKit passed on retry after a renderer crash. This evidence describes that release, not future roadmap work or universal real-device compatibility.
+The pre-layout rollback tag is [`pre-tailwind-layout-2026-09-12`](https://github.com/pyinthesky/financialplanner/releases/tag/pre-tailwind-layout-2026-09-12). [Layout contract and rollback procedure](docs/ui-layout.md).
 
 ## Run Locally
 
-Requires Node.js 22 or newer.
+Requires Node.js 22.13 or newer.
 
 ```bash
 npm ci
-npm run build:pages
-npm run test:planner
+npm run dev
 ```
 
-For local development:
+Validate a release:
 
 ```bash
-npx vite --config vite.github.config.ts
+npm test
+npx tsc --noEmit
+npm run build:pages
 ```
 
-## Deployment
+## Deployment & Contributing
 
-[The Pages workflow](.github/workflows/pages.yml) builds `dist-pages`, runs its gates and deploys through GitHub's official Pages actions. Repository Pages settings must use GitHub Actions as the source. Public-reference updates and new feature work remain separate concerns.
+[The Pages workflow](.github/workflows/pages.yml) builds `dist-pages`, runs its gates and deploys through GitHub Pages. Repository Pages settings use GitHub Actions as the source.
 
-## Contributing
-
-Issues and pull requests are welcome. Explain the user problem, supported behavior, assumptions and validation. Financial-law changes require authoritative sources and effective dates. Preserve privacy, accessibility and clear calculation boundaries.
+Issues and pull requests should explain the user problem, supported behavior, assumptions and validation. Preserve clear boundaries and avoid duplicating shared financial facts. No personal data belongs in examples or issue attachments.
 
 ## License
 
