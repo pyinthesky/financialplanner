@@ -117,6 +117,8 @@ const server = http.createServer((req, res) => {
         await page.keyboard.press('ArrowRight');
         assert.equal(await savingsRate.inputValue(),'26');
         assert.ok((await page.locator('[data-savings-illustration] svg desc').textContent()).includes('26%'));
+        const axisSize=await page.locator('[data-savings-illustration] svg text').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize)*el.ownerSVGElement.getBoundingClientRect().width/el.ownerSVGElement.viewBox.baseVal.width);
+        assert.ok(axisSize>=11.5,'Savings-curve labels remain legible at actual rendered size');
         assert.equal(await page.locator('[data-guide]').count(),9);
         await page.getByLabel('What Would You Like to Understand?').fill('  IAPD  ');
         assert.equal(await page.locator('[data-guide]').count(),1);
