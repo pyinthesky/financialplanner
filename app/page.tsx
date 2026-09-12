@@ -353,7 +353,7 @@ export default function HomePage() {
     const frame=requestAnimationFrame(()=>{
       window.scrollTo({top:0,behavior:'instant'});
       const heading=document.querySelector<HTMLElement>('[data-layout="content"] h1');
-      if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+      if(heading){heading.tabIndex=-1;heading.style.outline='none';heading.focus({preventScroll:true});}
     });
     return ()=>cancelAnimationFrame(frame);
   },[activeSection]);
@@ -615,7 +615,7 @@ export default function HomePage() {
   };
   const startFromWelcome=()=>{
     if(vaultStatus==='locked'){setVaultError('');setVaultOpen(true);}
-    else selectSection(lastPlanSection.current);
+    else selectSection(isBlankPlan(plan)?'household':lastPlanSection.current);
   };
   const returnShortcut=(key:keyof typeof RETURN_REFERENCES)=>{
     const r=RETURN_REFERENCES[key],receipt=plan.returnReferences?.[key];
@@ -2434,7 +2434,7 @@ export default function HomePage() {
             <Stack as="div" className="page-flow">{content}</Stack>
           </PageContent>
           {setupIndex>=0&&<nav aria-label="Plan Setup Steps" className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg md:static md:px-5 md:shadow-none print:hidden">
-            <div className="mx-auto max-w-[1376px]"><p className="mb-2 text-xs text-muted-foreground">Section {setupIndex+1} of {setupSections.length} · Add what you know; come back anytime.</p><div className="flex min-w-0 items-stretch gap-2">
+            <div className="mx-auto max-w-[1376px]"><p className="mb-2 text-xs text-muted-foreground">Section {setupIndex+1} of {setupSections.length}</p><div className="flex min-w-0 items-stretch gap-2">
               <Button variant="outline" className="h-auto min-h-11 shrink-0" onClick={()=>selectSection(setupIndex===0?'welcome':setupSections[setupIndex-1])}><ArrowLeft aria-hidden="true"/>Back</Button>
               <Button className="h-auto min-h-11 min-w-0 flex-1 whitespace-normal text-left md:flex-none" onClick={()=>selectSection(setupSections[setupIndex+1]??'overview')}><span>{setupIndex===setupSections.length-1?'See My Plan Summary':`Next: ${sections.find(s=>s.id===setupSections[setupIndex+1])!.label}`}</span><ArrowRight className="shrink-0" aria-hidden="true"/></Button>
             </div></div>

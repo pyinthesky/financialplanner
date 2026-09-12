@@ -128,7 +128,8 @@ const server = http.createServer((req, res) => {
         const setup=page.getByRole('navigation',{name:'Plan Setup Steps',exact:true});
         if(width<768){
           const rect=await setup.evaluate(el=>({bottom:el.getBoundingClientRect().bottom,height:el.getBoundingClientRect().height}));
-          assert.ok(Math.abs(rect.bottom-900)<=1&&rect.height<128,'Mobile setup controls stay visible with reserved space');
+          await page.screenshot({path:path.join(out,`${name}-${width}-setup-geometry.png`)});
+          assert.ok(Math.abs(rect.bottom-900)<=1&&rect.height<128,`Mobile setup controls stay visible with reserved space: ${JSON.stringify(rect)}`);
         }
         await noOverflow('Household with setup controls');
         await page.screenshot({path:path.join(out,`${name}-${width}-setup.png`)});
