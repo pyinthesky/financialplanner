@@ -2,7 +2,7 @@
 
 Contract: schemaVersion 2. Documentation reviewed September 12, 2026.
 
-The file is for the existing **Data & Privacy → Upload plan** action. This site is static; it does not accept POSTed plan data or populate a plan from URL contents. There is no automatic cloud transfer. A model may deliver a JSON attachment privately to its user, who imports it on their own device.
+The file is for the existing **Data & Privacy → Open a Saved Plan** action. This site is static; it does not accept POSTed plan data or populate a plan from URL contents. There is no automatic cloud transfer. A model may deliver a JSON attachment privately to its user, who imports it on their own device.
 
 ## Workflow
 
@@ -11,7 +11,7 @@ The file is for the existing **Data & Privacy → Upload plan** action. This sit
 3. Keep required fields; omit unknown optional sections. Use JSON numbers and booleans, not formatted strings. Use only properties/enumerations defined in the schema. Do not embed the schema itself or add a `$schema` property to the plan object.
 4. Validate locally against the schema when possible. Then check the units, dates, ownership and links described below. Never send the completed file to an online validator. If unable to validate, tell the user; do not claim the file was tested.
 5. Deliver `my-retirement-plan.json` as a UTF-8 attachment. List unresolved information in the accompanying message, outside the file.
-6. Tell the user to download any existing plan before importing. **The current importer replaces the active plan immediately.** An unlocked vault will save that replacement locally in encrypted form. A confirmation/preview for arbitrary generated files is a future enhancement.
+6. Tell the user to download any existing plan before importing. The app asks before choosing another file when a plan or saved copy already exists. **Selecting a valid file then replaces the active plan without a field-by-field preview.** An unlocked vault will save that replacement locally in encrypted form. Strict arbitrary-file validation and a field preview remain future enhancements.
 
 ## Privacy and Unknown Values
 

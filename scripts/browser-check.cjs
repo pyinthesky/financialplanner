@@ -57,13 +57,13 @@ const server = http.createServer((req, res) => {
           if(!navigationChecked){
             const menu=page.getByRole('navigation',{name:'Planner Sections',exact:true});
             assert.deepEqual(await menu.getByRole('heading').allTextContents(),['Your Plan','Results','Explore']);
-            assert.deepEqual(await menu.getByRole('button').evaluateAll(items=>items.map(el=>el.getAttribute('aria-label'))),['Data & Privacy','Household','Cash & Investments','Pensions & Social Security','Loans & Debts','Real Estate','Health & Long-Term Care','Taxes & Withdrawals','Current Budget','Retirement Budget','Plan Summary','Scenario Laboratory','Open Enrollment','Knowledge Center']);
+            assert.deepEqual(await menu.getByRole('button').evaluateAll(items=>items.map(el=>el.getAttribute('aria-label'))),['Welcome','Household','Cash & Investments','Pensions & Social Security','Loans & Debts','Real Estate','Health & Long-Term Care','Taxes & Withdrawals','Current Budget','Retirement Budget','Plan Summary','Scenario Laboratory','Open Enrollment','Knowledge Center','Data & Privacy']);
             assert.equal(await menu.locator('details, [aria-expanded]').count(),0,'Groups never require expanding');
             await page.screenshot({path:path.join(out,`${name}-${width}-grouped-navigation.png`)});
             navigationChecked=true;
           }
           await page.getByRole('button', { name: label, exact: true }).click();
-          const heading = label === 'Household' ? 'Household & Assumptions' : label;
+          const heading = label === 'Welcome' ? 'Make a Plan for the Life You Want.' : label === 'Household' ? 'Household & Assumptions' : label;
           await page.getByRole('heading', { name: heading, exact: true }).first().waitFor();
           if (width < 768) await page.locator('[data-mobile="true"]').waitFor({ state: 'hidden' });
         };
@@ -118,6 +118,26 @@ const server = http.createServer((req, res) => {
           });
           assert.deepEqual(violations,[],`${name} ${width}: dialog text and buttons fit the popup`);
         };
+        await page.getByRole('heading',{name:'Make a Plan for the Life You Want.',exact:true}).waitFor();
+        assert.doesNotMatch(await page.locator('[data-layout="content"]').innerText(),/AES|JSON|PBKDF2/,'Welcome uses everyday language');
+        await noOverflow('Welcome');
+        await page.screenshot({path:path.join(out,`${name}-${width}-welcome.png`),fullPage:true});
+        await page.getByRole('button',{name:'Start My Plan',exact:true}).click();
+        await page.getByRole('heading',{name:'Household & Assumptions',exact:true}).waitFor();
+        assert.ok((await page.locator('main input[type=number]').evaluateAll(inputs=>inputs.map(i=>i.value))).every(v=>v===''),'Start opens blank Household directly');
+        const setup=page.getByRole('navigation',{name:'Plan Setup Steps',exact:true});
+        if(width<768){
+          const rect=await setup.evaluate(el=>({bottom:el.getBoundingClientRect().bottom,height:el.getBoundingClientRect().height}));
+          assert.ok(Math.abs(rect.bottom-900)<=1&&rect.height<128,'Mobile setup controls stay visible with reserved space');
+        }
+        await noOverflow('Household with setup controls');
+        await page.screenshot({path:path.join(out,`${name}-${width}-setup.png`)});
+        await setup.getByRole('button',{name:'Next: Cash & Investments',exact:true}).click();
+        await page.getByRole('heading',{name:'Cash & Investments',exact:true}).first().waitFor();
+        await setup.getByRole('button',{name:'Back',exact:true}).click();
+        await page.getByRole('heading',{name:'Household & Assumptions',exact:true}).waitFor();
+        await setup.getByRole('button',{name:'Back',exact:true}).click();
+        await page.getByRole('heading',{name:'Make a Plan for the Life You Want.',exact:true}).waitFor();
         await navigate('Knowledge Center');
         assert.equal(await page.getByLabel('Illustration Savings Rate',{exact:true}).count(),0,'Illustration requires explicit loading');
         await page.getByRole('button',{name:'Explore the Savings Curve',exact:true}).click();
@@ -201,8 +221,16 @@ const server = http.createServer((req, res) => {
           fixture.accounts = [{ id: 'synthetic-cash', name: 'Synthetic Cash', owner: 'you', kind: 'cash', balance: 10000, annualContribution: 0 }];
           fixture.debts = [['A',100,50],['B',400,100],['C',1000,100]].map(([id,balance,minimumPayment]) => ({ id, name: id, kind: id === 'C' ? 'mortgage' : 'other', balance, minimumPayment, interestRate: 0 }));
           fixture.debtStrategy = { method: 'snowball', extraMonthlyPayment: 50 };
-          await navigate('Data & Privacy');
-          await page.locator('input[type=file]').setInputFiles({ name: 'synthetic-plan.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fixture)) });
+          await navigate('Welcome');
+          await page.getByRole('button',{name:'Open a Saved Plan',exact:true}).click();
+          await page.getByRole('dialog').waitFor();
+          await checkDialog();
+          await page.getByRole('button',{name:'Cancel',exact:true}).click();
+          await page.getByRole('button',{name:'Open a Saved Plan',exact:true}).click();
+          const chooserPromise=page.waitForEvent('filechooser');
+          await page.getByRole('button',{name:'Choose Plan File',exact:true}).click();
+          await (await chooserPromise).setFiles({ name: 'synthetic-plan.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fixture)) });
+          await page.getByRole('heading',{name:'Household & Assumptions',exact:true}).waitFor();
           await page.getByRole('button', { name: /Open data and privacy — Imported/ }).waitFor();
           await navigate('Retirement Budget');
           await expandFood();
@@ -328,7 +356,8 @@ const server = http.createServer((req, res) => {
         await checkDialog();
         await page.screenshot({path:path.join(out,`${name}-${width}-replace-dialog.png`)});
         await page.getByRole('button',{name:'Cancel',exact:true}).click();
-        await page.getByRole('button',{name:'Load Sample Plan',exact:true}).click();
+        await navigate('Welcome');
+        await page.getByRole('button',{name:'Explore a Sample Plan',exact:true}).click();
         await page.getByRole('button',{name:'Erase and Load Sample',exact:true}).click();
         await navigate('Plan Summary');
         await page.getByRole('heading',{name:'Cash & Investments',exact:true}).waitFor();
@@ -398,11 +427,28 @@ const server = http.createServer((req, res) => {
         await noOverflow('sample compact budget');
         await page.screenshot({path:path.join(out,`${name}-${width}-sample-budget.png`),fullPage:true});
         await navigate('Data & Privacy');
-        await page.getByRole('button',{name:'Create local vault',exact:true}).click();
-        await page.getByLabel('Vault passphrase',{exact:true}).fill('Public-Synthetic-Test-Only');
-        await page.getByRole('button',{name:'Create vault',exact:true}).click();
+        await page.getByRole('button',{name:'Save on This Device',exact:true}).click();
+        await page.getByLabel('Plan Password',{exact:true}).fill('Public-Synthetic-Test-Only');
+        await page.getByRole('button',{name:'Save My Plan',exact:true}).click();
         await page.getByRole('dialog').waitFor({state:'hidden'});
         await page.waitForFunction(()=>localStorage.length===1);
+        await page.reload();
+        await page.getByRole('button',{name:'Continue My Plan',exact:true}).click();
+        await page.getByRole('heading',{name:'Unlock Your Saved Plan',exact:true}).waitFor();
+        await page.getByLabel('Plan Password',{exact:true}).fill('Public-Synthetic-Test-Only');
+        await page.getByRole('button',{name:'Unlock',exact:true}).click();
+        await page.getByRole('heading',{name:'Household & Assumptions',exact:true}).waitFor();
+        await navigate('Welcome');
+        await page.getByRole('button',{name:'Continue My Plan',exact:true}).click();
+        await page.getByRole('heading',{name:'Household & Assumptions',exact:true}).waitFor();
+        await navigate('Data & Privacy');
+        const technical=page.locator('details').filter({has:page.locator('summary').filter({hasText:'Technical Details & Protection Limits'})});
+        assert.equal(await technical.getAttribute('open'),null);
+        await technical.locator('summary').click();
+        assert.match(await technical.innerText(),/AES-256-GCM/);
+        await noOverflow('Data and privacy details');
+        await page.screenshot({path:path.join(out,`${name}-${width}-privacy.png`),fullPage:true});
+
         await page.getByRole('button',{name:'Create New Plan',exact:true}).click();
         await page.getByRole('button',{name:'Erase and Create New Plan',exact:true}).click();
         await navigate('Current Budget');

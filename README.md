@@ -10,10 +10,12 @@ Start with blank inputs or explicitly load the fictional sample. Enter shared fa
 
 This is the current product inventory. Every item below is implemented within the stated scope. Future enhancements appear only in [Remaining Work](#delivery-roadmap); release narratives live in [Delivery History](docs/delivery-history.md).
 
-### Data & Privacy
+### Welcome, Data & Privacy
 
-- Session-only use or an optional encrypted local vault, with visible saving/locked/error states.
-- Raw JSON download and re-import, including compatibility with earlier saved plans.
+- A plain-language Welcome homepage with an illustrated planning journey. Start My Plan opens Household directly; returning users can continue, unlock or open a saved plan. Sample loading opens Plan Summary.
+
+- Session-only use or optional password-protected saving on this device, with visible saving/locked/error states. Technical encryption details sit behind an expandable disclosure.
+- Download My Plan and Open a Saved Plan use portable JSON files, including compatibility with earlier saved plans. Opening a different file prompts before file selection when a plan or saved copy already exists.
 - Public [llms.txt](https://pyinthesky.github.io/financialplanner/llms.txt), [import guide](https://pyinthesky.github.io/financialplanner/import-guide.md), generated version-2 JSON Schema and blank template for user-controlled file generation. CI checks schema drift and import examples; no plan-receiving endpoint or data-bearing links.
 - One-button fictional sample loading and confirmed Create New Plan, with an opportunity to download the current plan before replacement.
 - No bank connections or server storage of plan data. Google Search Console ownership verification is a meta tag, not analytics.
@@ -91,7 +93,7 @@ This is the current product inventory. Every item below is implemented within th
 
 ### Interface & Accessibility
 
-- Flat navigation grouped into Your Plan, Results and Explore, with Data & Privacy first.
+- Flat navigation grouped into Your Plan, Results and Explore, with Welcome first and Data & Privacy at the bottom. Back/Next controls connect every setup section; mobile controls remain visible without opening the sidebar.
 - Shared Tailwind page/card/form/action components, container-aware grids, consistent spacing, blank numeric entry, visible units, responsive table cards and locally bundled Lucide icons.
 - Keyboard-accessible controls and a mobile drawer. Chromium/WebKit journeys cover six widths, dialogs, form containment, card spacing and report output.
 

@@ -1,5 +1,7 @@
 # Delivery History
 
+- September 12: plain-language Welcome homepage, illustrated planning journey, direct start/continue/sample/open actions and mobile Back/Next setup controls. Data & Privacy moves to the bottom of the menu; technical details remain available by disclosure.
+
 - September 12: public LLM import instructions, generated version-2 JSON Schema and blank template, with drift and import-example tests. Financial data remains local; this is static documentation, not an upload API.
 
 The Knowledge Center release also adds an opt-in, independently calculated savings-rate curve inspired by the user-selected 2012 article. See [model and limitations](savings-illustration.md).

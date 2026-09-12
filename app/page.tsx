@@ -1,5 +1,6 @@
 "use client";
 import { ColumnGrid, ActionRow, FormGrid, PageContent, PlannerCard, Stack } from '@/components/ui/planner-layout';
+import { Welcome } from '@/components/welcome';
 import { KnowledgeCenter } from '@/components/knowledge-center';
 import { HouseholdMembers } from '@/components/household-members';
 import { EducationAccounts, EducationSummary } from '@/components/education';
@@ -9,7 +10,7 @@ const OpenEnrollment = lazy(() => import('@/components/open-enrollment').then(m 
 const EnrollmentPrint = lazy(() => import('@/components/open-enrollment').then(m => ({default:m.EnrollmentPrint})));
 import { EMPTY_ENROLLMENT } from '@/lib/enrollment';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, GraduationCap, TreePalm, PiggyBank, FlaskConical, BriefcaseBusiness, Building2, Calculator, ChevronRight, CircleDollarSign, Download, FileUp, HeartPulse, Home, Landmark, Lock, LockKeyhole, Menu, Plus, Printer, ReceiptText, ShieldCheck, Trash2, Unlock, WalletCards } from "lucide-react";
+import { Activity, Sprout, ArrowLeft, ArrowRight, GraduationCap, TreePalm, PiggyBank, FlaskConical, BriefcaseBusiness, Building2, Calculator, ChevronRight, CircleDollarSign, Download, FileUp, HeartPulse, Home, Landmark, Lock, LockKeyhole, Menu, Plus, Printer, ReceiptText, ShieldCheck, Trash2, Unlock, WalletCards } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ReferenceLine, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
@@ -53,13 +54,13 @@ import { buildPlanningSignals } from "@/lib/planning-signals";
 import { calculateQcdCapacity, type QcdCapacityStatus } from "@/lib/qcd";
 import { decryptPlan, encryptPlan } from "@/lib/vault";
 
-type SectionId = "knowledge" | "enrollment" | "realEstate" | "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "debt" | "health" | "taxes" | "data";
+type SectionId = "welcome" | "knowledge" | "enrollment" | "realEstate" | "scenarios" | "overview" | "household" | "currentBudget" | "retirementBudget" | "portfolio" | "income" | "debt" | "health" | "taxes" | "data";
 type VaultStatus = "off" | "locked" | "unlocked";
 type SaveStatus = "unsaved" | "locked" | "saving" | "saved" | "failed";
 
 const VAULT_KEY = "open-retirement-planner-vault-v1";
 const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
-  { id: "data", label: "Data & Privacy", icon: ShieldCheck },
+  { id: "welcome", label: "Welcome", icon: Sprout },
   { id: "household", label: "Household", icon: Home },
   { id: "portfolio", label: "Cash & Investments", icon: PiggyBank },
   { id: "income", label: "Pensions & Social Security", icon: Landmark },
@@ -73,13 +74,15 @@ const sections: { id: SectionId; label: string; icon: typeof Activity }[] = [
   { id: "scenarios", label: "Scenario Laboratory", icon: FlaskConical },
   { id: "enrollment", label: "Open Enrollment", icon: ShieldCheck },
   { id: "knowledge", label: "Knowledge Center", icon: GraduationCap },
+  { id: "data", label: "Data & Privacy", icon: ShieldCheck },
 ];
 
 const navigationGroups: { id: string; label: string | null; sections: SectionId[] }[] = [
-  { id: "privacy", label: null, sections: ["data"] },
+  { id: "welcome", label: null, sections: ["welcome"] },
   { id: "plan", label: "Your Plan", sections: ["household", "portfolio", "income", "debt", "realEstate", "health", "taxes", "currentBudget", "retirementBudget"] },
   { id: "results", label: "Results", sections: ["overview"] },
   { id: "explore", label: "Explore", sections: ["scenarios", "enrollment", "knowledge"] },
+  { id: "privacy", label: null, sections: ["data"] },
 ];
 
 const portfolioChartConfig = {
@@ -338,7 +341,23 @@ export default function HomePage() {
   useEffect(()=>{fetch(new URL('mortgage-rates.json',document.baseURI)).then(r=>r.ok?r.json():null).then(s=>{if(s?.observed&&validSnapshot(s,new Date(s.observed+'T00:00:00Z'))&&Date.parse(s.observed)<=Date.now())setRateSnapshot(s);}).catch(()=>{});},[]);
   const [plan, setPlan] = useState<PlannerData>(DEFAULT_PLAN);
   const [selectedScenarioId, setSelectedScenarioId] = useState('');
-  const [activeSection, setActiveSection] = useState<SectionId>("data");
+  const [activeSection, setActiveSection] = useState<SectionId>("welcome");
+  const lastPlanSection=useRef<SectionId>('household');
+  const setupSections=navigationGroups.find(g=>g.id==='plan')!.sections;
+  const setupIndex=setupSections.indexOf(activeSection);
+  const selectSection=(section:SectionId)=>{
+    if(setupSections.includes(section)||section==='overview')lastPlanSection.current=section;
+    setActiveSection(section);
+  };
+  useEffect(()=>{
+    const frame=requestAnimationFrame(()=>{
+      window.scrollTo({top:0,behavior:'instant'});
+      const heading=document.querySelector<HTMLElement>('[data-layout="content"] h1');
+      if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+    });
+    return ()=>cancelAnimationFrame(frame);
+  },[activeSection]);
+  const [importPrompt,setImportPrompt]=useState(false);
   const [vaultStatus, setVaultStatus] = useState<VaultStatus>("off");
   const [vaultOpen, setVaultOpen] = useState(false);
   const [passphrase, setPassphrase] = useState("");
@@ -516,6 +535,7 @@ export default function HomePage() {
     if (!file) return;
     try {
       setPlan(normalizePlan(JSON.parse(await file.text())));
+      setPlanEpoch(n=>n+1);selectSection("household");
       if (vaultStatus === "unlocked") {
         setSaveStatus("saving");
         setSaveState("Imported — saving encrypted…");
@@ -551,6 +571,7 @@ export default function HomePage() {
       setSaveState("Saved locally — encrypted");
       setPassphrase("");
       setVaultOpen(false);
+      if(activeSection==="welcome")selectSection(lastPlanSection.current);
     } catch (error) {
       if(!isCurrent())return;
       setVaultError(error instanceof Error ? error.message : "Unable to open the vault.");
@@ -583,9 +604,18 @@ export default function HomePage() {
     setVaultStatus('off');setSaveStatus('unsaved');setVaultOpen(false);setVaultError('');setConfirmErase(false);
     setPlan(replacement);setPlanEpoch(n=>n+1);setReplaceAction(null);
     setSaveState(action==='sample'?'Sample loaded — not saved':'Blank plan — not saved');
+    selectSection(action==='sample'?'overview':'household');
   };
   const requestReplacement=(action:'sample'|'new')=>{
     if(!isBlankPlan(plan)||vaultStatus!=='off')setReplaceAction(action);else replacePlan(action);
+  };
+  const requestImport=()=>{
+    if(!isBlankPlan(plan)||vaultStatus!=='off')setImportPrompt(true);
+    else fileInput.current?.click();
+  };
+  const startFromWelcome=()=>{
+    if(vaultStatus==='locked'){setVaultError('');setVaultOpen(true);}
+    else selectSection(lastPlanSection.current);
   };
   const returnShortcut=(key:keyof typeof RETURN_REFERENCES)=>{
     const r=RETURN_REFERENCES[key],receipt=plan.returnReferences?.[key];
@@ -2256,7 +2286,7 @@ export default function HomePage() {
 
   const renderData = () => (
     <>
-      <SectionHeading title="Data & Privacy" description="Start here: choose whether this browser should save your plan before entering financial details." />
+      <SectionHeading title="Data & Privacy" description="Save your progress, open a downloaded plan, or manage what stays on this device." />
       <Panel title="Explore or Start Fresh" eyebrow="YOUR PLAN"><p className="panel-copy">Load fictional example data to explore the planner, or start a new blank plan.</p><ActionRow as="div" className="budget-actions"><Button onClick={()=>requestReplacement('sample')}>Load Sample Plan</Button>{(!isBlankPlan(plan)||vaultStatus!=='off')&&<Button variant="outline" onClick={()=>requestReplacement('new')}>Create New Plan</Button>}</ActionRow></Panel>
       <div className="privacy-banner">
         <ShieldCheck />
@@ -2267,12 +2297,12 @@ export default function HomePage() {
         </div>
       </div>
       <ColumnGrid columns={3} className="three-column">
-        <Panel title="Encrypted Local Vault" eyebrow={vaultStatus.toUpperCase()}>
-          <p className="panel-copy">Optional: save changes in this browser using AES-256-GCM encryption. Without a vault, the open plan lasts only for this browser session unless you download it. Your passphrase is kept only in memory and cannot be recovered.</p>
+        <Panel title="Save on This Device" eyebrow="OPTIONAL SAVING">
+          <p className="panel-copy">Protect a saved copy with a password. Without saving or downloading, your entries are lost when you close or reload this tab. Keep your password safe: we cannot recover it.</p>
           <div className="button-stack">
             {vaultStatus === "unlocked" ? (
               <Button onClick={lockVault}>
-                <Lock /> Lock vault
+                <Lock /> Lock Saved Plan
               </Button>
             ) : (
               <Button
@@ -2281,7 +2311,7 @@ export default function HomePage() {
                   setVaultOpen(true);
                 }}
               >
-                <LockKeyhole /> {vaultStatus === "locked" ? "Unlock vault" : "Create local vault"}
+                <LockKeyhole /> {vaultStatus === "locked" ? "Unlock Saved Plan" : "Save on This Device"}
               </Button>
             )}
             {vaultStatus !== "off" &&
@@ -2302,21 +2332,22 @@ export default function HomePage() {
               ))}
           </div>
         </Panel>
-        <Panel title="Download Raw Data" eyebrow="PORTABLE JSON">
-          <p className="panel-copy">Save a readable copy you can inspect, version, and re-upload later. The raw file is not encrypted; store it carefully.</p>
+        <Panel title="Download My Plan" eyebrow="KEEP A COPY">
+          <p className="panel-copy">Keep a plan file you can open here later or on another device. This downloaded copy is not password-protected, so store it somewhere private.</p>
           <Button variant="outline" onClick={exportData}>
-            <Download /> Download plan
+            <Download /> Download My Plan
           </Button>
         </Panel>
-        <Panel title="Restore a Plan" eyebrow="JSON IMPORT">
+        <Panel title="Open a Saved Plan" eyebrow="PICK UP WHERE YOU LEFT OFF">
           <p className="panel-copy">Load a previously downloaded plan. Importing replaces the plan currently open on screen.</p>
-          <input ref={fileInput} className="sr-only" type="file" accept="application/json,.json" onChange={(event) => importData(event.target.files?.[0])} />
-          <Button variant="outline" onClick={() => fileInput.current?.click()}>
-            <FileUp /> Upload plan
+          <Button variant="outline" onClick={requestImport}>
+            <FileUp /> Open a Saved Plan
           </Button>
         </Panel>
       </ColumnGrid>
-      <Panel title="Threat Model" eyebrow="WHAT ENCRYPTION CAN — AND CANNOT — DO">
+      <details className="rounded-xl border border-border bg-white p-4"><summary className="min-h-11 cursor-pointer font-semibold">Technical Details & Protection Limits</summary>
+      <p className="mb-4 text-sm leading-6">Saved plans use AES-256-GCM encryption with a key derived from your password using PBKDF2. The password is held only in memory. Downloaded plan files use JSON, a readable format that can be opened by other software.</p>
+      <Panel title="What Protection Covers" eyebrow="SAVED DATA">
         <ColumnGrid className="threat-grid">
           <div>
             <strong>Helps protect against</strong>
@@ -2335,16 +2366,17 @@ export default function HomePage() {
             </ul>
           </div>
         </ColumnGrid>
-      </Panel>
+      </Panel></details>
     </>
   );
 
-  const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
+  const content = activeSection === "welcome" ? <Welcome hasPlan={!isBlankPlan(plan)} locked={vaultStatus==='locked'} onStart={startFromWelcome} onSample={()=>requestReplacement('sample')} onOpen={requestImport} onNew={()=>requestReplacement('new')}/> : activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
     : activeSection === "knowledge" ? <KnowledgeCenter/> : activeSection === "enrollment" ? <Suspense fallback={<p role="status">Loading Open Enrollment…</p>}><OpenEnrollment plan={plan} onChange={setPlan}/></Suspense> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan} initialSelected={selectedScenarioId}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <Stack as="div" className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></Stack> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>
+      <input ref={fileInput} className="sr-only" type="file" accept="application/json,.json" aria-label="Saved Plan File" onChange={event=>importData(event.target.files?.[0])}/>
       <SidebarProvider>
         <Sidebar collapsible="offcanvas">
           <SidebarHeader className="brand-block">
@@ -2357,7 +2389,7 @@ export default function HomePage() {
             </div>
           </SidebarHeader>
           <SidebarContent>
-            <PlannerNavigation opportunities={refinanceOpportunities(plan,rateSnapshot).length} activeSection={activeSection} onSelect={setActiveSection} />
+            <PlannerNavigation opportunities={refinanceOpportunities(plan,rateSnapshot).length} activeSection={activeSection} onSelect={selectSection} />
           </SidebarContent>
           <SidebarFooter>
             <div className="sidebar-privacy" data-save-state={saveStatus} role="status" aria-live="polite">
@@ -2382,15 +2414,15 @@ export default function HomePage() {
               <span>{sections.find((section) => section.id === activeSection)?.label}</span>
             </div>
             <div className="topbar-actions">
-              <Button className="vault-action" data-save-state={saveStatus} variant="ghost" aria-label={`Open data and privacy — ${saveState}`} onClick={() => setActiveSection("data")}>
+              <Button className="vault-action" data-save-state={saveStatus} variant="ghost" aria-label={`Open data and privacy — ${saveState}`} onClick={() => selectSection("data")}>
                 <span className="vault-status-icon">
                   {vaultStatus === "unlocked" ? <LockKeyhole /> : <Lock />}
                 </span>
-                <span className="hide-mobile">{saveStatus === "saving" ? "Saving encrypted…" : saveStatus === "failed" ? "Save failed" : vaultStatus === "unlocked" ? "Vault unlocked" : vaultStatus === "locked" ? "Vault locked" : "Not saved"}</span>
+                <span className="hide-mobile">{saveStatus === "saving" ? "Saving…" : saveStatus === "failed" ? "Save failed" : vaultStatus === "unlocked" ? "Saved on this device" : vaultStatus === "locked" ? "Saved plan locked" : "Not saved"}</span>
               </Button>
               <Button variant="outline" aria-label="Export plan data" onClick={exportData}>
                 <Download />
-                <span className="hide-mobile">Export</span>
+                <span className="hide-mobile">Download</span>
               </Button>
               <Button aria-label="Create PDF report" onClick={() => window.setTimeout(() => window.print(), 120)}>
                 <Printer />
@@ -2398,24 +2430,31 @@ export default function HomePage() {
               </Button>
             </div>
           </header>
-          <PageContent as="div" className="content-wrap">
+          <PageContent as="div" className={`content-wrap ${setupIndex>=0?"pb-32 md:pb-5 xl:pb-8":""}`}>
             <Stack as="div" className="page-flow">{content}</Stack>
           </PageContent>
+          {setupIndex>=0&&<nav aria-label="Plan Setup Steps" className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg md:static md:px-5 md:shadow-none print:hidden">
+            <div className="mx-auto max-w-[1376px]"><p className="mb-2 text-xs text-muted-foreground">Section {setupIndex+1} of {setupSections.length} · Add what you know; come back anytime.</p><div className="flex min-w-0 items-stretch gap-2">
+              <Button variant="outline" className="h-auto min-h-11 shrink-0" onClick={()=>selectSection(setupIndex===0?'welcome':setupSections[setupIndex-1])}><ArrowLeft aria-hidden="true"/>Back</Button>
+              <Button className="h-auto min-h-11 min-w-0 flex-1 whitespace-normal text-left md:flex-none" onClick={()=>selectSection(setupSections[setupIndex+1]??'overview')}><span>{setupIndex===setupSections.length-1?'See My Plan Summary':`Next: ${sections.find(s=>s.id===setupSections[setupIndex+1])!.label}`}</span><ArrowRight className="shrink-0" aria-hidden="true"/></Button>
+            </div></div>
+          </nav>}
           <footer className="site-footer">
             <span>Educational planning estimate — not financial, tax, legal, or medical advice.</span>
             <span>No ads · No tracking · No accounts</span>
           </footer>
         </SidebarInset>
       </SidebarProvider>
+      <Dialog open={importPrompt} onOpenChange={setImportPrompt}><DialogContent><DialogHeader><DialogTitle>Open a Different Plan?</DialogTitle><DialogDescription>Opening a file replaces the plan on screen. Download your current plan first if you want to keep it.</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={exportData}>Download Current Plan</Button><Button variant="outline" onClick={()=>setImportPrompt(false)}>Cancel</Button><Button onClick={()=>{setImportPrompt(false);fileInput.current?.click();}}>Choose Plan File</Button></DialogFooter></DialogContent></Dialog>
       <Dialog open={!!replaceAction} onOpenChange={open=>{if(!open)setReplaceAction(null);}}><DialogContent><DialogHeader><DialogTitle>{replaceAction==='new'?'Create New Plan?':'Replace with Sample Plan?'}</DialogTitle><DialogDescription>All current plan data and the saved local vault will be erased. Download your current plan first if you want to keep it. The replacement starts without a saved vault.</DialogDescription></DialogHeader><DialogFooter><Button variant="outline" onClick={exportData}>Download Current Plan</Button><Button variant="outline" onClick={()=>setReplaceAction(null)}>Cancel</Button><Button variant="destructive" onClick={()=>{if(replaceAction)replacePlan(replaceAction);}}>Erase and {replaceAction==='new'?'Create New Plan':'Load Sample'}</Button></DialogFooter></DialogContent></Dialog>
       <Dialog open={vaultOpen} onOpenChange={setVaultOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{vaultStatus === "locked" ? "Unlock your local vault" : "Create an encrypted local vault"}</DialogTitle>
-            <DialogDescription>{vaultStatus === "locked" ? "Enter the passphrase you used on this browser. It cannot be recovered." : "Your plan will be encrypted before it is saved in this browser. Use a unique passphrase you can remember."}</DialogDescription>
+            <DialogTitle>{vaultStatus === "locked" ? "Unlock Your Saved Plan" : "Save on This Device"}</DialogTitle>
+            <DialogDescription>{vaultStatus === "locked" ? "Enter the password you chose on this device. We cannot recover it." : "Choose a unique password to protect your saved plan. Keep it safe: we cannot reset it."}</DialogDescription>
           </DialogHeader>
           <div className="field-stack">
-            <Label htmlFor="vault-passphrase">Vault passphrase</Label>
+            <Label htmlFor="vault-passphrase">Plan Password</Label>
             <Input
               id="vault-passphrase"
               type="password"
@@ -2426,7 +2465,7 @@ export default function HomePage() {
                 if (event.key === "Enter") unlockOrCreateVault();
               }}
             />
-            <p className="field-help">At least 10 characters. The passphrase never leaves this page.</p>
+            <p className="field-help">At least 10 characters. Your password stays on this device.</p>
           </div>
           {vaultError && <p className="error-message">{vaultError}</p>}
           <DialogFooter>
@@ -2435,7 +2474,7 @@ export default function HomePage() {
             </Button>
             <Button onClick={unlockOrCreateVault}>
               {vaultStatus === "locked" ? <Unlock /> : <LockKeyhole />}
-              {vaultStatus === "locked" ? "Unlock" : "Create vault"}
+              {vaultStatus === "locked" ? "Unlock" : "Save My Plan"}
             </Button>
           </DialogFooter>
         </DialogContent>

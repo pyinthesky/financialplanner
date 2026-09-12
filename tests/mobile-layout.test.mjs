@@ -29,20 +29,6 @@ test("mobile navigation closes after selecting a planning section", () => {
   assert.match(page, /aria-current=\{activeSection === section\.id \? "page"/);
 });
 
-test("the privacy page starts the guided journey and summary follows plan entry", () => {
-  const privacyPosition = page.indexOf('{ id: "data", label: "Data & Privacy"');
-  const householdPosition = page.indexOf('{ id: "household", label: "Household"');
-  const summaryPosition = page.indexOf('{ id: "overview", label: "Plan Summary"');
-  assert.ok(privacyPosition >= 0 && privacyPosition < householdPosition);
-  assert.ok(summaryPosition > householdPosition);
-  assert.match(page, /useState<SectionId>\("data"\)/);
-});
-
-test("the privacy start explains all local persistence choices", () => {
-  assert.match(page, /You can work without saving, create an encrypted local vault, or restore a plan/);
-  assert.match(page, /Without a vault, the open plan lasts only for this browser session/);
-});
-
 test("navigation, page, and panel titles use consistent title case", () => {
   for (const title of [
     "Loans & Debts",
