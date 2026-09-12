@@ -1,5 +1,7 @@
 # Open Retirement Planner
 
+**Responsive layout update — September 12:** Shared Tailwind page, card, stack, form-grid, column-grid and action-row components replace competing layout rules across the planner. Forms respond to their enclosing card width; section spacing and card padding follow one compact scale. Retirement Budget, Cash & Investments and Scenario Laboratory use Tree Palm, Piggy Bank and Flask Conical icons. The pre-migration version is preserved as `pre-tailwind-layout-2026-09-12`. [Layout contract, checks and rollback](docs/ui-layout.md).
+
 **Navigation update — September 9:** The menu stays flat and always open. Data & Privacy stands alone; **Your Plan** groups household, accounts, benefits, debt, property, health, taxes and budgets; **Results** contains Plan Summary; **Explore** contains Scenario Laboratory and Open Enrollment. Subtle rules and bold headings separate sections, with wrapping labels and the existing mobile drawer behavior.
 
 

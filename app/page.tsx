@@ -1,4 +1,5 @@
 "use client";
+import { ColumnGrid, ActionRow, FormGrid, PageContent, PlannerCard, Stack } from '@/components/ui/planner-layout';
 import { HouseholdMembers } from '@/components/household-members';
 import { EducationAccounts, EducationSummary } from '@/components/education';
 import { withEnrollmentTax } from '@/lib/enrollment-tax';
@@ -168,7 +169,7 @@ function SectionHeading({ title, description, action }: { title: string; descrip
 
 function Panel({ title, eyebrow, children, className = "" }: { title?: string; eyebrow?: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`planner-panel ${className}`}>
+    <PlannerCard className={`planner-panel ${className}`}>
       {(title || eyebrow) && (
         <div className="panel-title">
           {eyebrow && <span>{eyebrow}</span>}
@@ -176,7 +177,7 @@ function Panel({ title, eyebrow, children, className = "" }: { title?: string; e
         </div>
       )}
       {children}
-    </section>
+    </PlannerCard>
   );
 }
 
@@ -702,9 +703,9 @@ export default function HomePage() {
   const renderHousehold = () => (
     <>
       <SectionHeading title="Household & Assumptions" description="Set the timeline and the few assumptions that drive most of the plan." />
-      <div className="two-column">
+      <ColumnGrid className="two-column">
         <Panel title="Planning Household" eyebrow="PEOPLE & TIMING">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <SelectField
               label="Household"
               value={plan.household.maritalStatus}
@@ -732,10 +733,10 @@ export default function HomePage() {
               <select id="state" value={plan.household.state} onChange={e=>setHousehold('state',e.target.value)}><option value="">Outside the U.S. / Not Selected</option>{plan.household.state&&!US_STATES[plan.household.state]&&<option value={plan.household.state}>{plan.household.state} (Imported)</option>}{Object.entries(US_STATES).map(([code,name])=><option key={code} value={code}>{name}</option>)}</select>
               <p className="field-help">ZIP stays on your device. Choose a state for available references; automatic local-rate lookup is not yet available. Tax calculations currently use U.S. rules.</p>
             </div>
-          </div>
+          </FormGrid>
         </Panel>
         <Panel title="Economic Assumptions" eyebrow="ALL VALUES EDITABLE">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field label="General inflation" value={plan.assumptions.inflation} onChange={(value) => setAssumption("inflation", value)} suffix="%" step={0.1} max={20} />
             <div className="assumption-shortcut"><Button variant="outline" onClick={() => setPlan(current => { const result = applyInflationReference(current.assumptions.inflation); return { ...current, assumptions: { ...current.assumptions, inflation: result.value }, inflationReference: result.receipt }; })}>Use {inflationReferenceValue().toFixed(2)}% Historical Inflation</Button><small>2004–2024 · historical, not a forecast</small>{canUndoInflationReference(plan.assumptions.inflation, plan.inflationReference)&&<Button variant="ghost" onClick={()=>setAssumption('inflation',plan.inflationReference!.previousValue)}>Undo Reference</Button>}</div>
             <Field label="Return before retirement" value={plan.assumptions.preRetirementReturn} onChange={(value) => setAssumption("preRetirementReturn", value)} suffix="%" step={0.1} max={30} />
@@ -745,10 +746,10 @@ export default function HomePage() {
             <Field label="Cash interest rate" value={plan.assumptions.cashReturn ?? 0} onChange={(value) => setAssumption("cashReturn", value)} suffix="%" step={0.1} max={30} help="Cash uses this separate rate, with interest included in ordinary income. Simulated market returns do not apply to cash." />
             {returnShortcut('cashReturn')}
             <p className="field-help">Everyday spending is managed in Retirement Budget.</p>
-          </div>
+          </FormGrid>
         </Panel>
-      </div>
-      <HouseholdMembers plan={plan} onChange={setPlan}/><details className="panel budget-flow"><summary>Monthly Timeline & Retirement Dates</summary><p className="field-help">Opening balances are as of January 1. Retirement months stop pay and change assigned bills.</p><div className="budget-fields"><label className="budget-field">Opening-Balance Year<Input aria-label="Opening-Balance Year" type="number" min="2026" max="2100" value={plan.budget.timeline?.startYear??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,startYear:e.target.value===''?null:+e.target.value}}}))}/></label>{(['you',...(plan.household.maritalStatus==='married'?['partner']:[])] as const).map(owner=><label className="budget-field" key={owner}>{owner==='you'?'Your Retirement Month':'Partner Retirement Month'}<Input aria-label={owner==='you'?'Your Retirement Month':'Partner Retirement Month'} type="month" value={plan.budget.timeline?.[owner==='you'?'retirementMonthYou':'retirementMonthPartner']??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{startYear:null,retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,[owner==='you'?'retirementMonthYou':'retirementMonthPartner']:e.target.value}}}))}/></label>)}</div></details>
+      </ColumnGrid>
+      <HouseholdMembers plan={plan} onChange={setPlan}/><PlannerCard as="details" stack className="panel budget-flow"><summary>Monthly Timeline & Retirement Dates</summary><p className="field-help">Opening balances are as of January 1. Retirement months stop pay and change assigned bills.</p><FormGrid as="div" className="budget-fields"><label className="budget-field">Opening-Balance Year<Input aria-label="Opening-Balance Year" type="number" min="2026" max="2100" value={plan.budget.timeline?.startYear??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,startYear:e.target.value===''?null:+e.target.value}}}))}/></label>{(['you',...(plan.household.maritalStatus==='married'?['partner']:[])] as const).map(owner=><label className="budget-field" key={owner}>{owner==='you'?'Your Retirement Month':'Partner Retirement Month'}<Input aria-label={owner==='you'?'Your Retirement Month':'Partner Retirement Month'} type="month" value={plan.budget.timeline?.[owner==='you'?'retirementMonthYou':'retirementMonthPartner']??''} onChange={e=>setPlan(p=>({...p,budget:{...p.budget,timeline:{startYear:null,retirementMonthYou:'',retirementMonthPartner:'',...p.budget.timeline,[owner==='you'?'retirementMonthYou':'retirementMonthPartner']:e.target.value}}}))}/></label>)}</FormGrid></PlannerCard>
       <PayrollEditor birthYear={plan.household.birthYear} partnerBirthYear={plan.household.partnerBirthYear} budget={plan.budget} accounts={plan.accounts} married={plan.household.maritalStatus==='married'} onChange={budget=>setPlan(p=>({...p,budget}))}/>
     </>
   );
@@ -1095,14 +1096,14 @@ export default function HomePage() {
   const renderHousing = () => (<>
         <Panel title="Home Carrying Costs" eyebrow="HOUSING">
           {plan.housing.statement?.enabled && <p className="panel-copy">The active mortgage statement supplies property tax and home insurance. Manual amounts below are retained for use if you turn it off.</p>}
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <SelectField label="Property tax entry method" value={plan.housing.propertyTaxMode ?? 'mills'} onChange={value => setHousing('propertyTaxMode', value as 'mills' | 'annual')} options={[{ value: 'annual', label: 'Annual Dollar Amount' }, { value: 'mills', label: 'Assessment and Mill Rate' }]} />
             {plan.housing.propertyTaxMode === 'annual' && <Field label="Annual property tax" value={plan.housing.annualPropertyTax ?? 0} onChange={value => setHousing('annualPropertyTax', value)} prefix="$" suffix="/ year" />}
             <Field label="Home market value" value={plan.housing.homeValue} onChange={(value) => setHousing("homeValue", value)} prefix="$" step={5000} />
             {plan.housing.propertyTaxMode !== 'annual' && <><Field label="Assessed percent" value={plan.housing.assessedPercent} onChange={(value) => setHousing("assessedPercent", value)} suffix="%" step={1} max={200} />
             <Field label="Mill rate" value={plan.housing.millRate} onChange={(value) => setHousing("millRate", value)} suffix="mills" step={0.1} help="One mill is $1 per $1,000 of assessed value." /></>}
             <Field label="Annual home insurance" value={plan.housing.annualInsurance} onChange={(value) => setHousing("annualInsurance", value)} prefix="$" suffix="/ year" step={100} />
-          </div>
+          </FormGrid>
           <div className="calculated-line">
             <span>Estimated annual property tax</span>
             <strong>{currency.format(propertyTaxAnnual(plan))}</strong>
@@ -1300,7 +1301,7 @@ export default function HomePage() {
           step={50}
         />}
       </div>
-      {plan.debtStrategy.method === 'custom' && <Panel title="Assigned Extra Payments"><div className="form-grid">{plan.debts.map(debt => <Field key={debt.id} label={`Extra for ${debt.name || 'Debt'}`} value={debt.customExtraPayment ?? 0} onChange={value => updateDebt(debt.id, {customExtraPayment:value})} prefix="$" suffix="/ month" />)}</div></Panel>}
+      {plan.debtStrategy.method === 'custom' && <Panel title="Assigned Extra Payments"><FormGrid as="div" className="form-grid">{plan.debts.map(debt => <Field key={debt.id} label={`Extra for ${debt.name || 'Debt'}`} value={debt.customExtraPayment ?? 0} onChange={value => updateDebt(debt.id, {customExtraPayment:value})} prefix="$" suffix="/ month" />)}</FormGrid></Panel>}
       <Panel>
         <div className="table-wrap mobile-card-table debts-table">
           <Table>
@@ -1399,13 +1400,13 @@ export default function HomePage() {
   const renderHealth = () => (
     <>
       <SectionHeading title="Health & Long-Term Care" description="Keep medical inflation and care shocks visible instead of hiding them inside general spending." />
-      <div className="two-column">
+      <ColumnGrid className="two-column">
         <Panel title="Healthcare" eyebrow="ANNUAL HOUSEHOLD COST">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field label="Before Medicare" value={plan.healthcare.preMedicareAnnual} onChange={(value) => setHealthcare("preMedicareAnnual", value)} prefix="$" suffix="/ year" step={500} help="Premiums plus expected out-of-pocket costs." />
             <Field label="Medicare years" value={plan.healthcare.medicareAnnual} onChange={(value) => setHealthcare("medicareAnnual", value)} prefix="$" suffix="/ year" step={500} help="Parts B/D, supplement or Advantage, dental, and expected out-of-pocket costs." />
             <Field label="Healthcare inflation" value={plan.healthcare.healthInflation} onChange={(value) => setHealthcare("healthInflation", value)} suffix="%" step={0.1} max={20} />
-          </div>
+          </FormGrid>
           <div className="info-callout">
             <Building2 />
             <div>
@@ -1415,17 +1416,17 @@ export default function HomePage() {
           </div>
         </Panel>
         <Panel title="Long-Term Care Reserve" eyebrow="STRESS SCENARIO">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field label="Annual care cost" value={plan.healthcare.longTermCareAnnual} onChange={(value) => setHealthcare("longTermCareAnnual", value)} prefix="$" suffix="/ year" step={1000} />
             <Field label="Care starts at age" value={plan.healthcare.longTermCareStartAge} onChange={(value) => setHealthcare("longTermCareStartAge", value)} suffix="years old" max={120} />
             <Field label="Years of care" value={plan.healthcare.longTermCareYears} onChange={(value) => setHealthcare("longTermCareYears", value)} suffix="years" max={20} />
-          </div>
+          </FormGrid>
           <div className="calculated-line">
             <span>Reserve before inflation</span>
             <strong>{currency.format(plan.healthcare.longTermCareAnnual * plan.healthcare.longTermCareYears)}</strong>
           </div>
         </Panel>
-      </div>
+      </ColumnGrid>
       <p className="model-note">
         <HeartPulse /> These are planning inputs—not quotes. A future data module can link current exchange, Medicare, and state long-term-care sources without sending your plan data anywhere.
       </p>
@@ -1543,9 +1544,9 @@ export default function HomePage() {
     return (
       <>
         <SectionHeading title="Taxes & Withdrawals" description="A transparent withdrawal order that can be reviewed—not a black-box recommendation." />
-        <div className="two-column">
+        <ColumnGrid className="two-column">
           <Panel title="Federal Tax Foundation" eyebrow="2026 IRS LAW">
-            <div className="form-grid">
+            <FormGrid as="div" className="form-grid">
               <SelectField
                 label="Federal filing status"
                 value={plan.household.filingStatus}
@@ -1564,7 +1565,7 @@ export default function HomePage() {
               <Field label="Capital-gains override rate" value={plan.assumptions.capitalGainsRate} onChange={(value) => setAssumption("capitalGainsRate", value)} suffix="%" step={0.1} max={50} help="Optional. Leave blank to use the 2026 federal 0% / 15% / 20% worksheet. A nonzero rate replaces those regular LTCG bands but does not replace NIIT." />
               <Field label="Annual tax-exempt interest" value={plan.assumptions.taxExemptInterest} onChange={(value) => setAssumption("taxExemptInterest", value)} prefix="$" suffix="/ year" step={100} help="Municipal-bond interest can increase taxable Social Security even though the interest itself is federally tax-exempt." />
               <Field label="Ordinary-income target" value={plan.assumptions.targetOrdinaryIncome} onChange={(value) => setAssumption("targetOrdinaryIncome", value)} prefix="$" suffix="/ year" step={1000} help="The model fills this band with tax-deferred withdrawals before drawing taxable assets." />
-            </div>
+            </FormGrid>
             {plan.household.filingStatus === "marriedSeparate" && (
               <label className="switch-row">
                 <span>
@@ -1628,9 +1629,9 @@ export default function HomePage() {
               </li>
             </ol>
           </Panel>
-        </div>
+        </ColumnGrid>
         <Panel title="Long-Term Capital Gains Worksheet" eyebrow="2026 FEDERAL ESTIMATE">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field
               label="Gross ordinary income"
               value={plan.capitalGainsPlanning.grossOrdinaryIncome}
@@ -1675,7 +1676,7 @@ export default function HomePage() {
               step={1000}
               help="For the 3.8% NIIT only. This can include investment interest, dividends, gains, rents, and royalties after allowed investment deductions."
             />
-          </div>
+          </FormGrid>
           <div className="worksheet-grid">
             <div><span>2026 standard deduction</span><strong>{currency.format(capitalGainsWorksheet.standardDeduction)}</strong></div>
             <div><span>Ordinary taxable income</span><strong>{currency.format(capitalGainsWorksheet.ordinaryTaxableIncome)}</strong></div>
@@ -1700,7 +1701,7 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="Roth Conversion Bracket Check" eyebrow="2026 FEDERAL ESTIMATE">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field
               label="Baseline gross ordinary income"
               value={plan.rothConversionPlanning.baselineGrossOrdinaryIncome}
@@ -1739,7 +1740,7 @@ export default function HomePage() {
                 { value: "0.35", label: "35%" },
               ]}
             />
-          </div>
+          </FormGrid>
           <div className="worksheet-grid">
             <div>
               <span>Top of target bracket · gross income</span>
@@ -1765,7 +1766,7 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="Roth Conversion Ladder" eyebrow="OWNER-SPECIFIC PROJECTION">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field
               label="Your annual conversion"
               value={plan.rothConversionPlanning.annualConversionYou}
@@ -1830,7 +1831,7 @@ export default function HomePage() {
                 max={120}
               />
             )}
-          </div>
+          </FormGrid>
           <div className="worksheet-grid">
             <div><span>Total modeled conversions</span><strong>{currency.format(totalPlannedConversions)}</strong></div>
             <div><span>Projected Tax Change Over the Full Plan</span><strong>{currency.format(projectedTaxDifference)}</strong><small>Includes later-year consequences and taxes generated by tax-paying withdrawals.</small></div>
@@ -1876,7 +1877,7 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="Medicare IRMAA Worksheet" eyebrow="2026 PREMIUMS · 2024 LOOKBACK">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field
               label="2024 Medicare MAGI"
               value={plan.medicareIrmaaPlanning.magi2024}
@@ -1920,7 +1921,7 @@ export default function HomePage() {
               max={2}
               help="Part D IRMAA is separate from—and added to—the premium charged by the selected prescription drug plan."
             />
-          </div>
+          </FormGrid>
           {medicareIrmaa ? (
             <div className="worksheet-grid">
               <div><span>2026 premium tier</span><strong>{medicareIrmaa.tierLabel}</strong></div>
@@ -1950,7 +1951,7 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="ACA Premium Tax Credit Worksheet" eyebrow="2026 MARKETPLACE ESTIMATE">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field
               label="2026 household ACA MAGI"
               value={plan.acaPlanning.householdMagi}
@@ -2002,7 +2003,7 @@ export default function HomePage() {
               step={100}
               help="Use the annual second-lowest-cost Silver plan premium from the Marketplace for the covered household members, ages, ZIP code, and plan year."
             />
-          </div>
+          </FormGrid>
           {acaPtc ? (
             <>
               <div className="worksheet-grid">
@@ -2058,7 +2059,7 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="Qualified Charitable Distribution Plan" eyebrow="2026 IRA RULES">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field
               label="Your intended annual QCD"
               value={plan.qcdPlanning.annualGiftYou}
@@ -2100,7 +2101,7 @@ export default function HomePage() {
                 />
               </>
             )}
-          </div>
+          </FormGrid>
           <div className="worksheet-grid">
             {qcdOwners.map(({ key, label, result }) => (
               <div key={key}>
@@ -2132,7 +2133,7 @@ export default function HomePage() {
           </p>
         </Panel>
         <Panel title="Early Distribution Check" eyebrow="IRC SECTION 72(T)">
-          <div className="form-grid">
+          <FormGrid as="div" className="form-grid">
             <Field
               label="Your confirmed annual exception"
               value={plan.earlyWithdrawalPlanning.annualConfirmedExceptionYou}
@@ -2165,7 +2166,7 @@ export default function HomePage() {
                 step={500}
               />
             )}
-          </div>
+          </FormGrid>
           {firstEarlyDistributionYear ? (
             <div className="worksheet-grid">
               <div><span>First projected review year / age</span><strong>{firstEarlyDistributionYear.year} / {firstEarlyDistributionYear.age}</strong></div>
@@ -2254,7 +2255,7 @@ export default function HomePage() {
   const renderData = () => (
     <>
       <SectionHeading title="Data & Privacy" description="Start here: choose whether this browser should save your plan before entering financial details." />
-      <Panel title="Explore or Start Fresh" eyebrow="YOUR PLAN"><p className="panel-copy">Load fictional example data to explore the planner, or start a new blank plan.</p><div className="budget-actions"><Button onClick={()=>requestReplacement('sample')}>Load Sample Plan</Button>{(!isBlankPlan(plan)||vaultStatus!=='off')&&<Button variant="outline" onClick={()=>requestReplacement('new')}>Create New Plan</Button>}</div></Panel>
+      <Panel title="Explore or Start Fresh" eyebrow="YOUR PLAN"><p className="panel-copy">Load fictional example data to explore the planner, or start a new blank plan.</p><ActionRow as="div" className="budget-actions"><Button onClick={()=>requestReplacement('sample')}>Load Sample Plan</Button>{(!isBlankPlan(plan)||vaultStatus!=='off')&&<Button variant="outline" onClick={()=>requestReplacement('new')}>Create New Plan</Button>}</ActionRow></Panel>
       <div className="privacy-banner">
         <ShieldCheck />
         <div>
@@ -2263,7 +2264,7 @@ export default function HomePage() {
           <p>Calculations, charts, imports, exports, and PDF rendering all happen on your device. You can work without saving, create an encrypted local vault, or restore a plan you previously downloaded. The site contains no analytics, advertising pixels, telemetry, sign-in, or third-party data calls.</p>
         </div>
       </div>
-      <div className="three-column">
+      <ColumnGrid columns={3} className="three-column">
         <Panel title="Encrypted Local Vault" eyebrow={vaultStatus.toUpperCase()}>
           <p className="panel-copy">Optional: save changes in this browser using AES-256-GCM encryption. Without a vault, the open plan lasts only for this browser session unless you download it. Your passphrase is kept only in memory and cannot be recovered.</p>
           <div className="button-stack">
@@ -2312,9 +2313,9 @@ export default function HomePage() {
             <FileUp /> Upload plan
           </Button>
         </Panel>
-      </div>
+      </ColumnGrid>
       <Panel title="Threat Model" eyebrow="WHAT ENCRYPTION CAN — AND CANNOT — DO">
-        <div className="threat-grid">
+        <ColumnGrid className="threat-grid">
           <div>
             <strong>Helps protect against</strong>
             <ul>
@@ -2331,14 +2332,14 @@ export default function HomePage() {
               <li>A weak or reused passphrase</li>
             </ul>
           </div>
-        </div>
+        </ColumnGrid>
       </Panel>
     </>
   );
 
   const content = activeSection === "currentBudget" || activeSection === "retirementBudget"
     ? <><CompactBudgetEditor key={activeSection+planEpoch} plan={plan} onChange={setPlan} retirement={activeSection==='retirementBudget'}/>{renderTimedCosts()}</>
-    : activeSection === "enrollment" ? <Suspense fallback={<p role="status">Loading Open Enrollment…</p>}><OpenEnrollment plan={plan} onChange={setPlan}/></Suspense> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan} initialSelected={selectedScenarioId}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <div className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></div> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
+    : activeSection === "enrollment" ? <Suspense fallback={<p role="status">Loading Open Enrollment…</p>}><OpenEnrollment plan={plan} onChange={setPlan}/></Suspense> : activeSection === "realEstate" ? <><RealEstateEditor plan={plan} onChange={setPlan}/>{renderHousing()}</> : activeSection === "scenarios" ? <><ScenarioLaboratory plan={plan} onChange={setPlan} initialSelected={selectedScenarioId}/><PropertyLaboratory plan={plan} onChange={setPlan}/></> : activeSection === "overview" ? (<><SectionHeading title="Plan Summary" description="See today’s cash flow and how it changes in retirement." /><Outlook plan={plan}/><SummaryPosition plan={plan}/><EducationSummary plan={plan}/><SummaryCashFlow key={planEpoch} plan={plan}/><DebtPayoffView plan={plan}/>{(plan.laboratory?.settings.enabled || plan.realEstate?.properties.length || plan.budget.pay.some(p=>p.payroll?.allocations)) ? <Stack as="div" className="budget-flow"><p className="field-help">Monthly budget and funding model selected for linked payroll, property or Scenario Laboratory settings.</p><MonthlyResults result={projectMonthly(plan)}/></Stack> : renderOverview()}</>) : activeSection === "household" ? renderHousehold() : activeSection === "portfolio" ? renderPortfolio() : activeSection === "income" ? renderIncome() : activeSection === "debt" ? renderDebt() : activeSection === "health" ? renderHealth() : activeSection === "taxes" ? renderTaxes() : renderData();
 
   return (
     <>
@@ -2395,9 +2396,9 @@ export default function HomePage() {
               </Button>
             </div>
           </header>
-          <main className="content-wrap">
-            <div className="page-flow">{content}</div>
-          </main>
+          <PageContent as="main" className="content-wrap">
+            <Stack as="div" className="page-flow">{content}</Stack>
+          </PageContent>
           <footer className="site-footer">
             <span>Educational planning estimate — not financial, tax, legal, or medical advice.</span>
             <span>No ads · No tracking · No accounts</span>

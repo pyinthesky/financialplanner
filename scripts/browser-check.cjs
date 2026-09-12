@@ -65,6 +65,39 @@ const server = http.createServer((req, res) => {
           assert.deepEqual(clipped,[],`${name} ${width} ${label}: visible content must fit even when an ancestor clips overflow`);
           const wrappedAmounts=await page.locator('main .budget-metrics strong').evaluateAll(elements=>elements.filter(el=>{if(!el.textContent.trim().startsWith('$'))return false;const range=document.createRange();range.selectNodeContents(el);const rects=[...range.getClientRects()];return rects.length>1||el.scrollWidth>el.clientWidth+1;}).map(el=>el.textContent));
           assert.deepEqual(wrappedAmounts,[],`${name} ${width} ${label}: summary amounts stay fully readable on one line`);
+          // Verify rendered geometry: a viewport-overflow check alone misses uneven
+          // padding, collapsed section gaps, and grids squeezed by nested cards.
+          const layoutProblems=await page.locator('main').evaluate(main=>{
+            const visible=el=>el.getClientRects().length&&el.getBoundingClientRect().height>0;
+            const problems=[];
+            const expectedPadding=window.innerWidth>=1280?20:window.innerWidth>=768?16:12;
+            for(const card of main.querySelectorAll('[data-layout="card"]')){
+              if(!visible(card))continue;
+              const style=getComputedStyle(card);
+              for(const side of ['paddingTop','paddingRight','paddingBottom','paddingLeft']){
+                if(Math.abs(parseFloat(style[side])-expectedPadding)>.5)problems.push(`Card ${side}: ${style[side]}`);
+              }
+            }
+            const flow=main.querySelector('.page-flow');
+            if(flow){
+              const children=[...flow.children].filter(visible);
+              const expectedGap=window.innerWidth>=768?16:12;
+              for(let i=1;i<children.length;i++){
+                const gap=children[i].getBoundingClientRect().top-children[i-1].getBoundingClientRect().bottom;
+                if(Math.abs(gap-expectedGap)>1)problems.push(`Page gap: ${gap}`);
+              }
+            }
+            for(const grid of main.querySelectorAll('[data-layout="form"]')){
+              if(!visible(grid))continue;
+              const bounds=grid.getBoundingClientRect();
+              for(const field of [...grid.children].filter(visible)){
+                const r=field.getBoundingClientRect();
+                if(r.left<bounds.left-1||r.right>bounds.right+1)problems.push('Field exceeds form grid');
+              }
+            }
+            return problems.slice(0,10);
+          });
+          assert.deepEqual(layoutProblems,[],`${name} ${width} ${label}: shared card padding, section gaps and form containment`);
         };
         const checkDialog = async () => {
           const dialog=page.getByRole('dialog');
