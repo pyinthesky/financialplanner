@@ -22,7 +22,7 @@ export function Welcome({hasPlan,locked,onStart,onSample,onOpen,onNew}:{hasPlan:
         <ActionRow className="mt-2"><Button variant="link" className="px-0" onClick={onOpen}><FileUp aria-hidden="true"/>Open a Saved Plan</Button>{(hasPlan||locked)&&<Button variant="link" onClick={onNew}>Create New Plan</Button>}</ActionRow>
         <p className="mt-2 text-xs leading-5 text-slate-500">New entries stay in this tab until you save or download them. The sample uses fictional information.</p>
       </div>
-      <img className="welcome-hero-art" src="./images/planning-horizon.webp" alt="" aria-hidden="true" width={1536} height={1024} fetchPriority="high" decoding="async" draggable={false}/>
+      <div className="welcome-hero-art" aria-hidden="true"><img src="./images/quiet-harbor.webp" alt="" width={1494} height={1992} fetchPriority="high" decoding="async" draggable={false}/></div>
     </PlannerCard>
     <section aria-label="Your Planning Journey">
       <h2 className="mb-3 text-lg font-semibold">A Clear Path, at Your Pace</h2>

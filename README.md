@@ -12,7 +12,7 @@ This is the current product inventory. Every item below is implemented within th
 
 ### Welcome, Data & Privacy
 
-- A plain-language Welcome homepage with locally bundled landscape artwork, softly shaded journey cards and an illustrated planning journey. Start My Plan opens Household directly; returning users can continue, unlock or open a saved plan. Sample loading opens Plan Summary.
+- A plain-language Welcome homepage with locally bundled harbor photography, softly shaded journey cards and an illustrated planning journey. Start My Plan opens Household directly; returning users can continue, unlock or open a saved plan. Sample loading opens Plan Summary.
 
 - Session-only use or optional password-protected saving on this device, with visible saving/locked/error states. Technical encryption details sit behind an expandable disclosure.
 - Download My Plan and Open a Saved Plan use portable JSON files, including compatibility with earlier saved plans. Opening a different file prompts before file selection when a plan or saved copy already exists.

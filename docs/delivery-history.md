@@ -1,6 +1,6 @@
 # Delivery History
 
-- September 12: warmer Welcome artwork and subtle journey-card gradients; Data & Privacy uses the menu-aligned navy-to-blue palette. Artwork is served with the static site and contains no user data.
+- September 12: user-supplied harbor photography and subtle journey-card gradients; Data & Privacy uses the menu-aligned navy-to-blue palette. The photograph is served with the static site; financial data remains local.
 
 - September 12: plain-language Welcome homepage, illustrated planning journey, direct start/continue/sample/open actions and mobile Back/Next setup controls. Data & Privacy moves to the bottom of the menu; technical details remain available by disclosure.
 

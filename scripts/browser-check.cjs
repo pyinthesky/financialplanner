@@ -120,7 +120,7 @@ const server = http.createServer((req, res) => {
         };
         await page.getByRole('heading',{name:'Make a Plan for the Life You Want.',exact:true}).waitFor();
         assert.doesNotMatch(await page.locator('[data-layout="content"]').innerText(),/AES|JSON|PBKDF2/,'Welcome uses everyday language');
-        await page.locator('.welcome-hero-art').evaluate(img=>img.decode());
+        await page.locator('.welcome-hero-art img').evaluate(img=>img.decode());
         const hero=await page.locator('.welcome-hero').evaluate(el=>{
           const image=el.querySelector('img'),copy=el.querySelector('.welcome-hero-copy');
           const box=el.getBoundingClientRect(),art=image.getBoundingClientRect(),text=copy.getBoundingClientRect();
